@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Project Documentation</title>
+    <style>
+        body {
+            font-family: maven pro, serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            padding: 10px 50px ;
+        }
+        #top{
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: underline;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        code {
+            font-family: monospace;
+            background-color: #e4e4e4;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="top">Task Manager Project Documentation</h1>
+        <h1>Contents</h1>
+
+        <nav>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#data-structure">Data Structure</a></li>
+                <li><a href="#contributing">Contributing</a></li>
+                <li><a href="#license">License</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="introduction">
+        <h2>1. Introduction</h2>
+        <p>The <strong>Task Manager</strong> project is a web-based application designed to help users manage their tasks effectively. The app allows users to add, edit, delete, and organize tasks with categories and due dates, while also tracking task completion status.</p>
+    </section>
+
+    <section id="features">
+        <h2>2. Features</h2>
+        <ul>
+            <li><strong>Task Management</strong>: Add, edit, and delete tasks.</li>
+            <li><strong>Task Completion</strong>: Mark tasks as completed or not completed.</li>
+            <li><strong>Task Categorization</strong>: Assign tasks to categories.</li>
+            <li><strong>Due Dates</strong>: Set deadlines for tasks.</li>
+            <li><strong>Data Persistence</strong>: Uses <code>localStorage</code> or <code>IndexedDB</code> to save tasks persistently.</li>
+        </ul>
+    </section>
+
+    <section id="installation">
+        <h2>3. Installation</h2>
+        <p>To run the Task Manager project locally, follow these steps:</p>
+        <ol>
+            <li><strong>Clone the repository:</strong></li>
+            <pre><code>git clone https://github.com/your-username/task-manager.git</code></pre>
+            <li><strong>Navigate to the project folder:</strong></li>
+            <pre><code>cd task-manager</code></pre>
+            <li><strong>Open the <code>index.html</code> file</strong> in your browser.</li>
+        </ol>
+        <p>No additional setup or dependencies are required for the basic version of the Task Manager.</p>
+    </section>
+
+    <section id="usage">
+        <h2>4. Usage</h2>
+        <p>Here are the steps to use the Task Manager:</p>
+        <ul>
+            <li><strong>Add a new task:</strong> Enter the task name, description, category, and due date, then click "Add Task" to save it.</li>
+            <li><strong>Edit a task:</strong> Click the "Edit" button next to a task to modify its details and save the changes.</li>
+            <li><strong>Delete a task:</strong> Click the "Delete" button next to a task to remove it from the list.</li>
+            <li><strong>Mark a task as completed:</strong> Use the checkbox or toggle button to mark a task as completed.</li>
+            <li><strong>Filter tasks:</strong> Use the filter dropdown to view tasks by completion status or due date.</li>
+        </ul>
+    </section>
+
+    <section id="data-structure">
+        <h2>5. Data Structure</h2>
+        <p>The task data is structured as follows:</p>
+        <pre><code>
+{
+    "task": "Task name",
+    "description": "Task description",
+    "completed": false,
+    "category": "Work",
+    "dueDate": "2025-02-10"
+}
+        </code></pre>
+        <ul>
+            <li><strong>task</strong>: The name of the task.</li>
+            <li><strong>description</strong>: A detailed description of the task.</li>
+            <li><strong>completed</strong>: A boolean value indicating whether the task is completed or not.</li>
+            <li><strong>category</strong>: The category assigned to the task (e.g., Work, Personal).</li>
+            <li><strong>dueDate</strong>: The date by which the task should be completed.</li>
+        </ul>
+    </section>
+
+    <section id="contributing">
+        <h2>6. Contributing</h2>
+        <p>We welcome contributions to improve the Task Manager project! If you'd like to contribute, please follow these steps:</p>
+        <ol>
+            <li>Fork the repository.</li>
+            <li>Create a new branch (<code>git checkout -b feature-name</code>).</li>
+            <li>Make your changes.</li>
+            <li>Commit your changes (<code>git commit -m 'Add new feature'</code>).</li>
+            <li>Push to your forked repository (<code>git push origin feature-name</code>).</li>
+            <li>Create a pull request.</li>
+        </ol>
+    </section>
+
+    <section id="license">
+        <h2>7. License</h2>
+        <p>This project is licensed under the MIT License. See the <a href="LICENSE" target="_blank">LICENSE</a> file for details.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Task Manager Project. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

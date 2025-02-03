@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+    <div id="heading"><text>Task Manager</text></div>
+
+    <div class="container">
+        <div id="form">
+            <t>New Task</t><br>
+            <form>
+                <label class="task" for="task">Task Name</label>
+                <input type="text" id="task" placeholder="Enter task">
+
+                <label class="description" for="description">Description</label>
+                <textarea id="des" placeholder="Enter Description" rows="4" cols="50"></textarea>
+
+                <label for="Set">Set Date</label>
+                <input type="date" id="date">
+
+                <!-- Button container for side-by-side alignment -->
+                <div class="button-container">
+                    <button class="b1" type="submit">Add</button>
+                    <button class="b2" type="button" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <div id="list">
+        <h2>Task List</h2>
+        <div id="combine">
+            <div><img id="filter" src="./Assests/Filter/filter.svg">
+
+                <div id="dropDown" class="filter-dropdown">
+
+                    <label for="filterType">Select Filter:</label>
+
+                    <select id="filterType" onchange="handleFilterChange()">
+
+                        <option value="">--Choose Filter--</option>
+                        <option value="completion">Completion Status</option>
+                        <option value="deadline">Deadline</option>
+
+                    </select>
+
+                    <div id="completionOption" style="display:none;">
+                        <label>Completed
+                            <input type="radio" name="completionStatus" value="completed" />
+                        </label>
+                        <label>Not Completed
+                            <input type="radio" name="completionStatus" value="notCompleted" />
+                        </label>
+                    </div>
+
+                    <div id="deadlineOption" style="display: none;">
+                        <label>Start Date:
+                            <input type="date" id="startDateFilter" />
+                        </label>
+
+                        <label>End Date:
+                            <input type="date" id="endDateFilter" />
+                        </label>
+
+                        
+                    </div>
+                    <div id="allButton">
+                       <button onclick="applyFilter()">Apply Filter</button>
+                       <button onclick="clearFilter()">Clear Filter</button>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+            <div id="clear" onclick="clearAll()"><img src="./Assests/Trash/trash.svg"></div>
+        </div>
+        <table>
+            <tr>
+                <th>Task Name</th>
+                <th>Description</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            <tbody id="taskTableBody"></tbody>
+        </table>
+    </div>
+
+    <footer>
+        <div id="logo">
+            <a class= "a"  href="https://github.com/MASTERxVIC"><img src="./Assests/Github/github.svg"></a>
+            <a class="b"href="https://www.linkedin.com/in/atul-kumar-012065234/"><img src="./Assests/Linkedin/linkedin.svg"></a>
+        </div>
+        <ul  id ="doc"><li onclick="newTab()">DOCUMENTATION</li></ul>
+        <p>&copy; <span id="year"></span> Task Manager | All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    
+
+
+    <script src="./index.js"></script>
+</body>
+
+</html>
