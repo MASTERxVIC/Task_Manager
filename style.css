@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;700&display=swap');
+
 * {
   font-family: "maven pro", serif;
   font-optical-sizing: auto;
@@ -500,4 +502,85 @@ footer {
 }
 footer p {
   margin: 0;
+}
+
+
+/* Small screens (phones, max-width: 600px) */
+@media (max-width: 600px) {
+  .container {
+    height: auto;
+    padding: 20px;
+  }
+  
+  #form {
+    width: 90%;
+    padding: 30px;
+  }
+  
+  input, textarea {
+    width: 100%;
+  }
+  
+  .button-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .b1, .b2 {
+    width: 100%;
+  }
+  
+  #list h2 {
+    font-size: 1.8em;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  th, td {
+    font-size: 0.9em;
+    padding: 10px;
+  }
+  
+  #combine {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+}
+
+/* Medium screens (tablets, max-width: 1024px) */
+@media (max-width: 1024px) {
+  .container {
+    height: auto;
+    padding: 40px;
+  }
+  
+  #form {
+    width: 50%;
+  }
+  
+  .button-container {
+    flex-direction: row;
+    gap: 10px;
+  }
+}
+
+/* Large screens (desktops, min-width: 1200px) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+  
+  #form {
+    width: 30%;
+  }
+  
+  table {
+    width: 80%;
+    margin: 0 auto;
+  }
 }

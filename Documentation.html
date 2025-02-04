@@ -5,53 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager Project Documentation</title>
     <style>
-        body {
-            font-family: maven pro, serif;
-            line-height: 1.6;
-            margin: 20px;
-            background-color: #f4f4f4;
-            padding: 10px 50px ;
-        }
-        #top{
-            margin-top: 10px;
-            text-align: center;
-            text-decoration: underline;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        p {
-            color: #555;
-        }
-        pre {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        ul {
-            list-style-type: disc;
-            margin-left: 20px;
-        }
-        code {
-            font-family: monospace;
-            background-color: #e4e4e4;
-            padding: 2px 5px;
-            border-radius: 4px;
-        }
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 14px;
-            color: #777;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;700&display=swap');
+
+body {
+    font-family: maven pro, serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f4f4f4;
+    padding: 10px 50px;
+}
+
+#top {
+    margin-top: 10px;
+    text-align: center;
+    text-decoration: underline;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+p {
+    color: #555;
+}
+
+pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+code {
+    font-family: monospace;
+    background-color: #e4e4e4;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+
+/* Small screens (phones, max-width: 600px) */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    pre {
+        font-size: 14px;
+        overflow-x: auto;
+    }
+    footer {
+        font-size: 12px;
+    }
+}
+
+/* Medium screens (tablets, max-width: 1024px) */
+@media (max-width: 1024px) {
+    body {
+        padding: 20px;
+    }
+    pre {
+        font-size: 16px;
+    }
+}
+
+/* Large screens (desktops, min-width: 1200px) */
+@media (min-width: 1200px) {
+    body {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+}
+
     </style>
 </head>
 <body>
