@@ -6,9 +6,13 @@ const NAV = [
   { key: 'completed', label: 'Completed', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
 ];
 
-export default function Sidebar({ view, setView, counts, onClose }) {
+export default function Sidebar({ view, setView, counts, user, onLogout, onClose }) {
+  // User email prefix for avatar letter
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
+
   return (
     <aside className="flex flex-col h-full w-full md:w-64 bg-surface border-r border-line px-4 py-6">
+      {/* Header */}
       <div className="flex items-center justify-between px-2 mb-8">
         <div className="flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg grad-ring flex items-center justify-center font-display font-bold text-void text-sm">
@@ -29,10 +33,11 @@ export default function Sidebar({ view, setView, counts, onClose }) {
         )}
       </div>
 
+      {/* Nav items */}
       <nav className="flex flex-col gap-1">
         {NAV.map((item) => {
           const active = view === item.key;
-          const count = counts[item.key] ?? 0;
+          const count = counts?.[item.key] ?? 0;
           return (
             <button
               key={item.key}
@@ -67,7 +72,41 @@ export default function Sidebar({ view, setView, counts, onClose }) {
         })}
       </nav>
 
+      {/* Bottom Footer Section */}
       <div className="mt-auto pt-6 border-t border-line flex flex-col gap-4">
+        {/* User Info & Logout Button */}
+        {user && (
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-void/50 border border-line/50">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-surface-raised border border-line flex items-center justify-center font-mono text-xs font-semibold text-ink shrink-0">
+                {userInitial}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-muted-dim leading-none mb-0.5">
+                  Logged in
+                </span>
+                <span className="text-xs font-medium text-ink truncate" title={user.email}>
+                  {user.email}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={onLogout}
+              aria-label="Logout"
+              title="Logout"
+              className="p-1.5 text-muted-dim hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Social Links & Docs */}
         <div className="flex items-center gap-3 px-2">
           <a
             href="https://github.com/MASTERxVIC"

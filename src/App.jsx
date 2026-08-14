@@ -5,10 +5,22 @@ import Topbar from './components/Topbar';
 import TaskList from './components/TaskList';
 import TaskDrawer from './components/TaskDrawer';
 import ConfirmDialog from './components/ConfirmDialog';
+import Auth from './components/Auth';
 import { useTasks } from './lib/useTasks';
 
 export default function App() {
-  const { tasks, addTask, updateTask, deleteTask, toggleTask, clearAll, counts } = useTasks();
+  const { 
+    user, 
+    loading, 
+    logout, 
+    tasks, 
+    addTask, 
+    updateTask, 
+    deleteTask, 
+    toggleTask, 
+    clearAll, 
+    counts 
+  } = useTasks();
 
   const [view, setView] = useState('all');
   const [search, setSearch] = useState('');
@@ -17,6 +29,24 @@ export default function App() {
   const [editingTask, setEditingTask] = useState(null);
   const [confirm, setConfirm] = useState(null); // { type: 'delete' | 'clearAll', id? }
 
+  // 1. Show Loading screen while checking auth session
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-void flex items-center justify-center text-gray-400">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span>Loading tasks...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Show Auth screen if user is not logged in
+  if (!user) {
+    return <Auth />;
+  }
+
+  // 3. Main App handlers for logged-in user
   const openAddDrawer = () => {
     setEditingTask(null);
     setDrawerOpen(true);
@@ -49,7 +79,13 @@ export default function App() {
     <div className="min-h-screen flex bg-void">
       {/* desktop sidebar */}
       <div className="hidden md:block shrink-0">
-        <Sidebar view={view} setView={setView} counts={counts} />
+        <Sidebar 
+          view={view} 
+          setView={setView} 
+          counts={counts} 
+          user={user} 
+          onLogout={logout} 
+        />
       </div>
 
       {/* mobile sidebar drawer */}
@@ -77,6 +113,8 @@ export default function App() {
                   setMobileNavOpen(false);
                 }}
                 counts={counts}
+                user={user}
+                onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
               />
             </motion.div>

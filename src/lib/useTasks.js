@@ -1,49 +1,118 @@
 import { useEffect, useMemo, useState } from 'react';
+import { supabase } from './supabaseClient';
 import { urgency } from './date';
-
-const STORAGE_KEY = 'todo-modern-tasks';
-
-function loadTasks() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
 
 function makeId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function useTasks() {
-  const [tasks, setTasks] = useState(loadTasks);
+  const [tasks, setTasks] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // 1. Session check and auth status listener
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchTasks(session.user.id);
+      else setLoading(false);
+    });
 
-  const addTask = ({ task, des, deadline, priority }) => {
-    setTasks((prev) => [
-      ...prev,
-      { id: makeId(), task, des, deadline, priority: priority || 'normal', completed: false },
-    ]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) fetchTasks(currentUser.id);
+      else {
+        setTasks([]);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 2. Fetch User Specific Tasks
+  const fetchTasks = async (userId) => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) console.error('Error fetching tasks:', error);
+    else setTasks(data || []);
+    setLoading(false);
   };
 
-  const updateTask = (id, patch) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  // 3. Add Task (linked with user_id)
+  const addTask = async ({ task, des, deadline, priority }) => {
+    if (!user) return;
+    const newTask = {
+      id: makeId(),
+      user_id: user.id,
+      task,
+      des,
+      deadline,
+      priority: priority || 'normal',
+      completed: false,
+    };
+
+    const { error } = await supabase.from('todos').insert([newTask]);
+    if (error) console.error('Error adding task:', error);
+    else setTasks((prev) => [newTask, ...prev]);
   };
 
-  const deleteTask = (id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const updateTask = async (id, patch) => {
+    const { error } = await supabase.from('todos').update(patch).eq('id', id);
+    if (error) console.error('Error updating task:', error);
+    else setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   };
 
-  const toggleTask = (id) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+  const deleteTask = async (id) => {
+    const { error } = await supabase.from('todos').delete().eq('id', id);
+    if (error) console.error('Error deleting task:', error);
+    else setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const clearAll = () => setTasks([]);
-  const clearCompleted = () => setTasks((prev) => prev.filter((t) => !t.completed));
+  const toggleTask = async (id) => {
+    const currentTask = tasks.find((t) => t.id === id);
+    if (!currentTask) return;
+
+    const { error } = await supabase
+      .from('todos')
+      .update({ completed: !currentTask.completed })
+      .eq('id', id);
+
+    if (error) console.error('Error toggling task:', error);
+    else {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, completed: !currentTask.completed } : t))
+      );
+    }
+  };
+
+  const clearAll = async () => {
+    if (!user) return;
+    const { error } = await supabase.from('todos').delete().eq('user_id', user.id);
+    if (error) console.error('Error clearing tasks:', error);
+    else setTasks([]);
+  };
+
+  const clearCompleted = async () => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('todos')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('completed', true);
+
+    if (error) console.error('Error clearing completed tasks:', error);
+    else setTasks((prev) => prev.filter((t) => !t.completed));
+  };
+
+  const logout = () => supabase.auth.signOut();
 
   const counts = useMemo(() => {
     const c = { all: tasks.length, today: 0, upcoming: 0, completed: 0, overdue: 0 };
@@ -57,5 +126,17 @@ export function useTasks() {
     return c;
   }, [tasks]);
 
-  return { tasks, addTask, updateTask, deleteTask, toggleTask, clearAll, clearCompleted, counts };
+  return {
+    user,
+    tasks,
+    loading,
+    addTask,
+    updateTask,
+    deleteTask,
+    toggleTask,
+    clearAll,
+    clearCompleted,
+    logout,
+    counts,
+  };
 }
