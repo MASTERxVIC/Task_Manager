@@ -1,28 +1,34 @@
 @import "tailwindcss";
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @theme {
-  /* structural — dark family built around the palette's Midnight Blue */
-  --color-void: #06090f;
-  --color-surface: #0d1526;
-  --color-surface-raised: #1b325f; /* Midnight Blue, used at full strength for raised/active surfaces */
-  --color-ink: #f4f6fb;
-  --color-muted: #8fb3d1;
-  --color-muted-dim: #587c9b;
-  --color-line: #2a3f66;
+  /* Structural — New Custom Palette */
+  --color-void: #F3F8FC;           /* Main App Background */
+  --color-surface: #7C6ACC;        /* Sidebar Background */
+  --color-surface-raised: #F3F8FC; /* Selected Items & Buttons */
+  --color-ink: #2E3D72;            /* Main Dark Blue Text & Normal Priority */
+  --color-muted: #2E3D72;          /* Secondary Text */
+  --color-muted-dim: #92A3CB;      /* Soft Borders & Muted Elements */
+  --color-line: #D0DCED;           /* Input & Card Border Lines */
 
-  /* accents — mapped directly from palette.css */
-  --color-magenta: #5433ff; /* Blue Violet — primary brand / CTA */
-  --color-violet: #2980b9; /* Steel Blue — secondary brand, "upcoming" */
-  --color-gold: #f6d365; /* Khaki — premium highlight, "today" + high priority */
-  --color-coral: #c04848; /* Indian Red — danger, "overdue" */
-  --color-amber: #f6d365; /* Khaki, reused — "today" badge shares the gold family */
-  --color-mint: #2e9e8b; /* derived teal (no green in the given palette) — "completed" */
+  /* Priority & Actions */
+  --color-high: #FF2C59;           /* High Priority */
+  --color-normal: #2E3D72;         /* Normal Priority */
+  --color-low: #CCDC69;            /* Low Priority */
+  --color-delete: #FC4445;          /* Delete Button / Danger */
 
-  --font-display: 'Clash Display', sans-serif;
-  --font-body: 'Satoshi', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  /* Accents & Badges */
+  --color-magenta: #7C6ACC;        /* Primary Brand / Sidebar */
+  --color-violet: #2E3D72;         /* Secondary Accent */
+  --color-gold: #FF2C59;           /* High Priority Badge */
+  --color-coral: #FC4445;          /* Overdue / Delete Accent */
+  --color-amber: #CCDC69;          /* Low Priority Badge */
+  --color-mint: #CCDC69;           /* Completed Status */
+
+  /* Fonts */
+  --font-display: 'Iosevka Charon Mono', monospace;
+  --font-body: 'Iosevka Charon Mono', monospace;
+  --font-mono: 'Iosevka Charon Mono', monospace;
 }
 
 * {
@@ -47,12 +53,12 @@ body {
 }
 
 ::selection {
-  background: var(--color-magenta);
-  color: var(--color-void);
+  background: var(--color-surface);
+  color: #FFFFFF;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-magenta);
+  outline: 2px solid var(--color-surface);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -66,18 +72,19 @@ body {
 }
 
 .grad-text {
-  background: linear-gradient(120deg, var(--color-gold), var(--color-magenta) 55%, var(--color-violet));
+  background: linear-gradient(120deg, var(--color-high), var(--color-surface));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .grad-ring {
-  background: linear-gradient(160deg, var(--color-magenta), var(--color-violet));
-  box-shadow: 0 4px 24px -6px rgba(84, 51, 255, 0.45);
+  background: linear-gradient(160deg, var(--color-surface), var(--color-normal));
+  box-shadow: 0 4px 24px -6px rgba(124, 106, 204, 0.35);
+  color: #FFFFFF;
 }
 
-/* custom scrollbar, quieter than the browser default */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -93,6 +100,6 @@ body {
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(1) opacity(0.6);
+  filter: opacity(0.7);
   cursor: pointer;
 }

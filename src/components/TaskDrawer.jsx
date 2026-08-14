@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PRIORITIES = [
-  { key: 'low', label: 'Low', color: 'bg-muted-dim' },
-  { key: 'normal', label: 'Normal', color: 'bg-violet' },
-  { key: 'high', label: 'High', color: 'bg-gold' },
+  { key: 'low', label: 'Low', color: 'bg-low' },
+  { key: 'normal', label: 'Normal', color: 'bg-normal' },
+  { key: 'high', label: 'High', color: 'bg-high' },
 ];
 
 const emptyForm = { task: '', des: '', deadline: '', priority: 'normal' };
@@ -49,7 +49,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-void/70 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
           />
           <motion.div
             key="drawer"
@@ -59,16 +59,16 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-surface border-l border-line flex flex-col"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-void border-l border-line flex flex-col shadow-2xl"
           >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-line">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-line bg-void">
               <h2 className="font-display font-semibold text-lg text-ink">
                 {editingTask ? 'Edit Task' : 'New Task'}
               </h2>
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="text-muted-dim hover:text-ink p-1"
+                className="text-muted/70 hover:text-ink p-1 transition-colors"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -79,7 +79,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto">
               <div className="flex-1 px-6 py-5 flex flex-col gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-muted mb-1.5" htmlFor="task-name">
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-name">
                     Task name
                   </label>
                   <input
@@ -88,12 +88,12 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                     value={form.task}
                     onChange={(e) => setForm((f) => ({ ...f, task: e.target.value }))}
                     placeholder="e.g. Renew domain"
-                    className="w-full bg-void border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted-dim focus:border-magenta outline-none transition-colors"
+                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted mb-1.5" htmlFor="task-des">
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-des">
                     Description
                   </label>
                   <textarea
@@ -102,12 +102,12 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                     value={form.des}
                     onChange={(e) => setForm((f) => ({ ...f, des: e.target.value }))}
                     placeholder="Optional details..."
-                    className="w-full bg-void border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted-dim focus:border-magenta outline-none transition-colors resize-none"
+                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors resize-none shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted mb-1.5" htmlFor="task-date">
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-date">
                     Due date
                   </label>
                   <input
@@ -115,45 +115,45 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                     type="date"
                     value={form.deadline}
                     onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
-                    className="w-full bg-void border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-magenta outline-none transition-colors"
+                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-surface outline-none transition-colors shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <span className="block text-xs font-medium text-muted mb-1.5">Priority</span>
+                  <span className="block text-xs font-medium text-ink/80 mb-1.5">Priority</span>
                   <div className="flex gap-2">
                     {PRIORITIES.map((p) => (
                       <button
                         key={p.key}
                         type="button"
                         onClick={() => setForm((f) => ({ ...f, priority: p.key }))}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           form.priority === p.key
-                            ? 'border-ink/30 bg-surface-raised text-ink'
-                            : 'border-line text-muted hover:text-ink'
+                            ? 'border-surface bg-surface/10 text-ink font-semibold shadow-sm'
+                            : 'border-line text-muted hover:text-ink bg-white'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${p.color}`} />
+                        <span className={`w-2 h-2 rounded-full ${p.color}`} />
                         {p.label}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {error && <p className="text-xs text-coral">{error}</p>}
+                {error && <p className="text-xs text-delete font-medium">{error}</p>}
               </div>
 
-              <div className="px-6 py-5 border-t border-line flex gap-3">
+              <div className="px-6 py-5 border-t border-line flex gap-3 bg-void">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-ink border border-line transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium text-ink/80 hover:text-ink border border-line bg-white transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold grad-ring text-void hover:opacity-90 transition-opacity"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-surface text-white hover:opacity-95 transition-opacity shadow-sm"
                 >
                   {editingTask ? 'Save changes' : 'Add task'}
                 </button>
