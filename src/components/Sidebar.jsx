@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 const NAV = [
   { key: 'all', label: 'All Tasks', icon: 'M4 6h16M4 12h16M4 18h16' },
   { key: 'today', label: 'Today', icon: 'M8 7V3M16 7V3M4 11h16M5 21h14a1 1 0 001-1V7a1 1 0 00-1-1H5a1 1 0 00-1 1v13a1 1 0 001 1z' },
@@ -11,7 +13,7 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
 
   return (
-    <aside className="flex flex-col h-full w-full md:w-64 bg-surface border-r border-line px-4 py-6">
+    <aside className="flex flex-col h-full w-full lg:w-64 bg-surface border-r border-line px-4 py-6">
       {/* Header */}
       <div className="flex items-center justify-between px-2 mb-8">
         <div className="flex items-center gap-2">
@@ -24,7 +26,7 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="md:hidden text-white/70 hover:text-white p-1"
+            className="lg:hidden text-white/70 hover:text-white p-1"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
