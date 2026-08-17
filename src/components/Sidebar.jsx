@@ -9,11 +9,10 @@ const NAV = [
 ];
 
 export default function Sidebar({ view, setView, counts, user, onLogout, onClose }) {
-  // User email prefix for avatar letter
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
 
   return (
-    <aside className="flex flex-col h-full w-full lg:w-64 bg-surface border-r border-line px-4 py-6">
+    <aside className="flex flex-col h-screen w-full lg:w-64 lg:sticky lg:top-0 shrink-0 bg-surface border-r border-line px-4 py-6 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-2 mb-8">
         <div className="flex items-center gap-2">
@@ -76,7 +75,6 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
 
       {/* Bottom Footer Section */}
       <div className="mt-auto pt-6 border-t border-white/20 flex flex-col gap-4">
-        {/* User Info & Logout Button */}
         {user && (
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/10 border border-white/10">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -108,7 +106,6 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
           </div>
         )}
 
-        {/* Social Links & Docs */}
         <div className="flex items-center gap-3 px-2">
           <a
             href="https://github.com/MASTERxVIC"

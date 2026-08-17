@@ -27,9 +27,8 @@ export default function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [confirm, setConfirm] = useState(null); // { type: 'delete' | 'clearAll', id? }
+  const [confirm, setConfirm] = useState(null);
 
-  // 1. Show Loading screen while checking auth session
   if (loading) {
     return (
       <div className="min-h-screen bg-void flex items-center justify-center text-gray-400">
@@ -41,12 +40,10 @@ export default function App() {
     );
   }
 
-  // 2. Show Auth screen if user is not logged in
   if (!user) {
     return <Auth />;
   }
 
-  // 3. Main App handlers for logged-in user
   const openAddDrawer = () => {
     setEditingTask(null);
     setDrawerOpen(true);
@@ -76,9 +73,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-void">
-      {/* desktop sidebar */}
-      <div className="hidden md:block shrink-0">
+    <div className="h-screen flex bg-void overflow-hidden">
+      {/* desktop sidebar - fixed height */}
+      <div className="hidden md:block shrink-0 h-screen">
         <Sidebar 
           view={view} 
           setView={setView} 
@@ -122,7 +119,8 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 min-w-0 flex flex-col">
+      {/* Main container with fixed height */}
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         <Topbar
           view={view}
           search={search}
@@ -133,7 +131,8 @@ export default function App() {
           hasTasks={tasks.length > 0}
         />
 
-        <main className="flex-1 px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
+        {/* Sirf yeh TaskList container scroll hoga */}
+        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList
             tasks={tasks}
             view={view}
@@ -152,7 +151,7 @@ export default function App() {
         title={confirm?.type === 'clearAll' ? 'Clear all tasks?' : 'Delete this task?'}
         body={
           confirm?.type === 'clearAll'
-            ? 'This removes every task permanently. This can\u2019t be undone.'
+            ? 'This removes every task permanently. This can’t be undone.'
             : 'This task will be removed permanently.'
         }
         confirmLabel={confirm?.type === 'clearAll' ? 'Clear all' : 'Delete'}
