@@ -138,7 +138,7 @@ export default function Sidebar({
               onClick={onLogout}
               aria-label="Logout"
               title="Logout"
-              className="p-1.5 text-white/70 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors shrink-0"
+              className="p-1.5 text-white/70 hover:text-red-500 rounded-lg transition-colors shrink-0"
             >
               <svg
                 width="16"
