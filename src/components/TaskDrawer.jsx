@@ -7,7 +7,13 @@ const PRIORITIES = [
   { key: "high", label: "High", color: "bg-high" },
 ];
 
-const emptyForm = { task: "", des: "", deadline: "", priority: "normal", image: "" };
+const emptyForm = {
+  task: "",
+  des: "",
+  deadline: "",
+  priority: "normal",
+  image: "",
+};
 
 export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
   const [form, setForm] = useState(emptyForm);
@@ -24,7 +30,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
               priority: editingTask.priority || "normal",
               image: editingTask.image || "",
             }
-          : emptyForm
+          : emptyForm,
       );
       setError("");
     }
@@ -158,7 +164,14 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <rect
+                            x="3"
+                            y="3"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          />
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
@@ -208,7 +221,8 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, deadline: e.target.value }))
                     }
-                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-surface outline-none transition-colors shadow-sm"
+                    onClick={(e) => e.target.showPicker?.()}
+                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-surface outline-none transition-colors shadow-sm cursor-pointer"
                   />
                 </div>
 
