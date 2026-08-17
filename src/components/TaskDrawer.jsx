@@ -30,7 +30,6 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
     }
   }, [open, editingTask]);
 
-  // Direct Image Attachment Handler (No OCR)
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -101,7 +100,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
 
             <form
               onSubmit={handleSubmit}
-              className="flex-1 flex flex-col overflow-y-auto"
+              className="flex-1 flex flex-col overflow-y-auto no-scrollbar"
             >
               <div className="flex-1 px-6 py-5 flex flex-col gap-5">
                 <div>
@@ -123,7 +122,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                   />
                 </div>
 
-                {/* Direct Image Attachment & Preview */}
+                {/* Attachment */}
                 <div>
                   <label className="block text-xs font-medium text-ink/80 mb-1.5">
                     Attachment

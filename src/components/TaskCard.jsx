@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { urgency, formatDeadline, URGENCY_META } from '../lib/date';
 
@@ -8,7 +8,6 @@ const PRIORITY_DOT = {
   high: 'bg-high',
 };
 
-// Auto-delete timer calculation helper
 function getRemainingDays(completedAt) {
   if (!completedAt) return 'Deletes in 7d';
   const completedDate = new Date(completedAt).getTime();
@@ -21,6 +20,17 @@ function getRemainingDays(completedAt) {
 
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
+
+  useEffect(() => {
+    if (showImageModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showImageModal]);
 
   const u = task.completed ? 'done' : urgency(task);
   const meta = URGENCY_META[u];
@@ -63,7 +73,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         </button>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 ">
           <div className="flex items-start justify-between gap-2">
             <p
               className={`text-sm font-medium leading-snug break-words ${
@@ -101,14 +111,12 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               {formatDeadline(task.deadline)}
             </span>
 
-            {/* 7-Day Auto Delete Badge - Only for Completed Tasks */}
             {task.completed && (
               <span className="font-mono text-[10px] font-medium tracking-wide px-2 py-0.5 rounded-md border border-red-500/20 bg-red-500/10 text-red-400">
                 {getRemainingDays(task.completed_at)}
               </span>
             )}
 
-            {/* Camera Icon */}
             {task.image && (
               <button
                 type="button"
@@ -177,7 +185,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowImageModal(false)}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

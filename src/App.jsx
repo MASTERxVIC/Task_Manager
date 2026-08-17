@@ -31,7 +31,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-void flex items-center justify-center text-gray-400">
+      <div className="h-dvh bg-void flex items-center justify-center text-gray-400">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <span>Loading tasks...</span>
@@ -72,24 +72,8 @@ export default function App() {
     setConfirm(null);
   };
 
-if (loading) {
-    return (
-      <div className="h-dvh bg-void flex items-center justify-center text-gray-400">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span>Loading tasks...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
-
   return (
-    /* h-dvh mobile browser address bar height ke saath adapt hota hai */
-      <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
+    <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
       
       {/* Desktop Sidebar */}
       <div className="hidden md:block w-64 shrink-0 h-full border-r border-line">
@@ -151,8 +135,8 @@ if (loading) {
           />
         </div>
 
-        {/* Sirf Task List area scroll hoga (min-h-0 is key here) */}
-        <main className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
+        {/* Clean scrollbar hiding using no-scrollbar */}
+        <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList
             tasks={tasks}
             view={view}
