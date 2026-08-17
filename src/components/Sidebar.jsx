@@ -1,25 +1,50 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const NAV = [
-  { key: 'all', label: 'All Tasks', icon: 'M4 6h16M4 12h16M4 18h16' },
-  { key: 'today', label: 'Today', icon: 'M8 7V3M16 7V3M4 11h16M5 21h14a1 1 0 001-1V7a1 1 0 00-1-1H5a1 1 0 00-1 1v13a1 1 0 001 1z' },
-  { key: 'upcoming', label: 'Upcoming', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-  { key: 'overdue', label: 'Overdue', icon: 'M12 9v4m0 4h.01M10.29 3.86l-8.18 14.14A1.5 1.5 0 003.34 20h17.32a1.5 1.5 0 001.23-2.36L13.71 3.86a1.5 1.5 0 00-2.42 0z' },
-  { key: 'completed', label: 'Completed', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { key: "all", label: "All Tasks", icon: "M4 6h16M4 12h16M4 18h16" },
+  {
+    key: "today",
+    label: "Today",
+    icon: "M8 7V3M16 7V3M4 11h16M5 21h14a1 1 0 001-1V7a1 1 0 00-1-1H5a1 1 0 00-1 1v13a1 1 0 001 1z",
+  },
+  {
+    key: "upcoming",
+    label: "Upcoming",
+    icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  },
+  {
+    key: "overdue",
+    label: "Overdue",
+    icon: "M12 9v4m0 4h.01M10.29 3.86l-8.18 14.14A1.5 1.5 0 003.34 20h17.32a1.5 1.5 0 001.23-2.36L13.71 3.86a1.5 1.5 0 00-2.42 0z",
+  },
+  {
+    key: "completed",
+    label: "Completed",
+    icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+  },
 ];
 
-export default function Sidebar({ view, setView, counts, user, onLogout, onClose }) {
-  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
+export default function Sidebar({
+  view,
+  setView,
+  counts,
+  user,
+  onLogout,
+  onClose,
+}) {
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
   return (
-    <aside className="flex flex-col h-screen w-full lg:w-64 lg:sticky lg:top-0 shrink-0 bg-surface border-r border-line px-4 py-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between px-2 mb-8">
+    <aside className="flex flex-col h-full w-full lg:w-64 shrink-0 bg-surface border-r border-line p-4 overflow-hidden">
+      {/* Header - Fixed Top */}
+      <div className="flex items-center justify-between px-2 mb-6 shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg grad-ring flex items-center justify-center font-display font-bold text-white text-sm">
             T
           </span>
-          <span className="font-display font-semibold text-lg text-white">Tasked</span>
+          <span className="font-display font-semibold text-lg text-white">
+            Tasked
+          </span>
         </div>
         {onClose && (
           <button
@@ -28,14 +53,19 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
             className="lg:hidden text-white/70 hover:text-white p-1"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         )}
       </div>
 
-      {/* Nav items */}
-      <nav className="flex flex-col gap-1">
+      {/* Nav items - Only this part will scroll if height is small */}
+      <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
         {NAV.map((item) => {
           const active = view === item.key;
           const count = counts?.[item.key] ?? 0;
@@ -45,25 +75,35 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
               onClick={() => setView(item.key)}
               className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 active
-                  ? 'bg-surface-raised text-ink font-semibold shadow-sm'
-                  : 'text-white/90 hover:text-white hover:bg-white/10'
+                  ? "bg-surface-raised text-ink font-semibold shadow-sm"
+                  : "text-white/90 hover:text-white hover:bg-white/10"
               }`}
             >
               <span className="flex items-center gap-3">
                 <span
                   className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-                    active ? 'grad-ring text-white' : 'bg-white/10 text-white/80 group-hover:text-white'
+                    active
+                      ? "grad-ring text-white"
+                      : "bg-white/10 text-white/80 group-hover:text-white"
                   }`}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path d={item.icon} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d={item.icon}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
                 {item.label}
               </span>
               <span
                 className={`font-mono text-[11px] px-1.5 py-0.5 rounded-md ${
-                  active ? 'bg-void text-ink font-bold' : 'bg-white/15 text-white'
+                  active
+                    ? "bg-void text-ink font-bold"
+                    : "bg-white/15 text-white"
                 }`}
               >
                 {count}
@@ -73,8 +113,8 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
         })}
       </nav>
 
-      {/* Bottom Footer Section */}
-      <div className="mt-auto pt-6 border-t border-white/20 flex flex-col gap-4">
+      {/* Bottom Footer Section - Fixed Bottom */}
+      <div className="shrink-0 mt-auto pt-4 border-t border-white/20 flex flex-col gap-3">
         {user && (
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/10 border border-white/10">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -85,7 +125,10 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
                 <span className="text-[10px] uppercase font-mono tracking-wider text-white/60 leading-none mb-0.5">
                   Logged in
                 </span>
-                <span className="text-xs font-medium text-white truncate" title={user.email}>
+                <span
+                  className="text-xs font-medium text-white truncate"
+                  title={user.email}
+                >
                   {user.email}
                 </span>
               </div>
@@ -97,7 +140,16 @@ export default function Sidebar({ view, setView, counts, user, onLogout, onClose
               title="Logout"
               className="p-1.5 text-white/70 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors shrink-0"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />

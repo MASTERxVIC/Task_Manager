@@ -72,10 +72,27 @@ export default function App() {
     setConfirm(null);
   };
 
+if (loading) {
+    return (
+      <div className="h-dvh bg-void flex items-center justify-center text-gray-400">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span>Loading tasks...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
   return (
-    <div className="h-screen flex bg-void overflow-hidden">
-      {/* desktop sidebar - fixed height */}
-      <div className="hidden md:block shrink-0 h-screen">
+    /* h-dvh mobile browser address bar height ke saath adapt hota hai */
+      <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
+      
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 shrink-0 h-full border-r border-line">
         <Sidebar 
           view={view} 
           setView={setView} 
@@ -85,7 +102,7 @@ export default function App() {
         />
       </div>
 
-      {/* mobile sidebar drawer */}
+      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {mobileNavOpen && (
           <>
@@ -101,7 +118,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-y-0 left-0 z-50 w-72 md:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-72 h-full md:hidden"
             >
               <Sidebar
                 view={view}
@@ -119,20 +136,23 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Main container with fixed height */}
-      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
-        <Topbar
-          view={view}
-          search={search}
-          setSearch={setSearch}
-          onAddClick={openAddDrawer}
-          onMenuClick={() => setMobileNavOpen(true)}
-          onClearAll={requestClearAll}
-          hasTasks={tasks.length > 0}
-        />
+      {/* Main Container */}
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
+        {/* Topbar fixed at top */}
+        <div className="shrink-0">
+          <Topbar
+            view={view}
+            search={search}
+            setSearch={setSearch}
+            onAddClick={openAddDrawer}
+            onMenuClick={() => setMobileNavOpen(true)}
+            onClearAll={requestClearAll}
+            hasTasks={tasks.length > 0}
+          />
+        </div>
 
-        {/* Sirf yeh TaskList container scroll hoga */}
-        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
+        {/* Sirf Task List area scroll hoga (min-h-0 is key here) */}
+        <main className="flex-1 min-h-0 overflow-y-auto px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList
             tasks={tasks}
             view={view}
@@ -145,7 +165,6 @@ export default function App() {
       </div>
 
       <TaskDrawer open={drawerOpen} onClose={closeDrawer} onSave={handleSave} editingTask={editingTask} />
-
       <ConfirmDialog
         open={!!confirm}
         title={confirm?.type === 'clearAll' ? 'Clear all tasks?' : 'Delete this task?'}
