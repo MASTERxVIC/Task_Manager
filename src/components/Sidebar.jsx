@@ -181,7 +181,7 @@ export default function Sidebar({
           {/* Join Board Button */}
           <button
             onClick={onOpenJoinModal}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3  hover:bg-white hover:text-surface text-gray-400 bg-surface/90 border border-line rounded-xl text-xs font-medium transition-all cursor-pointer"
+            className="glass-button w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 text-gray-300 rounded-xl text-xs font-medium cursor-pointer"
           >
             <svg
               width="14"
