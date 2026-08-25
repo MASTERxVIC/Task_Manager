@@ -28,7 +28,6 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
       setLoading(true);
       setError('');
 
-      // Insert board into Supabase (DB trigger creates creator membership)
       const { data: boardData, error: insertError } = await supabase
         .from('boards')
         .insert([
@@ -42,11 +41,13 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
       if (insertError) throw insertError;
 
-      setCreatedBoard(boardData);
-
+      // Parent ko instanly notify karein taaki dashboard sync ho sake
       if (onBoardCreated) {
         onBoardCreated(boardData);
       }
+
+      // Local Modal success screen
+      setCreatedBoard(boardData);
     } catch (err) {
       console.error('Create board error:', err);
       setError(typeof err === 'string' ? err : err?.message || 'Failed to create board. Please try again.');
@@ -138,14 +139,14 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="px-4 py-2 text-sm bg-white text-rose-800 hover:text-white hover:bg-rose-800 rounded-xl transition-colors disabled:opacity-50"
+                      className="px-4 py-2 text-sm bg-white text-rose-800 hover:text-white hover:bg-rose-800 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading || !boardName.trim()}
-                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-surface/70 hover:bg-surface rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-surface/70 hover:bg-surface rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {loading ? 'Creating...' : 'Create Board'}
@@ -171,7 +172,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                     <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block">
                       Invite Code
                     </span>
-                    <span className="text-base font-mono font-bold text-surface-400">
+                    <span className="text-base font-mono font-bold text-emerald-400">
                       {createdBoard.invite_code}
                     </span>
                   </div>
@@ -179,7 +180,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                   <button
                     type="button"
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface text-white text-xs font-medium rounded-lg transition-all shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface text-white text-xs font-medium rounded-lg transition-all shadow-md cursor-pointer"
                   >
                     {copied ? (
                       <>
@@ -198,7 +199,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="w-full py-2.5 text-sm font-medium bg-slate-800 hover:bg-slate-700 text-gray-200 rounded-xl transition-colors"
+                  className="w-full py-2.5 text-sm font-medium bg-slate-800 hover:bg-slate-700 text-gray-200 rounded-xl transition-colors cursor-pointer"
                 >
                   Done
                 </button>

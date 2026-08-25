@@ -27,6 +27,7 @@ export default function App() {
   } = useTasks();
 
   const [view, setView] = useState('all');
+  const [activeBoard, setActiveBoard] = useState(null); // Active Board Object Track karne ke liye
   const [search, setSearch] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -54,36 +55,58 @@ export default function App() {
     setEditingTask(null);
     setDrawerOpen(true);
   };
+
   const openEditDrawer = (task) => {
     setEditingTask(task);
     setDrawerOpen(true);
   };
+
   const closeDrawer = () => setDrawerOpen(false);
 
-  const handleSave = (form) => {
-    if (editingTask) {
-      updateTask(editingTask.id, form);
-    } else {
-      // Pass selected view/board ID if task creation needs board tagging
-      addTask(form);
+  const handleSave = async (form) => {
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, form);
+      } else {
+        const builtInViews = ['all', 'today', 'upcoming', 'completed'];
+        const boardId = builtInViews.includes(view) ? null : view;
+
+        await addTask({
+          ...form,
+          ...(boardId && { board_id: boardId })
+        });
+      }
+      setDrawerOpen(false);
+    } catch (err) {
+      console.error('Task save error:', err);
     }
-    setDrawerOpen(false);
   };
 
   const requestDelete = (id) => setConfirm({ type: 'delete', id });
   const requestClearAll = () => setConfirm({ type: 'clearAll' });
 
-  const handleConfirm = () => {
-    if (confirm?.type === 'delete') deleteTask(confirm.id);
-    if (confirm?.type === 'clearAll') clearAll();
+  const handleConfirm = async () => {
+    if (confirm?.type === 'delete') {
+      await deleteTask(confirm.id);
+    } else if (confirm?.type === 'clearAll') {
+      await clearAll();
+    }
     setConfirm(null);
   };
 
+  // Naya board create hone par state update aur View switch
+  const handleBoardCreated = (newBoard) => {
+    setActiveBoard(newBoard);
+    if (newBoard?.id) {
+      setView(newBoard.id);
+    }
+    if (refetchTasks) refetchTasks();
+  };
+
   const handleJoinBoard = async (inviteCode) => {
-    // 1. Fetch board using invite code
     const { data: board, error: boardError } = await supabase
       .from('boards')
-      .select('id, name')
+      .select('id, name, invite_code')
       .eq('invite_code', inviteCode.trim().toUpperCase())
       .maybeSingle();
 
@@ -91,7 +114,6 @@ export default function App() {
       throw new Error('Invalid invite code. Please check and try again.');
     }
 
-    // 2. Check existing membership
     const { data: existingMember } = await supabase
       .from('board_members')
       .select('id')
@@ -103,7 +125,6 @@ export default function App() {
       throw new Error('You have already joined this board.');
     }
 
-    // 3. Join board
     const { error: joinError } = await supabase
       .from('board_members')
       .insert([
@@ -116,16 +137,9 @@ export default function App() {
 
     if (joinError) throw new Error(joinError.message);
 
-    // Success - reload tasks/boards state & switch view
     if (refetchTasks) refetchTasks();
+    setActiveBoard(board);
     setView(board.id);
-    console.log(`Successfully joined board: ${board.name}`);
-  };
-
-  const handleBoardCreated = (newBoard) => {
-    console.log('Board successfully created:', newBoard);
-    if (refetchTasks) refetchTasks();
-    if (newBoard?.id) setView(newBoard.id);
   };
 
   return (
@@ -138,6 +152,7 @@ export default function App() {
           setView={setView} 
           counts={counts} 
           user={user} 
+          inviteCode={activeBoard?.invite_code || "XXXXXX"}
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
@@ -170,6 +185,7 @@ export default function App() {
                 }}
                 counts={counts}
                 user={user}
+                inviteCode={activeBoard?.invite_code || "XXXXXX"}
                 onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
                 onOpenJoinModal={() => {
@@ -186,9 +202,8 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Main Container */}
+      {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
-        {/* Topbar fixed at top */}
         <div className="shrink-0">
           <Topbar
             view={view}
@@ -201,7 +216,6 @@ export default function App() {
           />
         </div>
 
-        {/* Clean scrollbar hiding using no-scrollbar */}
         <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList
             tasks={tasks || []}
@@ -214,7 +228,12 @@ export default function App() {
         </main>
       </div>
 
-      <TaskDrawer open={drawerOpen} onClose={closeDrawer} onSave={handleSave} editingTask={editingTask} />
+      <TaskDrawer 
+        open={drawerOpen} 
+        onClose={closeDrawer} 
+        onSave={handleSave} 
+        editingTask={editingTask} 
+      />
       
       <CreateBoardModal
         open={createModalOpen}
