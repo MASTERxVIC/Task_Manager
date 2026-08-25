@@ -42,7 +42,7 @@ export default function Sidebar({
           <img
             src="/Logo.svg"
             alt="Tasked Logo"
-            className="w-8 h-8 rounded-lg object-contain"
+            className="w-6 h-6 rounded-lg object-contain"
           />
           <span className="font-display font-semibold text-lg text-white">
             Tasked
