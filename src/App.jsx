@@ -64,6 +64,7 @@ export default function App() {
     if (editingTask) {
       updateTask(editingTask.id, form);
     } else {
+      // Pass selected view/board ID if task creation needs board tagging
       addTask(form);
     }
     setDrawerOpen(false);
@@ -115,14 +116,16 @@ export default function App() {
 
     if (joinError) throw new Error(joinError.message);
 
-    // Success - reload tasks/boards state
+    // Success - reload tasks/boards state & switch view
     if (refetchTasks) refetchTasks();
+    setView(board.id);
     console.log(`Successfully joined board: ${board.name}`);
   };
 
   const handleBoardCreated = (newBoard) => {
     console.log('Board successfully created:', newBoard);
     if (refetchTasks) refetchTasks();
+    if (newBoard?.id) setView(newBoard.id);
   };
 
   return (
