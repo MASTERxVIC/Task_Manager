@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
@@ -12,6 +12,11 @@ import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
 
 export default function App() {
+  const [view, setView] = useState('all');
+  const [activeBoard, setActiveBoard] = useState(null);
+  const [boards, setBoards] = useState([]); // User's boards state
+
+  // Pass activeBoard?.id to useTasks if your hook supports board filtering
   const { 
     user, 
     loading, 
@@ -24,10 +29,8 @@ export default function App() {
     clearAll, 
     counts,
     refetchTasks
-  } = useTasks();
+  } = useTasks(activeBoard?.id);
 
-  const [view, setView] = useState('all');
-  const [activeBoard, setActiveBoard] = useState(null); // Active Board Object Track karne ke liye
   const [search, setSearch] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -35,6 +38,34 @@ export default function App() {
   const [confirm, setConfirm] = useState(null);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  // Fetch all boards for the logged-in user
+  const fetchBoards = async () => {
+    if (!user) return;
+    try {
+      // Fetch boards owned by user or where user is a member
+      const { data: memberBoards, error: memberErr } = await supabase
+        .from('board_members')
+        .select('board_id, boards(*)')
+        .eq('user_id', user.id);
+
+      if (memberErr) throw memberErr;
+
+      const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
+      setBoards(userBoards);
+
+      // Default active board set karein agar select nahi hai
+      if (userBoards.length > 0 && !activeBoard) {
+        setActiveBoard(userBoards[0]);
+      }
+    } catch (err) {
+      console.error('Error fetching boards:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBoards();
+  }, [user]);
 
   if (loading) {
     return (
@@ -68,15 +99,16 @@ export default function App() {
       if (editingTask) {
         await updateTask(editingTask.id, form);
       } else {
-        const builtInViews = ['all', 'today', 'upcoming', 'completed'];
-        const boardId = builtInViews.includes(view) ? null : view;
-
-        await addTask({
+        // Active board ID ko explicitly task ke sath attach karein
+        const taskPayload = {
           ...form,
-          ...(boardId && { board_id: boardId })
-        });
+          ...(activeBoard?.id ? { board_id: activeBoard.id } : {})
+        };
+
+        await addTask(taskPayload);
       }
       setDrawerOpen(false);
+      if (refetchTasks) await refetchTasks(); // Immediate UI sync
     } catch (err) {
       console.error('Task save error:', err);
     }
@@ -92,15 +124,13 @@ export default function App() {
       await clearAll();
     }
     setConfirm(null);
+    if (refetchTasks) await refetchTasks();
   };
 
-  // Naya board create hone par state update aur View switch
-  const handleBoardCreated = (newBoard) => {
+  const handleBoardCreated = async (newBoard) => {
     setActiveBoard(newBoard);
-    if (newBoard?.id) {
-      setView(newBoard.id);
-    }
-    if (refetchTasks) refetchTasks();
+    await fetchBoards();
+    if (refetchTasks) await refetchTasks();
   };
 
   const handleJoinBoard = async (inviteCode) => {
@@ -137,9 +167,9 @@ export default function App() {
 
     if (joinError) throw new Error(joinError.message);
 
-    if (refetchTasks) refetchTasks();
     setActiveBoard(board);
-    setView(board.id);
+    await fetchBoards();
+    if (refetchTasks) await refetchTasks();
   };
 
   return (
@@ -152,7 +182,9 @@ export default function App() {
           setView={setView} 
           counts={counts} 
           user={user} 
-          inviteCode={activeBoard?.invite_code || "XXXXXX"}
+          boards={boards}
+          activeBoard={activeBoard}
+          onSelectBoard={(board) => setActiveBoard(board)}
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
@@ -185,7 +217,12 @@ export default function App() {
                 }}
                 counts={counts}
                 user={user}
-                inviteCode={activeBoard?.invite_code || "XXXXXX"}
+                boards={boards}
+                activeBoard={activeBoard}
+                onSelectBoard={(board) => {
+                  setActiveBoard(board);
+                  setMobileNavOpen(false);
+                }}
                 onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
                 onOpenJoinModal={() => {

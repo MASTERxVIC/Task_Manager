@@ -10,7 +10,7 @@ export function useTasks() {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef(null);
 
-  // Clean Expired Tasks from local state
+  // Helper: Expired completed tasks locally filter karne ke liye
   const filterValidTasks = useCallback((taskList) => {
     const now = Date.now();
     return taskList.filter((t) => {
@@ -20,21 +20,11 @@ export function useTasks() {
     });
   }, []);
 
-  // 1. Fetch User Specific Tasks + Joined Board Tasks
+  // 1. Fetch User Specific & Board Tasks
   const fetchTasks = useCallback(async (userId) => {
     setLoading(true);
-
     try {
-      // Step A: Auto delete >7 days completed tasks in DB
-      const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
-      await supabase
-        .from('todos')
-        .delete()
-        .eq('user_id', userId)
-        .eq('completed', true)
-        .lt('completed_at', sevenDaysAgo);
-
-      // Step B: Get all board IDs user is a member of
+      // Board memberships fetch
       const { data: boardMemberships } = await supabase
         .from('board_members')
         .select('board_id')
@@ -42,7 +32,6 @@ export function useTasks() {
 
       const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
 
-      // Step C: Fetch tasks created by user OR belonging to user's joined boards
       let query = supabase.from('todos').select('*');
 
       if (joinedBoardIds.length > 0) {
@@ -65,15 +54,28 @@ export function useTasks() {
     }
   }, [filterValidTasks]);
 
-  // 2. Setup Safe Realtime Listener
+  // 2. Separate Cleanup Routine (Loop-proof)
+  const cleanupOldTasks = useCallback(async (userId) => {
+    try {
+      const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
+      await supabase
+        .from('todos')
+        .delete()
+        .eq('user_id', userId)
+        .eq('completed', true)
+        .lt('completed_at', sevenDaysAgo);
+    } catch (err) {
+      console.error('Cleanup tasks exception:', err);
+    }
+  }, []);
+
+  // 3. Setup Realtime Listener
   const setupRealtime = useCallback((userId) => {
-    // Agar active channel exist karta hai to pehle safely remove karein
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
 
-    // New unique channel per user session
     const channel = supabase
       .channel(`rt-todos-${userId}`)
       .on(
@@ -82,39 +84,44 @@ export function useTasks() {
         () => {
           fetchTasks(userId);
         }
-      );
+      )
+      .subscribe();
 
-    // .on() ke bad hi .subscribe() execute hoga
-    channel.subscribe();
     channelRef.current = channel;
   }, [fetchTasks]);
 
-  // 3. Auth Session Listener & Realtime Sync Setup
+  // 4. Auth Session & Initialization
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      
+
       if (currentUser) {
+        await cleanupOldTasks(currentUser.id);
         fetchTasks(currentUser.id);
         setupRealtime(currentUser.id);
       } else {
         setLoading(false);
       }
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      if (currentUser) {
+      if (event === 'SIGNED_IN' && currentUser) {
         fetchTasks(currentUser.id);
         setupRealtime(currentUser.id);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setTasks([]);
         if (channelRef.current) {
           supabase.removeChannel(channelRef.current);
@@ -125,16 +132,16 @@ export function useTasks() {
     });
 
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
-  }, [fetchTasks, setupRealtime]);
+  }, [fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // 4. Add Task (Supabase DB UUID default set karega)
+  // 5. Handlers
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
     if (!user) return;
     const newTask = {
@@ -156,21 +163,18 @@ export function useTasks() {
     }
   };
 
-  // 5. Update Task
   const updateTask = async (id, patch) => {
     const { error } = await supabase.from('todos').update(patch).eq('id', id);
     if (error) console.error('Error updating task:', error);
     else setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   };
 
-  // 6. Delete Task
   const deleteTask = async (id) => {
     const { error } = await supabase.from('todos').delete().eq('id', id);
     if (error) console.error('Error deleting task:', error);
     else setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // 7. Toggle Task
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -194,7 +198,6 @@ export function useTasks() {
     }
   };
 
-  // 8. Clear All Tasks
   const clearAll = async () => {
     if (!user) return;
     const { error } = await supabase.from('todos').delete().eq('user_id', user.id);
@@ -202,7 +205,6 @@ export function useTasks() {
     else setTasks([]);
   };
 
-  // 9. Clear Completed Tasks
   const clearCompleted = async () => {
     if (!user) return;
     const { error } = await supabase
