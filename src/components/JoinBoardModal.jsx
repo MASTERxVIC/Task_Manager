@@ -120,7 +120,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                   type="button"
                   onClick={handleClose}
                   disabled={loading}
-                  className="px-4 py-2 text-sm bg-white text-rose-800 border border-rose-800 hover:text-white hover:bg-rose-800 hover:border-0 rounded-xl transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm bg-white text-rose-800  hover:text-white hover:bg-rose-800  rounded-xl transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
