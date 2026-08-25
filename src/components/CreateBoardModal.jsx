@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FolderPlus, X, Loader2, Copy, Check, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -9,6 +9,17 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
   const [createdBoard, setCreatedBoard] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+
+  // Reset internal state whenever modal is closed from parent
+  useEffect(() => {
+    if (!open) {
+      setBoardName('');
+      setCreatedBoard(null);
+      setError('');
+      setCopied(false);
+      setLoading(false);
+    }
+  }, [open]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -41,12 +52,12 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
       if (insertError) throw insertError;
 
-      // Parent ko instanly notify karein taaki dashboard sync ho sake
+      // Parent ko notify karein
       if (onBoardCreated) {
         onBoardCreated(boardData);
       }
 
-      // Local Modal success screen
+      // Local Modal success screen set karein
       setCreatedBoard(boardData);
     } catch (err) {
       console.error('Create board error:', err);
@@ -65,10 +76,6 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
   const handleClose = () => {
     if (loading) return;
-    setBoardName('');
-    setCreatedBoard(null);
-    setError('');
-    setCopied(false);
     onClose();
   };
 
@@ -97,7 +104,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
             <button
               type="button"
               onClick={handleClose}
-              className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
