@@ -12,8 +12,15 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+
     if (!boardName.trim()) {
       setError('Please enter a board name');
+      return;
+    }
+
+    if (!user?.id) {
+      setError('User session not found. Please log in again.');
       return;
     }
 
@@ -21,7 +28,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
       setLoading(true);
       setError('');
 
-      // SQL triggers (Step 1 & 2) automatically handle invite_code generation & owner member insertion!
+      // Insert board into Supabase
       const { data, error: insertError } = await supabase
         .from('boards')
         .insert([
@@ -33,12 +40,23 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Supabase Insert Error:', insertError);
+        throw insertError;
+      }
 
+      console.log('Successfully created board:', data);
+
+      // Set state for Success Screen view inside modal
       setCreatedBoard(data);
-      if (onBoardCreated) onBoardCreated(data);
+
+      if (onBoardCreated) {
+        onBoardCreated(data);
+      }
     } catch (err) {
-      setError(err?.message || 'Failed to create board. Please try again.');
+      console.error('Create board catch:', err);
+      const msg = typeof err === 'string' ? err : err?.message || 'Failed to create board.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -83,6 +101,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
           >
             {/* Close Button */}
             <button
+              type="button"
               onClick={handleClose}
               className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
@@ -93,7 +112,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
               /* FORM: Create Board */
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-surface border border-surface/20">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
                     <FolderPlus className="w-6 h-6" />
                   </div>
                   <div>
@@ -115,7 +134,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                         if (error) setError('');
                       }}
                       placeholder="e.g. Frontend Sprint 2026"
-                      className="w-full px-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-800/80 border border-line focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all"
                       autoFocus
                     />
                     {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
@@ -126,14 +145,14 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="px-4 py-2 text-sm bg-white text-rose-800  hover:text-white hover:bg-rose-800 rounded-xl transition-colors disabled:opacity-50"
+                      className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading || !boardName.trim()}
-                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-surface/70 hover:bg-surface rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {loading ? 'Creating...' : 'Create Board'}
@@ -159,14 +178,15 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                     <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block">
                       Invite Code
                     </span>
-                    <span className="text-base font-mono font-bold text-surface-400">
+                    <span className="text-base font-mono font-bold text-blue-400">
                       {createdBoard.invite_code}
                     </span>
                   </div>
 
                   <button
+                    type="button"
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface text-white text-xs font-medium rounded-lg transition-all shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-all shadow-md"
                   >
                     {copied ? (
                       <>
@@ -183,6 +203,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleClose}
                   className="w-full py-2.5 text-sm font-medium bg-slate-800 hover:bg-slate-700 text-gray-200 rounded-xl transition-colors"
                 >
