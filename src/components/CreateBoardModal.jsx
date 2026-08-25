@@ -1,21 +1,26 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FolderPlus, X, Loader2, Copy, Check, Sparkles } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FolderPlus, X, Loader2, Copy, Check, Sparkles } from "lucide-react";
+import { supabase } from "../lib/supabaseClient";
 
-export default function CreateBoardModal({ open, onClose, user, onBoardCreated }) {
-  const [boardName, setBoardName] = useState('');
+export default function CreateBoardModal({
+  open,
+  onClose,
+  user,
+  onBoardCreated,
+}) {
+  const [boardName, setBoardName] = useState("");
   const [loading, setLoading] = useState(false);
   const [createdBoard, setCreatedBoard] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  // Reset internal state whenever modal is closed from parent
+  // Jab bhi Modal band ho, saari internal state reset ho jaye
   useEffect(() => {
     if (!open) {
-      setBoardName('');
+      setBoardName("");
       setCreatedBoard(null);
-      setError('');
+      setError("");
       setCopied(false);
       setLoading(false);
     }
@@ -26,21 +31,21 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
     e.stopPropagation();
 
     if (!boardName.trim()) {
-      setError('Please enter a board name');
+      setError("Please enter a board name");
       return;
     }
 
     if (!user?.id) {
-      setError('User session missing. Please re-login.');
+      setError("User session missing. Please re-login.");
       return;
     }
 
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const { data: boardData, error: insertError } = await supabase
-        .from('boards')
+        .from("boards")
         .insert([
           {
             name: boardName.trim(),
@@ -52,16 +57,20 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
       if (insertError) throw insertError;
 
-      // Parent ko notify karein
+      // Parent Component (Dashboard/Sidebar) ko instant notify karo
       if (onBoardCreated) {
         onBoardCreated(boardData);
       }
 
-      // Local Modal success screen set karein
+      // Success card dikhane ke liye
       setCreatedBoard(boardData);
     } catch (err) {
-      console.error('Create board error:', err);
-      setError(typeof err === 'string' ? err : err?.message || 'Failed to create board. Please try again.');
+      console.error("Create board error:", err);
+      setError(
+        typeof err === "string"
+          ? err
+          : err?.message || "Failed to create board. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -117,8 +126,12 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                     <FolderPlus className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Create New Board</h3>
-                    <p className="text-xs text-gray-400">Start a shared workspace for your team</p>
+                    <h3 className="text-lg font-semibold text-white">
+                      Create New Board
+                    </h3>
+                    <p className="text-xs text-gray-400">
+                      Start a shared workspace for your team
+                    </p>
                   </div>
                 </div>
 
@@ -132,13 +145,15 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                       value={boardName}
                       onChange={(e) => {
                         setBoardName(e.target.value);
-                        if (error) setError('');
+                        if (error) setError("");
                       }}
                       placeholder="e.g. Frontend Sprint 2026"
                       className="w-full px-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all"
                       autoFocus
                     />
-                    {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
+                    {error && (
+                      <p className="mt-1.5 text-xs text-red-400">{error}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-end gap-3 pt-2">
@@ -156,7 +171,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                       className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-surface/70 hover:bg-surface rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {loading ? 'Creating...' : 'Create Board'}
+                      {loading ? "Creating..." : "Create Board"}
                     </button>
                   </div>
                 </form>
@@ -169,8 +184,12 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Board Created!</h3>
-                  <p className="text-xs text-gray-400">Share this code with team members to join</p>
+                  <h3 className="text-lg font-semibold text-white">
+                    Board Created!
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Share this code with team members to join
+                  </p>
                 </div>
 
                 {/* Invite Code Card */}
@@ -203,6 +222,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
                   </button>
                 </div>
 
+                {/* Done Button -> Parent ko bolega ki Modal Close karo */}
                 <button
                   type="button"
                   onClick={handleClose}
