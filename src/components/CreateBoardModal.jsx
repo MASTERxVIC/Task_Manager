@@ -15,7 +15,7 @@ export default function CreateBoardModal({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
-  // Jab bhi Modal band ho, saari internal state reset ho jaye
+  // Clean state whenever modal opens or closes completely
   useEffect(() => {
     if (!open) {
       setBoardName("");
@@ -57,12 +57,7 @@ export default function CreateBoardModal({
 
       if (insertError) throw insertError;
 
-      // Parent Component (Dashboard/Sidebar) ko instant notify karo
-      if (onBoardCreated) {
-        onBoardCreated(boardData);
-      }
-
-      // Success card dikhane ke liye
+      // Local success card state update (Parent ko abhi notify mat karo taaki re-render na ho)
       setCreatedBoard(boardData);
     } catch (err) {
       console.error("Create board error:", err);
@@ -85,6 +80,12 @@ export default function CreateBoardModal({
 
   const handleClose = () => {
     if (loading) return;
+
+    // Board successfully ban chuka hai, toh modal close hone par parent list update karo
+    if (createdBoard && onBoardCreated) {
+      onBoardCreated(createdBoard);
+    }
+
     onClose();
   };
 
@@ -222,7 +223,7 @@ export default function CreateBoardModal({
                   </button>
                 </div>
 
-                {/* Done Button -> Parent ko bolega ki Modal Close karo */}
+                {/* Done Button */}
                 <button
                   type="button"
                   onClick={handleClose}
