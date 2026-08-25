@@ -200,12 +200,10 @@ export default function Sidebar({
             </svg>
             <span>Join Board with Code</span>
           </button>
-        </div>
-        {/* Action Buttons: Create Board & Join Board */}
-        <div className="flex flex-col gap-2 mb-4 shrink-0">
+
           <button
-            onClick={onOpenCreateModal}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.98] cursor-pointer"
+            onClick={onOpenJoinModal}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3  hover:bg-white hover:text-surface text-gray-400 bg-slate-800/60 border border-line rounded-xl text-xs font-medium transition-all cursor-pointer"
           >
             <svg
               width="15"
@@ -221,29 +219,6 @@ export default function Sidebar({
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             <span>Create Board</span>
-          </button>
-
-          <button
-            onClick={onOpenJoinModal}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-medium text-xs rounded-xl transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-blue-400"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="8.5" cy="7" r="4" />
-              <line x1="20" y1="8" x2="20" y2="14" />
-              <line x1="23" y1="11" x2="17" y2="11" />
-            </svg>
-            <span>Join Board</span>
           </button>
         </div>
       </nav>
