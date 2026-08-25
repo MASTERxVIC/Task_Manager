@@ -28,8 +28,8 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
       setLoading(true);
       setError('');
 
-      // Insert board into Supabase
-      const { data, error: insertError } = await supabase
+      // 1. Insert board into Supabase
+      const { data: boardData, error: insertError } = await supabase
         .from('boards')
         .insert([
           {
@@ -42,8 +42,26 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
       if (insertError) throw insertError;
 
-      setCreatedBoard(data);
-      if (onBoardCreated) onBoardCreated(data);
+      // 2. Creator ko automatically board_members me insert karein
+      const { error: memberError } = await supabase
+        .from('board_members')
+        .insert([
+          {
+            board_id: boardData.id,
+            user_id: user.id,
+            role: 'admin',
+          },
+        ]);
+
+      if (memberError) console.error('Member insertion error:', memberError);
+
+      // 3. Set local created board state to show invite screen
+      setCreatedBoard(boardData);
+
+      // 4. Call parent callback safely
+      if (onBoardCreated) {
+        onBoardCreated(boardData);
+      }
     } catch (err) {
       console.error('Create board error:', err);
       setError(typeof err === 'string' ? err : err?.message || 'Failed to create board. Please try again.');
