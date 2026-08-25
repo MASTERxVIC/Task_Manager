@@ -30,7 +30,7 @@ export default function Sidebar({
   setView,
   counts,
   user,
-  inviteCode = "TASKED2026",
+  inviteCode = "XXXXXX",
   onLogout,
   onClose,
   onOpenCreateModal,
@@ -39,8 +39,12 @@ export default function Sidebar({
   const [copied, setCopied] = useState(false);
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
+  // Check if a valid invite code exists (not empty and not XXXXXX)
+  const hasValidCode = Boolean(inviteCode && inviteCode !== "XXXXXX");
+  const displayCode = hasValidCode ? inviteCode : "XXXXXX";
+
   const handleCopyInvite = () => {
-    if (!inviteCode) return;
+    if (!hasValidCode) return;
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -138,13 +142,23 @@ export default function Sidebar({
               <p className="text-[10px] text-gray-400 font-medium uppercase">
                 Your Invite Code
               </p>
-              <p className="text-xs font-mono font-semibold text-white truncate">
-                {inviteCode || "TASKED2026"}
+              <p
+                className={`text-xs font-mono font-semibold truncate ${
+                  hasValidCode ? "text-white" : "text-gray-500"
+                }`}
+              >
+                {displayCode}
               </p>
             </div>
             <button
               onClick={handleCopyInvite}
-              className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors cursor-pointer"
+              disabled={!hasValidCode}
+              title={hasValidCode ? "Copy Invite Code" : "Create a board first"}
+              className={`p-1.5 rounded-lg transition-colors ${
+                hasValidCode
+                  ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
+                  : "bg-slate-800 text-gray-600 cursor-not-allowed opacity-50"
+              }`}
             >
               {copied ? (
                 <svg
@@ -201,7 +215,8 @@ export default function Sidebar({
             <span>Join Board with Code</span>
           </button>
 
-         <button
+          {/* Create Board Button */}
+          <button
             onClick={onOpenCreateModal}
             className="glass-button w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer"
           >
