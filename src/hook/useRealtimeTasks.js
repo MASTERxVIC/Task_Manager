@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase'; // path check kar lena ('../lib/supabase')
+import { supabase } from '../lib/supabaseClient'; 
 
 export function useRealtimeTasks(dashboardId) {
   const [tasks, setTasks] = useState([]);
