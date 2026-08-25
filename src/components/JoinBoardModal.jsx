@@ -103,7 +103,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                       if (error) setError('');
                     }}
                     placeholder="e.g. TASKED-9988"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line focus:border-surface focus:ring-1 focus:ring-surface rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all uppercase"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all uppercase"
                     autoFocus
                   />
                 </div>
