@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FolderPlus, X, Loader2, Copy, Check, Sparkles } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function CreateBoardModal({ open, onClose, user, onBoardCreated }) {
   const [boardName, setBoardName] = useState('');
