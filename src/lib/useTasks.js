@@ -1,19 +1,16 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import { urgency } from './date';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-function makeId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
 export function useTasks() {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const channelRef = useRef(null);
 
-  // Filter 7 days expired completed tasks from local state
+  // Clean Expired Tasks from local state
   const filterValidTasks = useCallback((taskList) => {
     const now = Date.now();
     return taskList.filter((t) => {
@@ -23,7 +20,7 @@ export function useTasks() {
     });
   }, []);
 
-  // 1. Fetch User Specific Tasks + Joined Board Tasks + Clean Expired Tasks
+  // 1. Fetch User Specific Tasks + Joined Board Tasks
   const fetchTasks = useCallback(async (userId) => {
     setLoading(true);
 
@@ -68,63 +65,79 @@ export function useTasks() {
     }
   }, [filterValidTasks]);
 
-  // 2. Auth Session Listener & Realtime Sync Setup
+  // 2. Setup Safe Realtime Listener
+  const setupRealtime = useCallback((userId) => {
+    // Agar active channel exist karta hai to pehle safely remove karein
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    // New unique channel per user session
+    const channel = supabase
+      .channel(`rt-todos-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'todos' },
+        () => {
+          fetchTasks(userId);
+        }
+      );
+
+    // .on() ke bad hi .subscribe() execute hoga
+    channel.subscribe();
+    channelRef.current = channel;
+  }, [fetchTasks]);
+
+  // 3. Auth Session Listener & Realtime Sync Setup
   useEffect(() => {
-    let realtimeChannel = null;
+    let mounted = true;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      
       if (currentUser) {
         fetchTasks(currentUser.id);
-        realtimeChannel = subscribeToTasks(currentUser.id);
+        setupRealtime(currentUser.id);
       } else {
         setLoading(false);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+
       if (currentUser) {
         fetchTasks(currentUser.id);
-        if (realtimeChannel) supabase.removeChannel(realtimeChannel);
-        realtimeChannel = subscribeToTasks(currentUser.id);
+        setupRealtime(currentUser.id);
       } else {
         setTasks([]);
-        if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
         setLoading(false);
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
-      if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
-  }, [fetchTasks]);
+  }, [fetchTasks, setupRealtime]);
 
-  // Realtime subscription handler for collaborative updates
-  const subscribeToTasks = (userId) => {
-    const channel = supabase
-      .channel('public:todos')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'todos' },
-        () => {
-          // Re-fetch tasks on insert/update/delete across shared boards
-          fetchTasks(userId);
-        }
-      )
-      .subscribe();
-
-    return channel;
-  };
-
-  // 3. Add Task
+  // 4. Add Task (Supabase DB UUID default set karega)
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
     if (!user) return;
     const newTask = {
-      id: makeId(),
       user_id: user.id,
       board_id,
       task,
@@ -135,26 +148,29 @@ export function useTasks() {
       completed_at: null,
     };
 
-    const { error } = await supabase.from('todos').insert([newTask]);
-    if (error) console.error('Error adding task:', error);
-    else setTasks((prev) => [newTask, ...prev]);
+    const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
+    if (error) {
+      console.error('Error adding task:', error);
+    } else if (data) {
+      setTasks((prev) => [data, ...prev]);
+    }
   };
 
-  // 4. Update Task
+  // 5. Update Task
   const updateTask = async (id, patch) => {
     const { error } = await supabase.from('todos').update(patch).eq('id', id);
     if (error) console.error('Error updating task:', error);
     else setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   };
 
-  // 5. Delete Task
+  // 6. Delete Task
   const deleteTask = async (id) => {
     const { error } = await supabase.from('todos').delete().eq('id', id);
     if (error) console.error('Error deleting task:', error);
     else setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // 6. Toggle Task
+  // 7. Toggle Task
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -178,7 +194,7 @@ export function useTasks() {
     }
   };
 
-  // 7. Clear All Tasks
+  // 8. Clear All Tasks
   const clearAll = async () => {
     if (!user) return;
     const { error } = await supabase.from('todos').delete().eq('user_id', user.id);
@@ -186,7 +202,7 @@ export function useTasks() {
     else setTasks([]);
   };
 
-  // 8. Clear Completed Tasks
+  // 9. Clear Completed Tasks
   const clearCompleted = async () => {
     if (!user) return;
     const { error } = await supabase
@@ -229,4 +245,4 @@ export function useTasks() {
     counts,
     refetchTasks: () => user && fetchTasks(user.id),
   };
-} 
+}
