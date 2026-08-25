@@ -78,7 +78,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
 
             {/* Header Icon & Title */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <div className="p-2.5 rounded-xl bg-surface border border-surface/20 ">
                 <UserPlus className="w-6 h-6" />
               </div>
               <div>
@@ -103,7 +103,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                       if (error) setError('');
                     }}
                     placeholder="e.g. TASKED-9988"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all uppercase"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line focus:border-surface focus:ring-1 focus:ring-surface rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all uppercase"
                     autoFocus
                   />
                 </div>
@@ -120,14 +120,14 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                   type="button"
                   onClick={handleClose}
                   disabled={loading}
-                  className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm text-gray-300 border border-rose-300 hover:text-white hover:bg-rose-800 rounded-xl transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !code.trim()}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-lime-600 hover:bg-lime-500 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {loading ? 'Joining...' : 'Join Board'}
