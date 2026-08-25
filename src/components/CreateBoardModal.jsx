@@ -28,7 +28,7 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
       setLoading(true);
       setError('');
 
-      // 1. Insert board into Supabase
+      // Insert board into Supabase (DB trigger creates creator membership)
       const { data: boardData, error: insertError } = await supabase
         .from('boards')
         .insert([
@@ -42,23 +42,8 @@ export default function CreateBoardModal({ open, onClose, user, onBoardCreated }
 
       if (insertError) throw insertError;
 
-      // 2. Creator ko automatically board_members me insert karein
-      const { error: memberError } = await supabase
-        .from('board_members')
-        .insert([
-          {
-            board_id: boardData.id,
-            user_id: user.id,
-            role: 'admin',
-          },
-        ]);
-
-      if (memberError) console.error('Member insertion error:', memberError);
-
-      // 3. Set local created board state to show invite screen
       setCreatedBoard(boardData);
 
-      // 4. Call parent callback safely
       if (onBoardCreated) {
         onBoardCreated(boardData);
       }
