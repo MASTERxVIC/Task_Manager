@@ -39,9 +39,11 @@ export default function Sidebar({
       {/* Header - Fixed Top */}
       <div className="flex items-center justify-between px-2 mb-6 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-lg grad-ring flex items-center justify-center font-display font-bold text-white text-sm">
-            T
-          </span>
+          <img
+            src="/Logo.svg"
+            alt="Tasked Logo"
+            className="w-8 h-8 rounded-lg object-contain"
+          />
           <span className="font-display font-semibold text-lg text-white">
             Tasked
           </span>
