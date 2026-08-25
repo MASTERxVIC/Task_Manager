@@ -127,7 +127,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                 <button
                   type="submit"
                   disabled={loading || !code.trim()}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-lime-600 hover:bg-lime-500 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-surface/70 hover:bg-surface rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {loading ? 'Joining...' : 'Join Board'}
