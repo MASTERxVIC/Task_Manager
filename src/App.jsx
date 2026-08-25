@@ -9,7 +9,7 @@ import Auth from './components/Auth';
 import JoinBoardModal from './components/JoinBoardModal';
 import CreateBoardModal from './components/CreateBoardModal';
 import { useTasks } from './lib/useTasks';
-import { supabase } from './lib/supabase';
+import { supabase } from './lib/supabaseClient';
 
 export default function App() {
   const { 
