@@ -6,7 +6,10 @@ import TaskList from './components/TaskList';
 import TaskDrawer from './components/TaskDrawer';
 import ConfirmDialog from './components/ConfirmDialog';
 import Auth from './components/Auth';
+import JoinBoardModal from './components/JoinBoardModal';
+import CreateBoardModal from './components/CreateBoardModal';
 import { useTasks } from './lib/useTasks';
+import { supabase } from './lib/supabase';
 
 export default function App() {
   const { 
@@ -19,7 +22,8 @@ export default function App() {
     deleteTask, 
     toggleTask, 
     clearAll, 
-    counts 
+    counts,
+    refetchTasks
   } = useTasks();
 
   const [view, setView] = useState('all');
@@ -28,6 +32,8 @@ export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   if (loading) {
     return (
@@ -72,6 +78,53 @@ export default function App() {
     setConfirm(null);
   };
 
+  const handleJoinBoard = async (inviteCode) => {
+    // 1. Fetch board using invite code
+    const { data: board, error: boardError } = await supabase
+      .from('boards')
+      .select('id, name')
+      .eq('invite_code', inviteCode.trim().toUpperCase())
+      .maybeSingle();
+
+    if (boardError || !board) {
+      throw new Error('Invalid invite code. Please check and try again.');
+    }
+
+    // 2. Check existing membership
+    const { data: existingMember } = await supabase
+      .from('board_members')
+      .select('id')
+      .eq('board_id', board.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (existingMember) {
+      throw new Error('You have already joined this board.');
+    }
+
+    // 3. Join board
+    const { error: joinError } = await supabase
+      .from('board_members')
+      .insert([
+        {
+          board_id: board.id,
+          user_id: user.id,
+          role: 'member'
+        }
+      ]);
+
+    if (joinError) throw new Error(joinError.message);
+
+    // Success - reload tasks/boards state
+    if (refetchTasks) refetchTasks();
+    console.log(`Successfully joined board: ${board.name}`);
+  };
+
+  const handleBoardCreated = (newBoard) => {
+    console.log('Board successfully created:', newBoard);
+    if (refetchTasks) refetchTasks();
+  };
+
   return (
     <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
       
@@ -83,6 +136,8 @@ export default function App() {
           counts={counts} 
           user={user} 
           onLogout={logout} 
+          onOpenJoinModal={() => setJoinModalOpen(true)}
+          onOpenCreateModal={() => setCreateModalOpen(true)}
         />
       </div>
 
@@ -114,6 +169,14 @@ export default function App() {
                 user={user}
                 onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
+                onOpenJoinModal={() => {
+                  setMobileNavOpen(false);
+                  setJoinModalOpen(true);
+                }}
+                onOpenCreateModal={() => {
+                  setMobileNavOpen(false);
+                  setCreateModalOpen(true);
+                }}
               />
             </motion.div>
           </>
@@ -131,14 +194,14 @@ export default function App() {
             onAddClick={openAddDrawer}
             onMenuClick={() => setMobileNavOpen(true)}
             onClearAll={requestClearAll}
-            hasTasks={tasks.length > 0}
+            hasTasks={tasks?.length > 0}
           />
         </div>
 
         {/* Clean scrollbar hiding using no-scrollbar */}
         <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList
-            tasks={tasks}
+            tasks={tasks || []}
             view={view}
             search={search}
             onToggle={toggleTask}
@@ -149,6 +212,20 @@ export default function App() {
       </div>
 
       <TaskDrawer open={drawerOpen} onClose={closeDrawer} onSave={handleSave} editingTask={editingTask} />
+      
+      <CreateBoardModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        user={user}
+        onBoardCreated={handleBoardCreated}
+      />
+
+      <JoinBoardModal
+        open={joinModalOpen}
+        onClose={() => setJoinModalOpen(false)}
+        onJoin={handleJoinBoard}
+      />
+
       <ConfirmDialog
         open={!!confirm}
         title={confirm?.type === 'clearAll' ? 'Clear all tasks?' : 'Delete this task?'}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 const NAV = [
@@ -29,15 +30,26 @@ export default function Sidebar({
   setView,
   counts,
   user,
+  inviteCode = "TASKED2026",
   onLogout,
   onClose,
+  onOpenCreateModal,
+  onOpenJoinModal,
 }) {
+  const [copied, setCopied] = useState(false);
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
+  const handleCopyInvite = () => {
+    if (!inviteCode) return;
+    navigator.clipboard.writeText(inviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <aside className="flex flex-col h-full w-full lg:w-64 shrink-0 bg-surface border-r border-line p-4 overflow-hidden">
+    <aside className="flex flex-col h-full w-full lg:w-64 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
       {/* Header - Fixed Top */}
-      <div className="flex items-center justify-between px-2 mb-6 shrink-0">
+      <div className="flex items-center justify-between mb-4 shrink-0 px-2">
         <div className="flex items-center gap-2">
           <img
             src="/Logo.svg"
@@ -66,7 +78,34 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Nav items - Only this part will scroll if height is small */}
+      {/* Action Buttons: Create Board & Join Board */}
+      <div className="flex flex-col gap-2 mb-4 shrink-0">
+        <button
+          onClick={onOpenCreateModal}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.98] cursor-pointer"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>Create Board</span>
+        </button>
+
+        <button
+          onClick={onOpenJoinModal}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-medium text-xs rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+          </svg>
+          <span>Join Board</span>
+        </button>
+      </div>
+
+      {/* Nav items */}
       <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
         {NAV.map((item) => {
           const active = view === item.key;
@@ -75,7 +114,7 @@ export default function Sidebar({
             <button
               key={item.key}
               onClick={() => setView(item.key)}
-              className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
                 active
                   ? "bg-surface-raised text-ink font-semibold shadow-sm"
                   : "text-white/90 hover:text-white hover:bg-white/10"
@@ -113,9 +152,57 @@ export default function Sidebar({
             </button>
           );
         })}
+
+        {/* COLLAB SECTION */}
+        <div className="px-3 py-2 mt-4">
+          <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase px-2">
+            Collab
+          </span>
+
+          {/* Invite Code Copy Block */}
+          <div className="mt-2 flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
+            <div className="min-w-0 pr-2">
+              <p className="text-[10px] text-gray-400 font-medium uppercase">
+                Your Invite Code
+              </p>
+              <p className="text-xs font-mono font-semibold text-white truncate">
+                {inviteCode || "TASKED2026"}
+              </p>
+            </div>
+            <button
+              onClick={handleCopyInvite}
+              className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              {copied ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Join Board Button */}
+          <button
+            onClick={onOpenJoinModal}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-medium transition-all cursor-pointer"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+            <span>Join Board with Code</span>
+          </button>
+        </div>
       </nav>
 
-      {/* Bottom Footer Section - Fixed Bottom */}
+      {/* Bottom Footer Section */}
       <div className="shrink-0 mt-auto pt-4 border-t border-white/20 flex flex-col gap-3">
         {user && (
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/10 border border-white/10">
