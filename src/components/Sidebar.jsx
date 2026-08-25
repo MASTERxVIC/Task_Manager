@@ -78,7 +78,7 @@ export default function Sidebar({
         )}
       </div>
 
-         {/* Nav items */}
+      {/* Nav items */}
       <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
         {NAV.map((item) => {
           const active = view === item.key;
@@ -147,11 +147,30 @@ export default function Sidebar({
               className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               {copied ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-green-400"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
@@ -162,9 +181,18 @@ export default function Sidebar({
           {/* Join Board Button */}
           <button
             onClick={onOpenJoinModal}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-medium transition-all cursor-pointer"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 bg-surface/10 hover:bg-white hover:text-surface text-gray-400 border border-surface/20 rounded-xl text-xs font-medium transition-all cursor-pointer"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="8.5" cy="7" r="4" />
               <line x1="20" y1="8" x2="20" y2="14" />
@@ -172,32 +200,51 @@ export default function Sidebar({
             </svg>
             <span>Join Board with Code</span>
           </button>
-             {/* Action Buttons: Create Board & Join Board */}
-      <div className="flex flex-col gap-2 mb-4 shrink-0">
-        <button
-          onClick={onOpenCreateModal}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.98] cursor-pointer"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>Create Board</span>
-        </button>
+        </div>
+        {/* Action Buttons: Create Board & Join Board */}
+        <div className="flex flex-col gap-2 mb-4 shrink-0">
+          <button
+            onClick={onOpenCreateModal}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.98] cursor-pointer"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Create Board</span>
+          </button>
 
-        <button
-          onClick={onOpenJoinModal}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-medium text-xs rounded-xl transition-all active:scale-[0.98] cursor-pointer"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="8.5" cy="7" r="4" />
-            <line x1="20" y1="8" x2="20" y2="14" />
-            <line x1="23" y1="11" x2="17" y2="11" />
-          </svg>
-          <span>Join Board</span>
-        </button>
-      </div>
+          <button
+            onClick={onOpenJoinModal}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-medium text-xs rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-blue-400"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+            <span>Join Board</span>
+          </button>
         </div>
       </nav>
 
