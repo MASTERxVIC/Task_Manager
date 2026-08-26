@@ -21,45 +21,62 @@ export function useTasks(boardId = null) {
     });
   }, []);
 
+  // Helper: Activity Logging Function
+  const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
+    if (!user) return;
+    try {
+      await supabase.from('activity_logs').insert([{
+        board_id: boardId || null,
+        todo_id: String(todoId),
+        user_id: user.id,
+        action_type: actionType,
+        task_title: taskTitle,
+        details: details
+      }]);
+    } catch (err) {
+      console.error('Failed to write activity log:', err);
+    }
+  }, [user, boardId]);
+
   // 1. Fetch Board Specific or User Specific Tasks
-const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-  setLoading(true);
-  try {
-    let query = supabase.from('todos').select('*');
+  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
+    setLoading(true);
+    try {
+      let query = supabase.from('todos').select('*');
 
-    if (currentBoardId) {
-      // 1. Agar specific board open hai
-      query = query.eq('board_id', currentBoardId);
-    } else {
-      // 2. Main Dashboard (Personal + Joined Boards)
-      const { data: boardMemberships } = await supabase
-        .from('board_members')
-        .select('board_id')
-        .eq('user_id', userId);
-
-      const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
-
-      if (joinedBoardIds.length > 0) {
-        // Query: User ke khud ke tasks OR joined boards ke saare tasks
-        query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
+      if (currentBoardId) {
+        // 1. Agar specific board open hai
+        query = query.eq('board_id', currentBoardId);
       } else {
-        query = query.eq('user_id', userId);
+        // 2. Main Dashboard (Personal + Joined Boards)
+        const { data: boardMemberships } = await supabase
+          .from('board_members')
+          .select('board_id')
+          .eq('user_id', userId);
+
+        const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
+
+        if (joinedBoardIds.length > 0) {
+          // Query: User ke khud ke tasks OR joined boards ke saare tasks
+          query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
+        } else {
+          query = query.eq('user_id', userId);
+        }
       }
-    }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error } = await query.order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching tasks:', error);
-    } else {
-      setTasks(filterValidTasks(data || []));
+      if (error) {
+        console.error('Error fetching tasks:', error);
+      } else {
+        setTasks(filterValidTasks(data || []));
+      }
+    } catch (err) {
+      console.error('Fetch tasks exception:', err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Fetch tasks exception:', err);
-  } finally {
-    setLoading(false);
-  }
-}, [filterValidTasks]);
+  }, [filterValidTasks]);
 
   // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
@@ -150,66 +167,51 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  
-// 5. Add Task
-const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
-  if (!user) return;
-  const newTaskId = crypto.randomUUID();
-  const newTask = {
-    id: newTaskId,
-    user_id: user.id,
-    board_id: board_id || boardId || null,
-    task,
-    des,
-    deadline,
-    priority: priority || 'normal',
-    completed: false,
-    completed_at: null,
+  // 5. Add Task
+  const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
+    if (!user) return;
+    const newTaskId = crypto.randomUUID();
+    const newTask = {
+      id: newTaskId,
+      user_id: user.id,
+      board_id: board_id || boardId || null,
+      task,
+      des,
+      deadline,
+      priority: priority || 'normal',
+      completed: false,
+      completed_at: null,
+    };
+
+    const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
+    if (!error && data) {
+      setTasks((prev) => [data, ...prev]);
+      await logActivity({
+        actionType: 'CREATED',
+        todoId: data.id,
+        taskTitle: task
+      });
+    }
   };
 
-  const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
-  if (!error && data) {
-    setTasks((prev) => [data, ...prev]);
-    await logActivity({
-      actionType: 'CREATED',
-      todoId: data.id,
-      taskTitle: task
-    });
-  }
-};
+  // 6. Update Task
+  const updateTask = async (id, patch) => {
+    const currentTask = tasks.find((t) => t.id === id);
+    const { image, ...validPatch } = patch;
 
-// 2. Update Task
-const updateTask = async (id, patch) => {
-  const currentTask = tasks.find((t) => t.id === id);
-  const { image, ...validPatch } = patch;
+    const { error } = await supabase.from('todos').update(validPatch).eq('id', id);
+    if (!error) {
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+      await logActivity({
+        actionType: 'UPDATED',
+        todoId: id,
+        taskTitle: currentTask?.task || 'Unknown Task',
+        details: patch
+      });
+    }
+  };
 
-  const { error } = await supabase.from('todos').update(validPatch).eq('id', id);
-  if (!error) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-    await logActivity({
-      actionType: 'UPDATED',
-      todoId: id,
-      taskTitle: currentTask?.task || 'Unknown Task',
-      details: patch
-    });
-  }
-};
-
-// 3. Delete Task
-const deleteTask = async (id) => {
-  const taskToDelete = tasks.find((t) => t.id === id);
-
-  const { error } = await supabase.from('todos').delete().eq('id', id);
-  if (!error) {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-    await logActivity({
-      actionType: 'DELETED',
-      todoId: id,
-      taskTitle: taskToDelete?.task || 'Unknown Task'
-    });
-  }
-};
-
+  // 7. Toggle Task (Fixed with Activity Logging)
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -230,6 +232,29 @@ const deleteTask = async (id) => {
           t.id === id ? { ...t, completed: nextCompleted, completed_at: completedAt } : t
         )
       );
+      
+      // Log entry based on complete or uncomplete status
+      await logActivity({
+        actionType: nextCompleted ? 'COMPLETED' : 'UNDO',
+        todoId: id,
+        taskTitle: currentTask.task || 'Unknown Task',
+        details: { completed: nextCompleted }
+      });
+    }
+  };
+
+  // 8. Delete Task
+  const deleteTask = async (id) => {
+    const taskToDelete = tasks.find((t) => t.id === id);
+
+    const { error } = await supabase.from('todos').delete().eq('id', id);
+    if (!error) {
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      await logActivity({
+        actionType: 'DELETED',
+        todoId: id,
+        taskTitle: taskToDelete?.task || 'Unknown Task'
+      });
     }
   };
 
@@ -276,22 +301,6 @@ const deleteTask = async (id) => {
     });
     return c;
   }, [validTasks]);
-
-  const logActivity = async ({ actionType, todoId, taskTitle, details = {} }) => {
-  if (!user) return;
-  try {
-    await supabase.from('activity_logs').insert([{
-      board_id: boardId || null,
-      todo_id: String(todoId),
-      user_id: user.id,
-      action_type: actionType,
-      task_title: taskTitle,
-      details: details
-    }]);
-  } catch (err) {
-    console.error('Failed to write activity log:', err);
-  }
-};
 
   return {
     user,
