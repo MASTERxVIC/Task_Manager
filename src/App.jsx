@@ -204,6 +204,7 @@ export default function App() {
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
+          onOpenLogs={() => setLogsOpen(true)}
         />
       </div>
 
@@ -249,6 +250,10 @@ export default function App() {
                   setMobileNavOpen(false);
                   setCreateModalOpen(true);
                 }}
+                onOpenLogs={() => {
+                  setMobileNavOpen(false);
+                  setLogsOpen(true);
+                }}
               />
             </motion.div>
           </>
@@ -269,17 +274,6 @@ export default function App() {
               hasTasks={tasks?.length > 0}
             />
           </div>
-
-          {activeBoard && (
-            <button
-              onClick={() => setLogsOpen(true)}
-              className="ml-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs font-medium transition-colors border border-gray-700 flex items-center gap-1.5 shrink-0"
-              title="View member activity history"
-            >
-              <span>📜</span>
-              <span className="hidden sm:inline">Activity Logs</span>
-            </button>
-          )}
         </div>
 
         <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
