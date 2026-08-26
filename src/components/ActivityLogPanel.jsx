@@ -112,41 +112,47 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                 logs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all"
+                    className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all flex flex-col gap-2"
                   >
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="font-semibold font-code text-xs text-gray-950">
-                        {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
-                      </span>
-                      <span className="text-[10px] text-muted font-medium">
+                    {/* Top Row: User Name + Action Badge on left, Timestamp on right */}
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-medium font-code text-xs text-gray-700 truncate">
+                          {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
+                        </span>
+                        
+                        {/* Action Badge right next to User Name */}
+                        <span
+                          className={`uppercase text-[10px] font-code px-1.5 py-0.5 rounded-md shrink-0 ${
+                            log.action_type === 'CREATE' || log.action_type === 'CREATED'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                              : log.action_type === 'DELETE' || log.action_type === 'DELETED'
+                              ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                              : log.action_type === 'COMPLETED'
+                              ? 'bg-teal-50 text-teal-600 border border-teal-200'
+                              : log.action_type === 'UNDO'
+                              ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                              : 'bg-sky-50 text-sky-600 border border-sky-200'
+                          }`}
+                        >
+                          {log.action_type}
+                        </span>
+                      </div>
+
+                      <span className="text-[10px] text-muted font-medium shrink-0">
                         {new Date(log.created_at).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
                       </span>
                     </div>
-                    <p className="text-xs font-code text-ink/80 flex items-center flex-wrap gap-1">
-                      <span
-                        className={`uppercase text-[10px] px-1.5 py-0.5 rounded-2xl ${
-                          log.action_type === 'CREATE' || log.action_type === 'CREATED'
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                            : log.action_type === 'DELETE' || log.action_type === 'DELETED'
-                            ? 'bg-rose-50 text-rose-600 border border-rose-200'
-                            : log.action_type === 'COMPLETED'
-                            ? 'bg-teal-50 text-teal-600 border border-teal-200'
-                            : log.action_type === 'UNDO'
-                            ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                            : 'bg-sky-50 text-sky-600 border border-sky-200'
-                        }`}
-                      >
-                        {log.action_type}
-                      </span>
-                      {log.task_title && (
-                        <span className="font-code font-medium text-gray-400 truncate max-w-[200px]">
-                          "{log.task_title}"
-                        </span>
-                      )}
-                    </p>
+
+                    {/* Bottom Row: Task Title taking full row width */}
+                    {log.task_title && (
+                      <div className="text-xs font-code text-gray-600 bg-gray-50/80 px-2.5 py-1.5 rounded-lg border border-gray-100 break-words">
+                        "{log.task_title}"
+                      </div>
+                    )}
                   </div>
                 ))
               )}
