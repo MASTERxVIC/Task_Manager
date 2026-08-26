@@ -29,6 +29,7 @@
   --font-display: 'Iosevka Charon Mono', monospace;
   --font-body: 'Iosevka Charon Mono', monospace;
   --font-mono: 'Iosevka Charon Mono', monospace;
+  --font-code: 'Space Grotesk', sans-serif;
 }
 
 * {

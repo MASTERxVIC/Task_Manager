@@ -125,7 +125,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         })}
                       </span>
                     </div>
-                    <p className="text-xs text-ink/80 flex items-center flex-wrap gap-1">
+                    <p className="text-xs font-code text-ink/80 flex items-center flex-wrap gap-1">
                       <span
                         className={`font-semibold uppercase text-[10px] px-1.5 py-0.5 rounded-2xl ${
                           log.action_type === 'CREATE' || log.action_type === 'CREATED'
@@ -142,7 +142,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         {log.action_type}
                       </span>
                       {log.task_title && (
-                        <span className="font-medium text-ink truncate max-w-[200px]">
+                        <span className="font-code font-medium text-ink truncate max-w-[200px]">
                           "{log.task_title}"
                         </span>
                       )}
