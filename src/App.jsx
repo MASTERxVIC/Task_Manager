@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
@@ -40,7 +40,7 @@ export default function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Fetch all boards for the logged-in user
-  const fetchBoards = async () => {
+  const fetchBoards = useCallback(async () => {
     if (!user) return;
     try {
       // Fetch boards owned by user or where user is a member
@@ -54,18 +54,22 @@ export default function App() {
       const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
       setBoards(userBoards);
 
-      // Default active board set karein agar select nahi hai
-      if (userBoards.length > 0 && !activeBoard) {
-        setActiveBoard(userBoards[0]);
-      }
+      // Default active board set karein agar select nahi hai ya current active board access me nahi hai
+      setActiveBoard((prevActive) => {
+        if (!prevActive && userBoards.length > 0) return userBoards[0];
+        if (prevActive && !userBoards.some((b) => b.id === prevActive.id)) {
+          return userBoards[0] || null;
+        }
+        return prevActive;
+      });
     } catch (err) {
       console.error('Error fetching boards:', err);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchBoards();
-  }, [user]);
+  }, [fetchBoards]);
 
   if (loading) {
     return (
@@ -134,27 +138,41 @@ export default function App() {
   };
 
   const handleJoinBoard = async (inviteCode) => {
+    const cleanCode = inviteCode.trim().toUpperCase();
+
+    // 1. Search board by invite code
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .select('id, name, invite_code')
-      .eq('invite_code', inviteCode.trim().toUpperCase())
+      .eq('invite_code', cleanCode)
       .maybeSingle();
 
-    if (boardError || !board) {
-      throw new Error('Invalid invite code. Please check and try again.');
+    if (boardError) {
+      console.error('Board search error:', boardError);
+      throw new Error('Database error while finding board.');
     }
 
-    const { data: existingMember } = await supabase
+    if (!board) {
+      throw new Error('Invalid invite code. No matching board found.');
+    }
+
+    // 2. Check if already joined
+    const { data: existingMember, error: memberCheckErr } = await supabase
       .from('board_members')
       .select('id')
       .eq('board_id', board.id)
       .eq('user_id', user.id)
       .maybeSingle();
 
+    if (memberCheckErr) {
+      console.error('Member check error:', memberCheckErr);
+    }
+
     if (existingMember) {
       throw new Error('You have already joined this board.');
     }
 
+    // 3. Add to board_members
     const { error: joinError } = await supabase
       .from('board_members')
       .insert([
@@ -165,8 +183,12 @@ export default function App() {
         }
       ]);
 
-    if (joinError) throw new Error(joinError.message);
+    if (joinError) {
+      console.error('Join error:', joinError);
+      throw new Error(joinError.message || 'Failed to join the board.');
+    }
 
+    // 4. Update state & active board
     setActiveBoard(board);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
