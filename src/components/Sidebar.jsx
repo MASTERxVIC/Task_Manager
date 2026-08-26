@@ -124,7 +124,7 @@ export default function Sidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute left-1 right-1 top-12 z-20 bg-slate-900 border border-line rounded-xl p-1.5 shadow-xl space-y-1 max-h-48 overflow-y-auto"
+              className="absolute left-1 right-1 top-12 z-20 bg-slate-900 border border-line rounded-xl p-1.5 shadow-xl space-y-1 max-h-48 overflow-y-auto no-scrollbar"
             >
               <div className="text-[10px] uppercase font-semibold text-gray-400 px-2 py-1 tracking-wider">
                 Your Workspaces
@@ -154,7 +154,7 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Filter Links */}
-      <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
+      <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1 no-scrollbar">
         {NAV.map((item) => {
           const active = view === item.key;
           const count = counts?.[item.key] ?? 0;
@@ -203,7 +203,6 @@ export default function Sidebar({
 
         {/* COLLAB SECTION ACCORDION */}
         <div className="px-1 py-2 mt-4 space-y-2">
-          {/* Header Toggle */}
           <div
             onClick={() => setIsCollabOpen((prev) => !prev)}
             className="flex items-center justify-between cursor-pointer px-2 py-1 select-none group"
@@ -224,7 +223,6 @@ export default function Sidebar({
             </button>
           </div>
 
-          {/* Collapsible Content */}
           <AnimatePresence>
             {isCollabOpen && (
               <motion.div
@@ -234,7 +232,6 @@ export default function Sidebar({
                 transition={{ duration: 0.2 }}
                 className="space-y-2 overflow-hidden"
               >
-                {/* Active Board Invite Code Copy Block */}
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                   <div className="min-w-0 pr-2">
                     <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
@@ -270,7 +267,6 @@ export default function Sidebar({
                   </button>
                 </div>
 
-                {/* Action Buttons */}
                 <button
                   onClick={onOpenJoinModal}
                   className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
@@ -293,7 +289,6 @@ export default function Sidebar({
 
         {/* LOGS SECTION ACCORDION */}
         <div className="px-1 py-2 mt-2 space-y-2">
-          {/* Header Toggle */}
           <div
             onClick={() => setIsLogsOpen((prev) => !prev)}
             className="flex items-center justify-between cursor-pointer px-2 py-1 select-none group"
@@ -314,7 +309,6 @@ export default function Sidebar({
             </button>
           </div>
 
-          {/* Collapsible Content */}
           <AnimatePresence>
             {isLogsOpen && (
               <motion.div

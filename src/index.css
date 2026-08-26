@@ -1,30 +1,29 @@
-
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @theme {
-  /* Structural — New Custom Palette */
-  --color-void: #F3F8FC;           /* Main App Background */
-  --color-surface: #7C6ACC;        /* Sidebar Background */
-  --color-surface-raised: #F3F8FC; /* Selected Items & Buttons */
-  --color-ink: #2E3D72;            /* Main Dark Blue Text & Normal Priority */
-  --color-muted: #2E3D72;          /* Secondary Text */
-  --color-muted-dim: #92A3CB;      /* Soft Borders & Muted Elements */
-  --color-line: #D0DCED;           /* Input & Card Border Lines */
+  /* Structural — Custom Palette */
+  --color-void: #F3F8FC;
+  --color-surface: #7C6ACC;
+  --color-surface-raised: #F3F8FC;
+  --color-ink: #2E3D72;
+  --color-muted: #2E3D72;
+  --color-muted-dim: #92A3CB;
+  --color-line: #D0DCED;
 
   /* Priority & Actions */
-  --color-high: #FF2C59;           /* High Priority */
-  --color-normal: #2E3D72;         /* Normal Priority */
-  --color-low: #CCDC69;            /* Low Priority */
-  --color-delete: #FC4445;          /* Delete Button / Danger */
+  --color-high: #FF2C59;
+  --color-normal: #2E3D72;
+  --color-low: #CCDC69;
+  --color-delete: #FC4445;
 
   /* Accents & Badges */
-  --color-magenta: #7C6ACC;        /* Primary Brand / Sidebar */
-  --color-violet: #2E3D72;         /* Secondary Accent */
-  --color-gold: #FF2C59;           /* High Priority Badge */
-  --color-coral: #FC4445;          /* Overdue / Delete Accent */
-  --color-amber: #CCDC69;          /* Low Priority Badge */
-  --color-mint: #CCDC69;           /* Completed Status */
+  --color-magenta: #7C6ACC;
+  --color-violet: #2E3D72;
+  --color-gold: #FF2C59;
+  --color-coral: #FC4445;
+  --color-amber: #CCDC69;
+  --color-mint: #CCDC69;
 
   /* Fonts */
   --font-display: 'Iosevka Charon Mono', monospace;
@@ -35,6 +34,7 @@
 * {
   box-sizing: border-box;
 }
+
 html {
   height: -webkit-fill-available;
 }
@@ -60,6 +60,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-touch-callout: none;
 }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -101,7 +102,7 @@ body {
   color: #FFFFFF;
 }
 
-/* Custom scrollbar */
+/* Default Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -120,15 +121,13 @@ input[type='date']::-webkit-calendar-picker-indicator {
   filter: opacity(0.7);
   cursor: pointer;
 }
-@layer utilities {
-  /* Chrome, Safari, Opera me scrollbar hide karne ke liye */
-  .no-scrollbar::-webkit-scrollbar {
+
+/* Utility to hide scrollbars globally */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
     display: none;
-  }
-  /* Firefox, IE, Edge me scrollbar hide karne ke liye */
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }
 
