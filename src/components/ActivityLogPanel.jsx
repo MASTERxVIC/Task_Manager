@@ -7,7 +7,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
   const fetchActivityLogs = async (currentBoardId) => {
     if (!currentBoardId) return;
-    
+
     setLoading(true);
     const { data, error } = await supabase
       .from('activity_logs')
@@ -84,7 +84,9 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               <p className="text-gray-600">
                 <span className={`font-semibold uppercase text-xs mr-1 ${
                   log.action_type === 'CREATE' || log.action_type === 'CREATED' ? 'text-green-600' :
-                  log.action_type === 'DELETE' || log.action_type === 'DELETED' ? 'text-red-600' : 'text-blue-600'
+                  log.action_type === 'DELETE' || log.action_type === 'DELETED' ? 'text-red-600' :
+                  log.action_type === 'COMPLETED' ? 'text-emerald-600' :
+                  log.action_type === 'UNDO' ? 'text-amber-600' : 'text-blue-600'
                 }`}>
                   [{log.action_type}]
                 </span>

@@ -78,5 +78,36 @@ export const useTodos = () => {
     return { error };
   };
 
-  return { addTodo, updateTodo, deleteTodo };
+  // 4. TOGGLE COMPLETE / UNDO FUNCTION
+const toggleTodoStatus = async (todoId, currentCompleted, taskTitle, boardId, userId) => {
+  const newStatus = !currentCompleted;
+
+  const { data, error } = await supabase
+    .from('todos')
+    .update({ 
+      completed: newStatus,
+      completed_at: newStatus ? new Date().toISOString() : null 
+    })
+    .eq('id', todoId)
+    .select()
+    .single();
+
+  if (!error && data) {
+    // Determine action label based on tick/untick
+    const actionType = newStatus ? 'COMPLETED' : 'UNDO';
+
+    await logActivity({
+      boardId,
+      userId,
+      todoId: data.id,
+      actionType: actionType,
+      taskTitle: taskTitle || data.task,
+      details: { completed: newStatus }
+    });
+  }
+
+  return { data, error };
+};
+
+  return { addTodo, updateTodo, deleteTodo, toggleTodoStatus };
 };
