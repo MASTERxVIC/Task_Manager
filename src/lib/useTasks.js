@@ -173,12 +173,23 @@ export function useTasks(boardId = null) {
   }
 };
 
-  const updateTask = async (id, patch) => {
-    const { error } = await supabase.from('todos').update(patch).eq('id', id);
-    if (error) console.error('Error updating task:', error);
-    else setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-  };
+ const updateTask = async (id, patch) => {
+  // Database schema me jo columns nahi hain unhe strip/remove karein
+  const { image, ...validPatch } = patch; 
 
+  const { error } = await supabase
+    .from('todos')
+    .update(validPatch)
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating task:', error);
+  } else {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
+    );
+  }
+};
   const deleteTask = async (id) => {
     const { error } = await supabase.from('todos').delete().eq('id', id);
     if (error) console.error('Error deleting task:', error);
