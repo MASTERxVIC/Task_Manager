@@ -151,25 +151,27 @@ export function useTasks(boardId = null) {
 
   // 5. Handlers
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
-    if (!user) return;
-    const newTask = {
-      user_id: user.id,
-      board_id: board_id || boardId || null,
-      task,
-      des,
-      deadline,
-      priority: priority || 'normal',
-      completed: false,
-      completed_at: null,
-    };
+  if (!user) return;
 
-    const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
-    if (error) {
-      console.error('Error adding task:', error);
-    } else if (data) {
-      setTasks((prev) => [data, ...prev]);
-    }
+  const newTask = {
+    id: crypto.randomUUID(), // 👈 Yahan unique text ID pass kar rahe hain
+    user_id: user.id,
+    board_id: board_id || boardId || null,
+    task,
+    des,
+    deadline,
+    priority: priority || 'normal',
+    completed: false,
+    completed_at: null,
   };
+
+  const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
+  if (error) {
+    console.error('Error adding task:', error);
+  } else if (data) {
+    setTasks((prev) => [data, ...prev]);
+  }
+};
 
   const updateTask = async (id, patch) => {
     const { error } = await supabase.from('todos').update(patch).eq('id', id);
