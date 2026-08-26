@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
-  ChevronUp,
   Check,
   FolderPlus,
   UserPlus,
@@ -217,11 +216,11 @@ export default function Sidebar({
               className="p-1 rounded-md text-gray-400 group-hover:text-white hover:bg-white/10 transition-all"
               aria-label="Toggle Collab Section"
             >
-              {isCollabOpen ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                  isCollabOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
           </div>
 
@@ -293,7 +292,7 @@ export default function Sidebar({
         </div>
 
         {/* LOGS SECTION ACCORDION */}
-        <div className="px-1 py-2 space-y-2">
+        <div className="px-1 py-2 mt-2 space-y-2">
           {/* Header Toggle */}
           <div
             onClick={() => setIsLogsOpen((prev) => !prev)}
@@ -307,11 +306,11 @@ export default function Sidebar({
               className="p-1 rounded-md text-gray-400 group-hover:text-white hover:bg-white/10 transition-all"
               aria-label="Toggle Logs Section"
             >
-              {isLogsOpen ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                  isLogsOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
           </div>
 
