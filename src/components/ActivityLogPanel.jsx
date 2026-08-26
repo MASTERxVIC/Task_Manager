@@ -102,11 +102,11 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
               {loading ? (
                 <div className="flex justify-center items-center py-10">
-                  <p className="text-muted text-xs font-medium">Loading activity logs...</p>
+                  <p className="text-white text-xs font-medium">Loading activity logs...</p>
                 </div>
               ) : logs.length === 0 ? (
                 <div className="text-center py-10">
-                  <p className="text-muted text-xs font-medium">No activity recorded yet.</p>
+                  <p className="text-white text-xs font-medium">No activity recorded yet.</p>
                 </div>
               ) : (
                 logs.map((log) => (
@@ -115,9 +115,9 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all flex flex-col gap-2"
                   >
                     {/* Top Row: User Name + Action Badge on left, Timestamp on right */}
-                    <div className="flex justify-between items-center gap-2">
+                    <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold text-sm sm:text-xs text-gray-800 truncate">
+                        <span className="font-semibold md:text-sm text-xs text-surface truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
@@ -149,7 +149,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
                     {/* Bottom Row: Task Title taking full row width */}
                     {log.task_title && (
-                      <div className="text-xs font-code text-gray-600 px-2.5 py-1.5 break-words">
+                      <div className="text-xs font-code text-gray-600  break-words">
                         "{log.task_title}"
                       </div>
                     )}
