@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
+  ChevronUp,
   Check,
   FolderPlus,
   UserPlus,
@@ -50,6 +51,7 @@ export default function Sidebar({
 }) {
   const [copied, setCopied] = useState(false);
   const [isBoardDropdownOpen, setIsBoardDropdownOpen] = useState(false);
+  const [isCollabOpen, setIsCollabOpen] = useState(false); // Collab accordion state (By default closed)
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
@@ -198,64 +200,94 @@ export default function Sidebar({
           );
         })}
 
-        {/* COLLAB SECTION */}
+        {/* COLLAB SECTION ACCORDION */}
         <div className="px-1 py-2 mt-4 space-y-2">
-          <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase px-2">
-            Collab
-          </span>
-
-          {/* Active Board Invite Code Copy Block */}
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
-            <div className="min-w-0 pr-2">
-              <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
-                {activeBoard ? `${activeBoard.name} Code` : "Invite Code"}
-              </p>
-              <p
-                className={`text-xs font-mono font-semibold truncate ${
-                  hasValidCode ? "text-emerald-400" : "text-gray-500"
-                }`}
-              >
-                {displayCode}
-              </p>
-            </div>
+          {/* Header Toggle */}
+          <div
+            onClick={() => setIsCollabOpen((prev) => !prev)}
+            className="flex items-center justify-between cursor-pointer px-2 py-1 select-none group"
+          >
+            <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase group-hover:text-white transition-colors">
+              Collab
+            </span>
             <button
-              onClick={handleCopyInvite}
-              disabled={!hasValidCode}
-              title={
-                hasValidCode
-                  ? "Copy Invite Code"
-                  : "Select or create a board first"
-              }
-              className={`p-1.5 rounded-lg transition-colors ${
-                hasValidCode
-                  ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
-                  : "bg-slate-800 text-gray-600 cursor-not-allowed opacity-50"
-              }`}
+              type="button"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white hover:bg-white/10 transition-all"
+              aria-label="Toggle Collab Section"
             >
-              {copied ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              {isCollabOpen ? (
+                <ChevronUp className="w-4 h-4" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4" />
               )}
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <button
-            onClick={onOpenJoinModal}
-            className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Join Board with Code</span>
-          </button>
+          {/* Collapsible Content */}
+          <AnimatePresence>
+            {isCollabOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2 overflow-hidden"
+              >
+                {/* Active Board Invite Code Copy Block */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
+                      {activeBoard ? `${activeBoard.name} Code` : "Invite Code"}
+                    </p>
+                    <p
+                      className={`text-xs font-mono font-semibold truncate ${
+                        hasValidCode ? "text-emerald-400" : "text-gray-500"
+                      }`}
+                    >
+                      {displayCode}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCopyInvite}
+                    disabled={!hasValidCode}
+                    title={
+                      hasValidCode
+                        ? "Copy Invite Code"
+                        : "Select or create a board first"
+                    }
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      hasValidCode
+                        ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
+                        : "bg-slate-800 text-gray-600 cursor-not-allowed opacity-50"
+                    }`}
+                  >
+                    {copied ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
 
-          <button
-            onClick={onOpenCreateModal}
-            className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
-          >
-            <FolderPlus className="w-4 h-4" />
-            <span>Create Board</span>
-          </button>
+                {/* Action Buttons */}
+                <button
+                  onClick={onOpenJoinModal}
+                  className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Join Board with Code</span>
+                </button>
+
+                <button
+                  onClick={onOpenCreateModal}
+                  className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  <span>Create Board</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 
