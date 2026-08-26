@@ -85,7 +85,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="text-gray-300 hover:text-white p-1 transition-colors"
+                className="text-gray-300 hover:text-white p-1 cursor-pointer transition-colors"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path
