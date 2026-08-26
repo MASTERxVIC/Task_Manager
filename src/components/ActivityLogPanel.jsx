@@ -150,7 +150,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     {/* Bottom Row: Task Title taking full row width */}
                     {log.task_title && (
                       <div className="text-xs font-code text-gray-600  break-words">
-                        "{log.task_title}"
+                        {log.task_title}
                       </div>
                     )}
                   </div>
