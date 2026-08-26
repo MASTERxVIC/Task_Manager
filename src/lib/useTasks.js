@@ -22,43 +22,44 @@ export function useTasks(boardId = null) {
   }, []);
 
   // 1. Fetch Board Specific or User Specific Tasks
-  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-    setLoading(true);
-    try {
-      let query = supabase.from('todos').select('*');
+const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
+  setLoading(true);
+  try {
+    let query = supabase.from('todos').select('*');
 
-      if (currentBoardId) {
-        // Agar active board selected hai toh strictly us board ke tasks filter honge
-        query = query.eq('board_id', currentBoardId);
+    if (currentBoardId) {
+      // 1. Agar specific board open hai
+      query = query.eq('board_id', currentBoardId);
+    } else {
+      // 2. Main Dashboard (Personal + Joined Boards)
+      const { data: boardMemberships } = await supabase
+        .from('board_members')
+        .select('board_id')
+        .eq('user_id', userId);
+
+      const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
+
+      if (joinedBoardIds.length > 0) {
+        // Query: User ke khud ke tasks OR joined boards ke saare tasks
+        query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
       } else {
-        // User's personal board memberships fetch kar ke personal/shared load karein
-        const { data: boardMemberships } = await supabase
-          .from('board_members')
-          .select('board_id')
-          .eq('user_id', userId);
-
-        const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
-
-        if (joinedBoardIds.length > 0) {
-          query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
-        } else {
-          query = query.eq('user_id', userId);
-        }
+        query = query.eq('user_id', userId);
       }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching tasks:', error);
-      } else {
-        setTasks(filterValidTasks(data || []));
-      }
-    } catch (err) {
-      console.error('Fetch tasks exception:', err);
-    } finally {
-      setLoading(false);
     }
-  }, [filterValidTasks]);
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching tasks:', error);
+    } else {
+      setTasks(filterValidTasks(data || []));
+    }
+  } catch (err) {
+    console.error('Fetch tasks exception:', err);
+  } finally {
+    setLoading(false);
+  }
+}, [filterValidTasks]);
 
   // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
