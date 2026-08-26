@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   LogOut,
   X,
+  History,
 } from "lucide-react";
 
 const NAV = [
@@ -48,14 +49,15 @@ export default function Sidebar({
   onClose,
   onOpenCreateModal,
   onOpenJoinModal,
+  onOpenLogs,
 }) {
   const [copied, setCopied] = useState(false);
   const [isBoardDropdownOpen, setIsBoardDropdownOpen] = useState(false);
-  const [isCollabOpen, setIsCollabOpen] = useState(false); // Collab accordion state (By default closed)
+  const [isCollabOpen, setIsCollabOpen] = useState(false);
+  const [isLogsOpen, setIsLogsOpen] = useState(false);
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
-  // Active board invite code logic
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(inviteCode && inviteCode !== "XXXXXX");
   const displayCode = hasValidCode ? inviteCode : "XXXXXX";
@@ -284,6 +286,56 @@ export default function Sidebar({
                 >
                   <FolderPlus className="w-4 h-4" />
                   <span>Create Board</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* LOGS SECTION ACCORDION */}
+        <div className="px-1 py-2 mt-2 space-y-2">
+          {/* Header Toggle */}
+          <div
+            onClick={() => setIsLogsOpen((prev) => !prev)}
+            className="flex items-center justify-between cursor-pointer px-2 py-1 select-none group"
+          >
+            <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase group-hover:text-white transition-colors">
+              Logs
+            </span>
+            <button
+              type="button"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white hover:bg-white/10 transition-all"
+              aria-label="Toggle Logs Section"
+            >
+              {isLogsOpen ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+
+          {/* Collapsible Content */}
+          <AnimatePresence>
+            {isLogsOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2 overflow-hidden"
+              >
+                <button
+                  onClick={onOpenLogs}
+                  disabled={!activeBoard}
+                  className={`glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium transition-all ${
+                    activeBoard
+                      ? "cursor-pointer hover:bg-white/10"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  <History className="w-4 h-4" />
+                  <span>Activity Logs</span>
                 </button>
               </motion.div>
             )}
