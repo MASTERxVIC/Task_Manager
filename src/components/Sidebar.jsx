@@ -293,7 +293,7 @@ export default function Sidebar({
         </div>
 
         {/* LOGS SECTION ACCORDION */}
-        <div className="px-1 py-2 mt-2 space-y-2">
+        <div className="px-1 py-2 space-y-2">
           {/* Header Toggle */}
           <div
             onClick={() => setIsLogsOpen((prev) => !prev)}
