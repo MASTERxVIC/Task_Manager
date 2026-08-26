@@ -75,11 +75,11 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-void border-l border-line flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-surface flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-line bg-void">
-              <h2 className="font-display font-semibold text-lg text-ink">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-line ">
+              <h2 className="font-display font-semibold text-lg text-white">
                 Board Activity
               </h2>
               <button
@@ -127,7 +127,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
                     <p className="text-xs text-ink/80 flex items-center flex-wrap gap-1">
                       <span
-                        className={`font-semibold uppercase text-[10px] px-1.5 py-0.5 rounded ${
+                        className={`font-semibold uppercase text-[10px] px-1.5 py-0.5 rounded-2xl ${
                           log.action_type === 'CREATE' || log.action_type === 'CREATED'
                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                             : log.action_type === 'DELETE' || log.action_type === 'DELETED'
