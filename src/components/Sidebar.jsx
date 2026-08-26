@@ -217,7 +217,7 @@ export default function Sidebar({
               aria-label="Toggle Collab Section"
             >
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 cursor-pointer ${
                   isCollabOpen ? "rotate-180" : ""
                 }`}
               />
@@ -307,7 +307,7 @@ export default function Sidebar({
               aria-label="Toggle Logs Section"
             >
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 cursor-pointer ${
                   isLogsOpen ? "rotate-180" : ""
                 }`}
               />
