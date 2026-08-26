@@ -1,0 +1,82 @@
+import { supabase } from '../lib/supabaseClient'; // Path correct rakhein
+
+export const useTodos = () => {
+  
+  // Helper to insert log
+  const logActivity = async ({ boardId, userId, todoId, actionType, taskTitle, details = {} }) => {
+    try {
+      await supabase.from('activity_logs').insert([
+        {
+          board_id: boardId,
+          user_id: userId,
+          todo_id: todoId,
+          action_type: actionType,
+          task_title: taskTitle,
+          details: details,
+        },
+      ]);
+    } catch (err) {
+      console.error('Failed to log activity:', err);
+    }
+  };
+
+  // 1. CREATE TODO
+  const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
+    const { data, error } = await supabase
+      .from('todos')
+      .insert([{ task, board_id: boardId, user_id: userId, priority, deadline, completed: false }])
+      .select()
+      .single();
+
+    if (!error && data) {
+      await logActivity({
+        boardId,
+        userId,
+        todoId: data.id,
+        actionType: 'CREATE',
+        taskTitle: data.task,
+      });
+    }
+    return { data, error };
+  };
+
+  // 2. EDIT / UPDATE TODO
+  const updateTodo = async (todoId, updates, boardId, userId) => {
+    const { data, error } = await supabase
+      .from('todos')
+      .update(updates)
+      .eq('id', todoId)
+      .select()
+      .single();
+
+    if (!error && data) {
+      await logActivity({
+        boardId,
+        userId,
+        todoId: data.id,
+        actionType: 'EDIT',
+        taskTitle: data.task,
+        details: updates,
+      });
+    }
+    return { data, error };
+  };
+
+  // 3. DELETE TODO
+  const deleteTodo = async (todoId, taskTitle, boardId, userId) => {
+    const { error } = await supabase.from('todos').delete().eq('id', todoId);
+
+    if (!error) {
+      await logActivity({
+        boardId,
+        userId,
+        todoId,
+        actionType: 'DELETE',
+        taskTitle: taskTitle,
+      });
+    }
+    return { error };
+  };
+
+  return { addTodo, updateTodo, deleteTodo };
+};

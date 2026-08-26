@@ -7,16 +7,16 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
   const fetchActivityLogs = async (currentBoardId) => {
     if (!currentBoardId) return;
+    
     setLoading(true);
-
     const { data, error } = await supabase
       .from('activity_logs')
-      .select('*, profiles:user_id(email, full_name)')
+      .select('*, profiles!user_id(email, full_name)')
       .eq('board_id', currentBoardId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching activity logs:', error);
+      console.error('Error fetching logs:', error);
     } else {
       setLogs(data || []);
     }
@@ -26,6 +26,28 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   useEffect(() => {
     if (isOpen && boardId) {
       fetchActivityLogs(boardId);
+
+      // Realtime listener: Jab bhi naya log aayega, panel me automatic dikhega
+      const channel = supabase
+        .channel(`board_activity_${boardId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'activity_logs',
+            filter: `board_id=eq.${boardId}`,
+          },
+          () => {
+            // Re-fetch to get linked profile data
+            fetchActivityLogs(boardId);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [boardId, isOpen]);
 
@@ -61,8 +83,8 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               </div>
               <p className="text-gray-600">
                 <span className={`font-semibold uppercase text-xs mr-1 ${
-                  log.action_type === 'CREATED' ? 'text-green-600' :
-                  log.action_type === 'DELETED' ? 'text-red-600' : 'text-blue-600'
+                  log.action_type === 'CREATE' || log.action_type === 'CREATED' ? 'text-green-600' :
+                  log.action_type === 'DELETE' || log.action_type === 'DELETED' ? 'text-red-600' : 'text-blue-600'
                 }`}>
                   [{log.action_type}]
                 </span>
