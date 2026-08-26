@@ -4,7 +4,8 @@ import { urgency } from './date';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-export function useTasks() {
+// Board ID support added
+export function useTasks(boardId = null) {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,24 +21,29 @@ export function useTasks() {
     });
   }, []);
 
-  // 1. Fetch User Specific & Board Tasks
-  const fetchTasks = useCallback(async (userId) => {
+  // 1. Fetch Board Specific or User Specific Tasks
+  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     setLoading(true);
     try {
-      // Board memberships fetch
-      const { data: boardMemberships } = await supabase
-        .from('board_members')
-        .select('board_id')
-        .eq('user_id', userId);
-
-      const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
-
       let query = supabase.from('todos').select('*');
 
-      if (joinedBoardIds.length > 0) {
-        query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
+      if (currentBoardId) {
+        // Agar active board selected hai toh strictly us board ke tasks filter honge
+        query = query.eq('board_id', currentBoardId);
       } else {
-        query = query.eq('user_id', userId);
+        // User's personal board memberships fetch kar ke personal/shared load karein
+        const { data: boardMemberships } = await supabase
+          .from('board_members')
+          .select('board_id')
+          .eq('user_id', userId);
+
+        const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
+
+        if (joinedBoardIds.length > 0) {
+          query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
+        } else {
+          query = query.eq('user_id', userId);
+        }
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -54,7 +60,7 @@ export function useTasks() {
     }
   }, [filterValidTasks]);
 
-  // 2. Separate Cleanup Routine (Loop-proof)
+  // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
     try {
       const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
@@ -69,20 +75,22 @@ export function useTasks() {
     }
   }, []);
 
-  // 3. Setup Realtime Listener
-  const setupRealtime = useCallback((userId) => {
+  // 3. Realtime Listener
+  const setupRealtime = useCallback((userId, currentBoardId = null) => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
 
+    const channelName = currentBoardId ? `rt-todos-board-${currentBoardId}` : `rt-todos-${userId}`;
+
     const channel = supabase
-      .channel(`rt-todos-${userId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'todos' },
         () => {
-          fetchTasks(userId);
+          fetchTasks(userId, currentBoardId);
         }
       )
       .subscribe();
@@ -90,7 +98,7 @@ export function useTasks() {
     channelRef.current = channel;
   }, [fetchTasks]);
 
-  // 4. Auth Session & Initialization
+  // 4. Auth Session & Active Board Change Effect
   useEffect(() => {
     let isMounted = true;
 
@@ -103,8 +111,8 @@ export function useTasks() {
 
       if (currentUser) {
         await cleanupOldTasks(currentUser.id);
-        fetchTasks(currentUser.id);
-        setupRealtime(currentUser.id);
+        fetchTasks(currentUser.id, boardId);
+        setupRealtime(currentUser.id, boardId);
       } else {
         setLoading(false);
       }
@@ -119,8 +127,8 @@ export function useTasks() {
       setUser(currentUser);
 
       if (event === 'SIGNED_IN' && currentUser) {
-        fetchTasks(currentUser.id);
-        setupRealtime(currentUser.id);
+        fetchTasks(currentUser.id, boardId);
+        setupRealtime(currentUser.id, boardId);
       } else if (event === 'SIGNED_OUT') {
         setTasks([]);
         if (channelRef.current) {
@@ -139,14 +147,14 @@ export function useTasks() {
         channelRef.current = null;
       }
     };
-  }, [fetchTasks, setupRealtime, cleanupOldTasks]);
+  }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
   // 5. Handlers
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
     if (!user) return;
     const newTask = {
       user_id: user.id,
-      board_id,
+      board_id: board_id || boardId || null,
       task,
       des,
       deadline,
@@ -200,19 +208,28 @@ export function useTasks() {
 
   const clearAll = async () => {
     if (!user) return;
-    const { error } = await supabase.from('todos').delete().eq('user_id', user.id);
+    let query = supabase.from('todos').delete();
+    if (boardId) {
+      query = query.eq('board_id', boardId);
+    } else {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { error } = await query;
     if (error) console.error('Error clearing tasks:', error);
     else setTasks([]);
   };
 
   const clearCompleted = async () => {
     if (!user) return;
-    const { error } = await supabase
-      .from('todos')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('completed', true);
+    let query = supabase.from('todos').delete().eq('completed', true);
+    if (boardId) {
+      query = query.eq('board_id', boardId);
+    } else {
+      query = query.eq('user_id', user.id);
+    }
 
+    const { error } = await query;
     if (error) console.error('Error clearing completed tasks:', error);
     else setTasks((prev) => prev.filter((t) => !t.completed));
   };
@@ -245,6 +262,6 @@ export function useTasks() {
     clearCompleted,
     logout,
     counts,
-    refetchTasks: () => user && fetchTasks(user.id),
+    refetchTasks: () => user && fetchTasks(user.id, boardId),
   };
 }
