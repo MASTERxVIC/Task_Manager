@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   const [logs, setLogs] = useState([]);
