@@ -213,11 +213,11 @@ export default function Sidebar({
             </span>
             <button
               type="button"
-              className="p-1 rounded-md text-gray-400 group-hover:text-white  transition-all"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all cursor-pointer"
               aria-label="Toggle Collab Section"
             >
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 hover:text-white transition-transform duration-200 cursor-pointer ${
+                className={`w-4 h-4 transition-transform duration-200 ${
                   isCollabOpen ? "rotate-180" : ""
                 }`}
               />
@@ -303,11 +303,11 @@ export default function Sidebar({
             </span>
             <button
               type="button"
-              className="p-1 rounded-md text-gray-400 group-hover:text-white transition-all"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all cursor-pointer"
               aria-label="Toggle Logs Section"
             >
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 hover:text-white transition-transform duration-200 cursor-pointer ${
+                className={`w-4 h-4 transition-transform duration-200 ${
                   isLogsOpen ? "rotate-180" : ""
                 }`}
               />
