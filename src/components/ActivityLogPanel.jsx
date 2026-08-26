@@ -115,7 +115,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all"
                   >
                     <div className="flex justify-between items-center mb-1.5">
-                      <span className="font-semibold text-xs text-ink">
+                      <span className="font-semibold font-code text-xs text-gray-950">
                         {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                       </span>
                       <span className="text-[10px] text-muted font-medium">
@@ -127,7 +127,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
                     <p className="text-xs font-code text-ink/80 flex items-center flex-wrap gap-1">
                       <span
-                        className={`font-semibold uppercase text-[10px] px-1.5 py-0.5 rounded-2xl ${
+                        className={`uppercase text-[10px] px-1.5 py-0.5 rounded-2xl ${
                           log.action_type === 'CREATE' || log.action_type === 'CREATED'
                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                             : log.action_type === 'DELETE' || log.action_type === 'DELETED'
@@ -142,7 +142,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         {log.action_type}
                       </span>
                       {log.task_title && (
-                        <span className="font-code font-medium text-ink truncate max-w-[200px]">
+                        <span className="font-code font-medium text-gray-400 truncate max-w-[200px]">
                           "{log.task_title}"
                         </span>
                       )}
