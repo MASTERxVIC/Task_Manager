@@ -150,12 +150,13 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // 5. Handlers
-  const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
+  
+// 5. Add Task
+const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
   if (!user) return;
-
+  const newTaskId = crypto.randomUUID();
   const newTask = {
-    id: crypto.randomUUID(), // 👈 Yahan unique text ID pass kar rahe hain
+    id: newTaskId,
     user_id: user.id,
     board_id: board_id || boardId || null,
     task,
@@ -167,35 +168,47 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
   };
 
   const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
-  if (error) {
-    console.error('Error adding task:', error);
-  } else if (data) {
+  if (!error && data) {
     setTasks((prev) => [data, ...prev]);
+    await logActivity({
+      actionType: 'CREATED',
+      todoId: data.id,
+      taskTitle: task
+    });
   }
 };
 
- const updateTask = async (id, patch) => {
-  // Database schema me jo columns nahi hain unhe strip/remove karein
-  const { image, ...validPatch } = patch; 
+// 2. Update Task
+const updateTask = async (id, patch) => {
+  const currentTask = tasks.find((t) => t.id === id);
+  const { image, ...validPatch } = patch;
 
-  const { error } = await supabase
-    .from('todos')
-    .update(validPatch)
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error updating task:', error);
-  } else {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
-    );
+  const { error } = await supabase.from('todos').update(validPatch).eq('id', id);
+  if (!error) {
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+    await logActivity({
+      actionType: 'UPDATED',
+      todoId: id,
+      taskTitle: currentTask?.task || 'Unknown Task',
+      details: patch
+    });
   }
 };
-  const deleteTask = async (id) => {
-    const { error } = await supabase.from('todos').delete().eq('id', id);
-    if (error) console.error('Error deleting task:', error);
-    else setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
+
+// 3. Delete Task
+const deleteTask = async (id) => {
+  const taskToDelete = tasks.find((t) => t.id === id);
+
+  const { error } = await supabase.from('todos').delete().eq('id', id);
+  if (!error) {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    await logActivity({
+      actionType: 'DELETED',
+      todoId: id,
+      taskTitle: taskToDelete?.task || 'Unknown Task'
+    });
+  }
+};
 
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
@@ -263,6 +276,22 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     });
     return c;
   }, [validTasks]);
+
+  const logActivity = async ({ actionType, todoId, taskTitle, details = {} }) => {
+  if (!user) return;
+  try {
+    await supabase.from('activity_logs').insert([{
+      board_id: boardId || null,
+      todo_id: String(todoId),
+      user_id: user.id,
+      action_type: actionType,
+      task_title: taskTitle,
+      details: details
+    }]);
+  } catch (err) {
+    console.error('Failed to write activity log:', err);
+  }
+};
 
   return {
     user,

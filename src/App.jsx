@@ -8,6 +8,7 @@ import ConfirmDialog from './components/ConfirmDialog';
 import Auth from './components/Auth';
 import JoinBoardModal from './components/JoinBoardModal';
 import CreateBoardModal from './components/CreateBoardModal';
+import ActivityLogPanel from './components/ActivityLogPanel'; // 1. Added Import
 import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
 
@@ -38,6 +39,7 @@ export default function App() {
   const [confirm, setConfirm] = useState(null);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(false); // 2. Added State for Activity Logs
 
   // Fetch all boards for the logged-in user
   const fetchBoards = useCallback(async () => {
@@ -263,16 +265,30 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
-        <div className="shrink-0">
-          <Topbar
-            view={view}
-            search={search}
-            setSearch={setSearch}
-            onAddClick={openAddDrawer}
-            onMenuClick={() => setMobileNavOpen(true)}
-            onClearAll={requestClearAll}
-            hasTasks={tasks?.length > 0}
-          />
+        <div className="shrink-0 flex items-center justify-between pr-4">
+          <div className="flex-1">
+            <Topbar
+              view={view}
+              search={search}
+              setSearch={setSearch}
+              onAddClick={openAddDrawer}
+              onMenuClick={() => setMobileNavOpen(true)}
+              onClearAll={requestClearAll}
+              hasTasks={tasks?.length > 0}
+            />
+          </div>
+
+          {/* 3. Added Activity Logs Button */}
+          {activeBoard && (
+            <button
+              onClick={() => setLogsOpen(true)}
+              className="ml-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs font-medium transition-colors border border-gray-700 flex items-center gap-1.5 shrink-0"
+              title="View member activity history"
+            >
+              <span>📜</span>
+              <span className="hidden sm:inline">Activity Logs</span>
+            </button>
+          )}
         </div>
 
         <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
@@ -286,6 +302,13 @@ export default function App() {
           />
         </main>
       </div>
+
+      {/* 4. Added Activity Log Panel */}
+      <ActivityLogPanel
+        boardId={activeBoard?.id}
+        isOpen={logsOpen}
+        onClose={() => setLogsOpen(false)}
+      />
 
       <TaskDrawer 
         open={drawerOpen} 
