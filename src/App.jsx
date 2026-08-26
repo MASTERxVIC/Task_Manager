@@ -8,16 +8,15 @@ import ConfirmDialog from './components/ConfirmDialog';
 import Auth from './components/Auth';
 import JoinBoardModal from './components/JoinBoardModal';
 import CreateBoardModal from './components/CreateBoardModal';
-import ActivityLogPanel from './components/ActivityLogPanel'; // 1. Added Import
+import ActivityLogPanel from './components/ActivityLogPanel';
 import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
 
 export default function App() {
   const [view, setView] = useState('all');
   const [activeBoard, setActiveBoard] = useState(null);
-  const [boards, setBoards] = useState([]); // User's boards state
+  const [boards, setBoards] = useState([]);
 
-  // Pass activeBoard?.id to useTasks if your hook supports board filtering
   const { 
     user, 
     loading, 
@@ -39,13 +38,12 @@ export default function App() {
   const [confirm, setConfirm] = useState(null);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [logsOpen, setLogsOpen] = useState(false); // 2. Added State for Activity Logs
+  const [logsOpen, setLogsOpen] = useState(false);
 
   // Fetch all boards for the logged-in user
   const fetchBoards = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) return;
     try {
-      // Fetch boards owned by user or where user is a member
       const { data: memberBoards, error: memberErr } = await supabase
         .from('board_members')
         .select('board_id, boards(*)')
@@ -56,7 +54,6 @@ export default function App() {
       const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
       setBoards(userBoards);
 
-      // Default active board set karein agar select nahi hai ya current active board access me nahi hai
       setActiveBoard((prevActive) => {
         if (!prevActive && userBoards.length > 0) return userBoards[0];
         if (prevActive && !userBoards.some((b) => b.id === prevActive.id)) {
@@ -67,7 +64,7 @@ export default function App() {
     } catch (err) {
       console.error('Error fetching boards:', err);
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchBoards();
@@ -105,16 +102,14 @@ export default function App() {
       if (editingTask) {
         await updateTask(editingTask.id, form);
       } else {
-        // Active board ID ko explicitly task ke sath attach karein
         const taskPayload = {
           ...form,
           ...(activeBoard?.id ? { board_id: activeBoard.id } : {})
         };
-
         await addTask(taskPayload);
       }
       setDrawerOpen(false);
-      if (refetchTasks) await refetchTasks(); // Immediate UI sync
+      if (refetchTasks) await refetchTasks();
     } catch (err) {
       console.error('Task save error:', err);
     }
@@ -134,6 +129,7 @@ export default function App() {
   };
 
   const handleBoardCreated = async (newBoard) => {
+    setCreateModalOpen(false);
     setActiveBoard(newBoard);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
@@ -142,7 +138,6 @@ export default function App() {
   const handleJoinBoard = async (inviteCode) => {
     const cleanCode = inviteCode.trim().toUpperCase();
 
-    // 1. Search board by invite code
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .select('id, name, invite_code')
@@ -158,7 +153,6 @@ export default function App() {
       throw new Error('Invalid invite code. No matching board found.');
     }
 
-    // 2. Check if already joined
     const { data: existingMember, error: memberCheckErr } = await supabase
       .from('board_members')
       .select('id')
@@ -174,7 +168,6 @@ export default function App() {
       throw new Error('You have already joined this board.');
     }
 
-    // 3. Add to board_members
     const { error: joinError } = await supabase
       .from('board_members')
       .insert([
@@ -190,7 +183,7 @@ export default function App() {
       throw new Error(joinError.message || 'Failed to join the board.');
     }
 
-    // 4. Update state & active board
+    setJoinModalOpen(false);
     setActiveBoard(board);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
@@ -198,7 +191,6 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
-      
       {/* Desktop Sidebar */}
       <div className="hidden md:block w-64 shrink-0 h-full border-r border-line">
         <Sidebar 
@@ -278,7 +270,6 @@ export default function App() {
             />
           </div>
 
-          {/* 3. Added Activity Logs Button */}
           {activeBoard && (
             <button
               onClick={() => setLogsOpen(true)}
@@ -303,7 +294,6 @@ export default function App() {
         </main>
       </div>
 
-      {/* 4. Added Activity Log Panel */}
       <ActivityLogPanel
         boardId={activeBoard?.id}
         isOpen={logsOpen}

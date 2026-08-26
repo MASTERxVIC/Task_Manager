@@ -1,11 +1,16 @@
-import { supabase } from '../lib/supabaseClient'; // Path correct rakhein
+import { supabase } from '../lib/supabaseClient';
 
 export const useTodos = () => {
   
   // Helper to insert log
   const logActivity = async ({ boardId, userId, todoId, actionType, taskTitle, details = {} }) => {
+    if (!boardId || !userId) {
+      console.warn('Activity log skipped: boardId or userId is missing.', { boardId, userId });
+      return;
+    }
+
     try {
-      await supabase.from('activity_logs').insert([
+      const { error } = await supabase.from('activity_logs').insert([
         {
           board_id: boardId,
           user_id: userId,
@@ -15,6 +20,10 @@ export const useTodos = () => {
           details: details,
         },
       ]);
+
+      if (error) {
+        console.error('Failed to log activity:', error);
+      }
     } catch (err) {
       console.error('Failed to log activity:', err);
     }
@@ -40,7 +49,7 @@ export const useTodos = () => {
     return { data, error };
   };
 
-  // 2. EDIT / UPDATE TODO
+  // 2. EDIT / UPDATE TODO (Smart Detection for Toggle/Completed)
   const updateTodo = async (todoId, updates, boardId, userId) => {
     const { data, error } = await supabase
       .from('todos')
@@ -50,11 +59,20 @@ export const useTodos = () => {
       .single();
 
     if (!error && data) {
+      // Automatic action type detection
+      let actionType = 'EDIT';
+      if (typeof updates.completed === 'boolean') {
+        actionType = updates.completed ? 'COMPLETED' : 'UNDO';
+      }
+
+      const targetBoardId = boardId || data.board_id;
+      const targetUserId = userId || data.user_id;
+
       await logActivity({
-        boardId,
-        userId,
+        boardId: targetBoardId,
+        userId: targetUserId,
         todoId: data.id,
-        actionType: 'EDIT',
+        actionType: actionType,
         taskTitle: data.task,
         details: updates,
       });
@@ -79,35 +97,37 @@ export const useTodos = () => {
   };
 
   // 4. TOGGLE COMPLETE / UNDO FUNCTION
-const toggleTodoStatus = async (todoId, currentCompleted, taskTitle, boardId, userId) => {
-  const newStatus = !currentCompleted;
+  const toggleTodoStatus = async (todoId, currentCompleted, taskTitle, boardId, userId) => {
+    const newStatus = !currentCompleted;
 
-  const { data, error } = await supabase
-    .from('todos')
-    .update({ 
-      completed: newStatus,
-      completed_at: newStatus ? new Date().toISOString() : null 
-    })
-    .eq('id', todoId)
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from('todos')
+      .update({ 
+        completed: newStatus,
+        completed_at: newStatus ? new Date().toISOString() : null 
+      })
+      .eq('id', todoId)
+      .select()
+      .single();
 
-  if (!error && data) {
-    // Determine action label based on tick/untick
-    const actionType = newStatus ? 'COMPLETED' : 'UNDO';
+    if (!error && data) {
+      const actionType = newStatus ? 'COMPLETED' : 'UNDO';
 
-    await logActivity({
-      boardId,
-      userId,
-      todoId: data.id,
-      actionType: actionType,
-      taskTitle: taskTitle || data.task,
-      details: { completed: newStatus }
-    });
-  }
+      const targetBoardId = boardId || data.board_id;
+      const targetUserId = userId || data.user_id;
 
-  return { data, error };
-};
+      await logActivity({
+        boardId: targetBoardId,
+        userId: targetUserId,
+        todoId: data.id,
+        actionType: actionType,
+        taskTitle: taskTitle || data.task,
+        details: { completed: newStatus }
+      });
+    }
+
+    return { data, error };
+  };
 
   return { addTodo, updateTodo, deleteTodo, toggleTodoStatus };
 };
