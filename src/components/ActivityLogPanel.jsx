@@ -117,13 +117,13 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     {/* Top Row: User Name + Action Badge on left, Timestamp on right */}
                     <div className="flex justify-between items-center gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-normal text-xs text-gray-700 truncate">
+                        <span className="font-semibold text-sm sm:text-xs text-gray-800 truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
                         {/* Action Badge right next to User Name */}
                         <span
-                          className={`uppercase text-[10px] font-code px-1.5 py-0.5 rounded-full shrink-0 ${
+                          className={`uppercase text-[8px] font-code px-1.5 py-0.5 rounded-full font-semibold shrink-0 ${
                             log.action_type === 'CREATE' || log.action_type === 'CREATED'
                               ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                               : log.action_type === 'DELETE' || log.action_type === 'DELETED'
@@ -149,7 +149,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
                     {/* Bottom Row: Task Title taking full row width */}
                     {log.task_title && (
-                      <div className="text-xs font-code text-gray-600 bg-gray-50/80 px-2.5 py-1.5 rounded-lg border border-gray-100 break-words">
+                      <div className="text-xs font-code text-gray-600 px-2.5 py-1.5 break-words">
                         "{log.task_title}"
                       </div>
                     )}
