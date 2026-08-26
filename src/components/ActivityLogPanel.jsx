@@ -85,7 +85,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="text-muted/70 hover:text-ink p-1 transition-colors"
+                className="text-gray-300 hover:text-white p-1 transition-colors"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path
@@ -112,7 +112,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                 logs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all flex flex-col gap-2"
+                    className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all flex flex-col gap-1"
                   >
                     {/* Top Row: User Name + Action Badge on left, Timestamp on right */}
                     <div className="flex justify-between items-center gap-1">
