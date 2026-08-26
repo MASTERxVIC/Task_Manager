@@ -213,7 +213,7 @@ export default function Sidebar({
             </span>
             <button
               type="button"
-              className="p-1 rounded-md text-gray-400 hover:text-white  transition-all"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white  transition-all"
               aria-label="Toggle Collab Section"
             >
               <ChevronDown
@@ -303,7 +303,7 @@ export default function Sidebar({
             </span>
             <button
               type="button"
-              className="p-1 rounded-md text-gray-400 hover:text-white transition-all"
+              className="p-1 rounded-md text-gray-400 group-hover:text-white transition-all"
               aria-label="Toggle Logs Section"
             >
               <ChevronDown
