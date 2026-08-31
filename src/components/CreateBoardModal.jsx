@@ -30,8 +30,16 @@ export default function CreateBoardModal({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!boardName.trim()) {
+    const trimmedName = boardName.trim();
+
+    if (!trimmedName) {
       setError("Please enter a board name");
+      return;
+    }
+
+    // Validation: Prevent creating a workspace named "Default"
+    if (trimmedName.toLowerCase() === "default") {
+      setError("Workspace name 'Default' is reserved. Please choose another name.");
       return;
     }
 
@@ -48,7 +56,7 @@ export default function CreateBoardModal({
         .from("boards")
         .insert([
           {
-            name: boardName.trim(),
+            name: trimmedName,
             created_by: user.id,
           },
         ])
@@ -57,7 +65,7 @@ export default function CreateBoardModal({
 
       if (insertError) throw insertError;
 
-      // Local success card state update (Parent ko abhi notify mat karo taaki re-render na ho)
+      // Local success card state update
       setCreatedBoard(boardData);
     } catch (err) {
       console.error("Create board error:", err);
@@ -81,7 +89,6 @@ export default function CreateBoardModal({
   const handleClose = () => {
     if (loading) return;
 
-    // Board successfully ban chuka hai, toh modal close hone par parent list update karo
     if (createdBoard && onBoardCreated) {
       onBoardCreated(createdBoard);
     }

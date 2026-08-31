@@ -63,7 +63,8 @@ export default function Sidebar({
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
-  const isDefaultBoard = activeBoard?.is_default || activeBoard?.name?.toLowerCase() === "default board";
+  // Strict check: Only board with exact name "Default" is protected
+  const isDefaultBoard = activeBoard?.name?.trim().toLowerCase() === "default";
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(!isDefaultBoard && inviteCode && inviteCode !== "XXXXXX");
 
@@ -138,42 +139,46 @@ export default function Sidebar({
               transition={{ duration: 0.15 }}
               className="absolute left-1 right-1 top-12 z-20 bg-slate-900 border border-line rounded-xl p-1.5 shadow-xl space-y-1 max-h-48 overflow-y-auto no-scrollbar"
             >
-              <div className="text-[10px] uppercase font-semibold text-gray-400 px-2 py-1 tracking-wider flex items-center justify-between">
-                <span>Your Workspaces</span>
+              <div className="text-[10px] uppercase font-semibold text-gray-400 px-2 py-1 tracking-wider">
+                Your Workspaces
               </div>
               {boards.map((board) => {
-                const isDefault = board.is_default || board.name?.toLowerCase() === "default board";
+                const isBoardDefault = board.name?.trim().toLowerCase() === "default";
                 return (
                   <div
                     key={board.id}
-                    className={`group/board relative flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
-                      activeBoard?.id === board.id
-                        ? "bg-surface text-ink font-semibold"
-                        : "text-gray-300 hover:bg-white/10"
-                    }`}
                     onClick={() => {
                       onSelectBoard(board);
                       setIsBoardDropdownOpen(false);
                     }}
+                    className={`group flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
+                      activeBoard?.id === board.id
+                        ? "bg-surface text-ink font-semibold"
+                        : "text-gray-300 hover:bg-white/10"
+                    }`}
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
-                      {isDefault && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
+                      {isBoardDefault && (
+                        <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" title="Default Locked Board" />
+                      )}
                       <span className="truncate">{board.name}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {activeBoard?.id === board.id && (
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
                       )}
-                      {!isDefault && onDeleteBoard && (
+                      
+                      {/* Delete Button - Hidden for "Default", Visible on Hover for Custom Boards */}
+                      {!isBoardDefault && onDeleteBoard && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDeleteBoard(board);
                           }}
-                          title="Delete Board"
-                          className="opacity-0 group-hover/board:opacity-100 p-1 hover:text-red-400 transition-opacity"
+                          title="Delete Workspace"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-opacity cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -266,6 +271,7 @@ export default function Sidebar({
                 transition={{ duration: 0.2 }}
                 className="space-y-2 overflow-hidden"
               >
+                {/* Invite Box hidden if current workspace is "Default" */}
                 {!isDefaultBoard && (
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                     <div className="min-w-0 pr-2">
