@@ -15,6 +15,7 @@ export function parseDeadline(deadline) {
   return new Date(y, m - 1, d);
 }
 
+// checkig update
 export function urgency(task) {
   if (task.completed) return 'done';
   if (!task.deadline) return 'none';
