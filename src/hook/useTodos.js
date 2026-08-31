@@ -31,7 +31,6 @@ export const useTodos = () => {
 
   // 1. CREATE TODO
  const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
-    // Fallback taaki undefined boardId error na de
     const safeBoardId = boardId || null;
     
     const { data, error } = await supabase
@@ -39,6 +38,11 @@ export const useTodos = () => {
       .insert([{ task, board_id: safeBoardId, user_id: userId, priority, deadline, completed: false }])
       .select()
       .single();
+
+    // Yeh error print karna zaroori hai taaki asli vajah pata chale
+    if (error) {
+      console.error("Supabase Todo Insert Error Details:", error);
+    }
 
     if (!error && data) {
       await logActivity({
@@ -51,6 +55,7 @@ export const useTodos = () => {
     }
     return { data, error };
   };
+
   
   // 2. EDIT / UPDATE TODO (Smart Detection for Toggle/Completed)
   const updateTodo = async (todoId, updates, boardId, userId) => {
