@@ -40,37 +40,73 @@ export default function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
 
-  // Fetch all boards for the logged-in user
-// App.js me fetchBoards function update karein
-const fetchBoards = useCallback(async () => {
-  if (!user?.id) return;
-  try {
-    const { data: memberBoards, error: memberErr } = await supabase
-      .from('board_members')
-      .select('board_id, boards(*)')
-      .eq('user_id', user.id);
+  // Fetch all boards for the logged-in user with auto-creation fallback
+  const fetchBoards = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      // 1. Fetch joined/created boards via board_members relation
+      const { data: memberBoards, error: memberErr } = await supabase
+        .from('board_members')
+        .select('board_id, boards(*)')
+        .eq('user_id', user.id);
 
-    if (memberErr) throw memberErr;
+      if (memberErr) throw memberErr;
 
-    const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
-    
-    // Sort boards so 'is_default' comes first
-    userBoards.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
+      let userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
+      
+      // Fallback: Agar member mapping nahi mili toh direct 'created_by' se search karein
+      if (userBoards.length === 0) {
+        const { data: createdBoards } = await supabase
+          .from('boards')
+          .select('*')
+          .eq('created_by', user.id);
 
-    setBoards(userBoards);
-
-    // Set Default Board as Active on first load
-    setActiveBoard((prevActive) => {
-      if (!prevActive) {
-        const defaultBoard = userBoards.find((b) => b.is_default) || userBoards[0];
-        return defaultBoard || null;
+        if (createdBoards && createdBoards.length > 0) {
+          userBoards = createdBoards;
+        }
       }
-      return prevActive;
-    });
-  } catch (err) {
-    console.error('Error fetching boards:', err);
-  }
-}, [user?.id]);
+
+      // Fallback Auto-Create: Agar user ka koi board DB me exist hi nahi karta, toh auto-create 'Default' board
+      if (userBoards.length === 0) {
+        const { data: newBoard, error: createBoardErr } = await supabase
+          .from('boards')
+          .insert([{ name: 'Default', created_by: user.id }])
+          .select()
+          .single();
+
+        if (!createBoardErr && newBoard) {
+          // Add user to board_members for the new Default board
+          await supabase
+            .from('board_members')
+            .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
+            
+          userBoards = [newBoard];
+        }
+      }
+
+      // Sort boards so 'is_default' or 'Default' name comes first
+      userBoards.sort((a, b) => {
+        const aIsDefault = a.is_default || a.name?.toLowerCase() === 'default';
+        const bIsDefault = b.is_default || b.name?.toLowerCase() === 'default';
+        return (bIsDefault ? 1 : 0) - (aIsDefault ? 1 : 0);
+      });
+
+      setBoards(userBoards);
+
+      // Set Active Board logic
+      setActiveBoard((prevActive) => {
+        if (!prevActive) {
+          const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') || userBoards[0];
+          return defaultBoard || null;
+        }
+        // Ensure prevActive matches updated list object reference
+        const matchedActive = userBoards.find((b) => b.id === prevActive.id);
+        return matchedActive || userBoards[0] || null;
+      });
+    } catch (err) {
+      console.error('Error fetching boards:', err);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     fetchBoards();
@@ -136,6 +172,14 @@ const fetchBoards = useCallback(async () => {
 
   const handleBoardCreated = async (newBoard) => {
     setCreateModalOpen(false);
+    
+    // Ensure entry in board_members on frontend side if DB trigger missing
+    if (newBoard?.id && user?.id) {
+      await supabase
+        .from('board_members')
+        .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
+    }
+
     setActiveBoard(newBoard);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
