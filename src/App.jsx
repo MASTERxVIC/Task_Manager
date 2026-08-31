@@ -41,30 +41,36 @@ export default function App() {
   const [logsOpen, setLogsOpen] = useState(false);
 
   // Fetch all boards for the logged-in user
-  const fetchBoards = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const { data: memberBoards, error: memberErr } = await supabase
-        .from('board_members')
-        .select('board_id, boards(*)')
-        .eq('user_id', user.id);
+// App.js me fetchBoards function update karein
+const fetchBoards = useCallback(async () => {
+  if (!user?.id) return;
+  try {
+    const { data: memberBoards, error: memberErr } = await supabase
+      .from('board_members')
+      .select('board_id, boards(*)')
+      .eq('user_id', user.id);
 
-      if (memberErr) throw memberErr;
+    if (memberErr) throw memberErr;
 
-      const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
-      setBoards(userBoards);
+    const userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
+    
+    // Sort boards so 'is_default' comes first
+    userBoards.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
 
-      setActiveBoard((prevActive) => {
-        if (!prevActive && userBoards.length > 0) return userBoards[0];
-        if (prevActive && !userBoards.some((b) => b.id === prevActive.id)) {
-          return userBoards[0] || null;
-        }
-        return prevActive;
-      });
-    } catch (err) {
-      console.error('Error fetching boards:', err);
-    }
-  }, [user?.id]);
+    setBoards(userBoards);
+
+    // Set Default Board as Active on first load
+    setActiveBoard((prevActive) => {
+      if (!prevActive) {
+        const defaultBoard = userBoards.find((b) => b.is_default) || userBoards[0];
+        return defaultBoard || null;
+      }
+      return prevActive;
+    });
+  } catch (err) {
+    console.error('Error fetching boards:', err);
+  }
+}, [user?.id]);
 
   useEffect(() => {
     fetchBoards();
