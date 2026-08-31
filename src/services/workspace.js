@@ -16,44 +16,80 @@ function generateInviteCode() {
   return "TASK-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-// 2. Create Workspace
-export async function createWorkspace(title, userId) {
+// 2. Fetch Workspaces/Boards for User
+export async function getWorkspaces() {
+  const { data, error } = await supabase
+    .from('boards')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error("Fetch Workspaces Error:", error.message);
+    throw error;
+  }
+  return data || [];
+}
+
+// 3. Create Workspace
+export async function createWorkspace(name, userId) {
   const inviteCode = generateInviteCode();
   
-  // Insert Dashboard
-  const { data: dashboard, error: dbError } = await supabase
-    .from('dashboards')
-    .insert([{ title, owner_id: userId, invite_code: inviteCode }])
+  // Insert Board (Custom dynamic workspace is_default = false by default)
+  const { data: board, error: dbError } = await supabase
+    .from('boards')
+    .insert([{ name, created_by: userId, invite_code: inviteCode, is_default: false }])
     .select()
     .single();
 
   if (dbError) throw dbError;
 
   // Add Owner as Member
-  await supabase
-    .from('dashboard_members')
-    .insert([{ dashboard_id: dashboard.id, user_id: userId, role: 'OWNER' }]);
+  const { error: memberError } = await supabase
+    .from('board_members')
+    .insert([{ board_id: board.id, user_id: userId, role: 'owner' }]);
 
-  return dashboard;
+  if (memberError) console.error("Error adding owner to members:", memberError.message);
+
+  return board;
 }
 
-// 3. Join Workspace via Invite Code
+// 4. Join Workspace via Invite Code
 export async function joinWorkspaceByCode(inviteCode, userId) {
-  // Find Dashboard
-  const { data: dashboard, error } = await supabase
-    .from('dashboards')
+  // Find Board
+  const { data: board, error } = await supabase
+    .from('boards')
     .select('id')
     .eq('invite_code', inviteCode.trim().toUpperCase())
     .single();
 
-  if (error || !dashboard) throw new Error("Invalid Invite Code");
+  if (error || !board) throw new Error("Invalid Invite Code");
 
   // Insert Member
   const { error: joinError } = await supabase
-    .from('dashboard_members')
-    .upsert([{ dashboard_id: dashboard.id, user_id: userId, role: 'MEMBER' }]);
+    .from('board_members')
+    .upsert([{ board_id: board.id, user_id: userId, role: 'member' }]);
 
   if (joinError) throw joinError;
 
-  return dashboard.id;
+  return board.id;
+}
+
+// 5. Delete Workspace with Default Guard
+export async function deleteWorkspace(boardId, isDefault) {
+  // Strict Safety Guard: Default workspace delete request block karein
+  if (isDefault) {
+    throw new Error("Default workspace delete nahi kiya ja sakta!");
+  }
+
+  const { error } = await supabase
+    .from('boards')
+    .delete()
+    .eq('id', boardId);
+
+  if (error) {
+    console.error("Delete Workspace Error:", error.message);
+    throw error;
+  }
+
+  return true;
 }

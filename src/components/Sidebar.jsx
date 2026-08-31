@@ -10,6 +10,8 @@ import {
   LogOut,
   X,
   History,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 const NAV = [
@@ -51,6 +53,7 @@ export default function Sidebar({
   onOpenLogs,
 }) {
   const [copied, setCopied] = useState(false);
+  const [showCode, setShowCode] = useState(false);
   const [isBoardDropdownOpen, setIsBoardDropdownOpen] = useState(false);
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
@@ -59,7 +62,13 @@ export default function Sidebar({
 
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(inviteCode && inviteCode !== "XXXXXX");
-  const displayCode = hasValidCode ? inviteCode : "XXXXXX";
+  
+  // Rendered Code logic: If valid code exists, toggle between masked dots and actual code
+  const displayCode = hasValidCode
+    ? showCode
+      ? inviteCode
+      : "••••••"
+    : "XXXXXX";
 
   const handleCopyInvite = () => {
     if (!hasValidCode) return;
@@ -245,26 +254,45 @@ export default function Sidebar({
                       {displayCode}
                     </p>
                   </div>
-                  <button
-                    onClick={handleCopyInvite}
-                    disabled={!hasValidCode}
-                    title={
-                      hasValidCode
-                        ? "Copy Invite Code"
-                        : "Select or create a board first"
-                    }
-                    className={`p-1.5 rounded-lg transition-colors ${
-                      hasValidCode
-                        ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
-                        : "bg-slate-800 text-gray-600 cursor-not-allowed opacity-50"
-                    }`}
-                  >
-                    {copied ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Toggle Eye Button */}
+                    {hasValidCode && (
+                      <button
+                        onClick={() => setShowCode((prev) => !prev)}
+                        title={showCode ? "Hide Code" : "Show Code"}
+                        className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer transition-colors"
+                      >
+                        {showCode ? (
+                          <EyeOff className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-gray-400" />
+                        )}
+                      </button>
                     )}
-                  </button>
+
+                    {/* Copy Button */}
+                    <button
+                      onClick={handleCopyInvite}
+                      disabled={!hasValidCode}
+                      title={
+                        hasValidCode
+                          ? "Copy Invite Code"
+                          : "Select or create a board first"
+                      }
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        hasValidCode
+                          ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
+                          : "bg-slate-800 text-gray-600 cursor-not-allowed opacity-50"
+                      }`}
+                    >
+                      {copied ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <button
