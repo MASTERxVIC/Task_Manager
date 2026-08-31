@@ -30,16 +30,19 @@ export const useTodos = () => {
   };
 
   // 1. CREATE TODO
-  const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
+ const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
+    // Fallback taaki undefined boardId error na de
+    const safeBoardId = boardId || null;
+    
     const { data, error } = await supabase
       .from('todos')
-      .insert([{ task, board_id: boardId, user_id: userId, priority, deadline, completed: false }])
+      .insert([{ task, board_id: safeBoardId, user_id: userId, priority, deadline, completed: false }])
       .select()
       .single();
 
     if (!error && data) {
       await logActivity({
-        boardId,
+        boardId: safeBoardId,
         userId,
         todoId: data.id,
         actionType: 'CREATE',
@@ -48,7 +51,7 @@ export const useTodos = () => {
     }
     return { data, error };
   };
-
+  
   // 2. EDIT / UPDATE TODO (Smart Detection for Toggle/Completed)
   const updateTodo = async (todoId, updates, boardId, userId) => {
     const { data, error } = await supabase
