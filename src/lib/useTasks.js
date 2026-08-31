@@ -21,10 +21,24 @@ export function useTasks(boardId = null) {
     });
   }, []);
 
-  // Helper: Activity Logging Function
+  // Helper: Activity Logging Function (Added safeguard to skip logging for default boards)
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
     if (!user) return;
     try {
+      // Agar active boardId diya hai, toh check karo kya wo default board hai?
+      if (boardId) {
+        const { data: boardData } = await supabase
+          .from('boards')
+          .select('is_default, name')
+          .eq('id', boardId)
+          .maybeSingle();
+
+        // Agar board default hai, toh log create mat karo
+        if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
+          return;
+        }
+      }
+
       await supabase.from('activity_logs').insert([{
         board_id: boardId || null,
         todo_id: String(todoId),
@@ -40,6 +54,8 @@ export function useTasks(boardId = null) {
 
   // 1. Fetch Board Specific or User Specific Tasks
   const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
+    // FIX: Board change ya fetch shuru hote hi purane tasks turant clear karo taaki mixing na ho
+    setTasks([]);
     setLoading(true);
     try {
       let query = supabase.from('todos').select('*');
