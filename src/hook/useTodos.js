@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabaseClient';
 
 export const useTodos = () => {
   
-  // Helper to insert log
+  // Helper to insert log (Default vs Custom board handles gracefully)
   const logActivity = async ({ boardId, userId, todoId, actionType, taskTitle, details = {} }) => {
     if (!boardId || !userId) {
       console.warn('Activity log skipped: boardId or userId is missing.', { boardId, userId });
@@ -10,19 +10,20 @@ export const useTodos = () => {
     }
 
     try {
-      const { error } = await supabase.from('activity_logs').insert([
-        {
-          board_id: boardId,
-          user_id: userId,
-          todo_id: todoId,
-          action_type: actionType,
-          task_title: taskTitle,
-          details: details,
-        },
-      ]);
+      // Clean safe payload
+      const payload = {
+        board_id: boardId,
+        user_id: userId,
+        todo_id: todoId || null, // Handle null if task is deleted
+        action_type: actionType,
+        task_title: taskTitle,
+        details: details,
+      };
+
+      const { error } = await supabase.from('activity_logs').insert([payload]);
 
       if (error) {
-        console.error('Failed to log activity:', error);
+        console.error('Failed to log activity:', error.message);
       }
     } catch (err) {
       console.error('Failed to log activity:', err);
@@ -30,18 +31,28 @@ export const useTodos = () => {
   };
 
   // 1. CREATE TODO
- const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
+  const addTodo = async ({ task, boardId, userId, priority, deadline }) => {
     const safeBoardId = boardId || null;
     
+    // Clean Payload without undefined attributes
+    const payload = {
+      task,
+      board_id: safeBoardId,
+      user_id: userId,
+      completed: false
+    };
+
+    if (priority) payload.priority = priority;
+    if (deadline) payload.deadline = deadline;
+
     const { data, error } = await supabase
       .from('todos')
-      .insert([{ task, board_id: safeBoardId, user_id: userId, priority, deadline, completed: false }])
+      .insert([payload])
       .select()
       .single();
 
-    // Yeh error print karna zaroori hai taaki asli vajah pata chale
     if (error) {
-      console.error("Supabase Todo Insert Error Details:", error);
+      console.error("Supabase Todo Insert Error Details:", error.message, error.details);
     }
 
     if (!error && data) {
@@ -56,8 +67,7 @@ export const useTodos = () => {
     return { data, error };
   };
 
-  
-  // 2. EDIT / UPDATE TODO (Smart Detection for Toggle/Completed)
+  // 2. EDIT / UPDATE TODO
   const updateTodo = async (todoId, updates, boardId, userId) => {
     const { data, error } = await supabase
       .from('todos')
@@ -66,8 +76,11 @@ export const useTodos = () => {
       .select()
       .single();
 
+    if (error) {
+      console.error("Supabase Todo Update Error:", error.message);
+    }
+
     if (!error && data) {
-      // Automatic action type detection
       let actionType = 'EDIT';
       if (typeof updates.completed === 'boolean') {
         actionType = updates.completed ? 'COMPLETED' : 'UNDO';
@@ -90,17 +103,23 @@ export const useTodos = () => {
 
   // 3. DELETE TODO
   const deleteTodo = async (todoId, taskTitle, boardId, userId) => {
-    const { error } = await supabase.from('todos').delete().eq('id', todoId);
-
-    if (!error) {
+    // Foreign Key crash fix: Pehle Activity Log likho, fir item Delete karo!
+    if (boardId && userId) {
       await logActivity({
         boardId,
         userId,
-        todoId,
+        todoId: null, // Foreign Key integrity guard
         actionType: 'DELETE',
         taskTitle: taskTitle,
       });
     }
+
+    const { error } = await supabase.from('todos').delete().eq('id', todoId);
+    
+    if (error) {
+      console.error("Supabase Todo Delete Error:", error.message);
+    }
+
     return { error };
   };
 
@@ -108,15 +127,19 @@ export const useTodos = () => {
   const toggleTodoStatus = async (todoId, currentCompleted, taskTitle, boardId, userId) => {
     const newStatus = !currentCompleted;
 
+    // Build update object safely
+    const updatePayload = { completed: newStatus };
+
     const { data, error } = await supabase
       .from('todos')
-      .update({ 
-        completed: newStatus,
-        completed_at: newStatus ? new Date().toISOString() : null 
-      })
+      .update(updatePayload)
       .eq('id', todoId)
       .select()
       .single();
+
+    if (error) {
+      console.error("Supabase Toggle Status Error:", error.message, error.details);
+    }
 
     if (!error && data) {
       const actionType = newStatus ? 'COMPLETED' : 'UNDO';
