@@ -50,6 +50,34 @@ export default function App() {
     }
   };
 
+  // Board delete karne aur active board handle karne ka logic
+  const handleDeleteBoard = async (boardToDelete) => {
+    if (!boardToDelete?.id) return;
+    try {
+      const { error } = await supabase
+        .from('boards')
+        .delete()
+        .eq('id', boardToDelete.id);
+
+      if (error) throw error;
+
+      const updatedBoards = boards.filter((b) => b.id !== boardToDelete.id);
+      setBoards(updatedBoards);
+
+      if (activeBoard?.id === boardToDelete.id) {
+        const fallbackBoard =
+          updatedBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') ||
+          updatedBoards[0];
+
+        handleSelectBoard(fallbackBoard || null);
+      }
+
+      if (refetchTasks) await refetchTasks();
+    } catch (err) {
+      console.error('Board delete error:', err);
+    }
+  };
+
   // Fetch all boards for the logged-in user with auto-creation fallback & persistent selection
   const fetchBoards = useCallback(async () => {
     if (!user?.id) return;
@@ -275,6 +303,7 @@ export default function App() {
           boards={boards}
           activeBoard={activeBoard}
           onSelectBoard={(board) => handleSelectBoard(board)}
+          onDeleteBoard={handleDeleteBoard}
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
@@ -314,6 +343,7 @@ export default function App() {
                   handleSelectBoard(board);
                   setMobileNavOpen(false);
                 }}
+                onDeleteBoard={handleDeleteBoard}
                 onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
                 onOpenJoinModal={() => {
