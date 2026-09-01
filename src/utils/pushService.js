@@ -1,11 +1,8 @@
 import { supabase } from '../lib/supabaseClient';
 
-// Public VAPID Key ko yahan set karein (ya env file se import karein)
+// Real VAPID Public Key (Past generated key paste karein)
 const VAPID_PUBLIC_KEY = 'BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY';
 
-/**
- * Helper function to convert base64url string to Uint8Array required by PushManager
- */
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -22,47 +19,43 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 /**
- * A. User Gesture / Click se invoke hone wala Push Notification Setup Function
+ * Push Notification Enable Function
+ * @param {string} userId - Current logged in user ID
+ * @param {boolean} isUserClick - Manual button click check (Alerts control ke liye)
  */
-export async function enableNotifications(userId) {
-  if (!userId) {
-    console.warn('User ID missing for enabling push notifications.');
-    return false;
-  }
+export async function enableNotifications(userId, isUserClick = false) {
+  if (!userId) return false;
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    alert('Push notifications is browser me supported nahi hain.');
+    if (isUserClick) alert('Push notifications is browser me supported nahi hain.');
     return false;
   }
 
   try {
-    // 1. Explicit User Interaction par permission demand
     const permission = await Notification.requestPermission();
     
     if (permission === 'denied') {
-      alert('Notification permission blocked hai! URL bar ke lock icon par click karke Allow karein.');
+      if (isUserClick) {
+        alert('Notification permission blocked hai! Browser lock icon par click karke Allow karein.');
+      }
       return false;
     }
 
-    if (permission !== 'granted') {
-      console.warn('Notification permission not granted.');
-      return false;
-    }
+    if (permission !== 'granted') return false;
 
-    // 2. Service Worker Ready / Register
+    // Service worker setup
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
 
-    // 3. Converting VAPID key to Uint8Array buffer to prevent InvalidCharacterError
     const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
-    // 4. Subscription Generate
+    // Subscription Token generate
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: convertedVapidKey,
     });
 
-    // 5. Supabase Profiles table Update
+    // Supabase DB Update
     const { error } = await supabase
       .from('profiles')
       .update({ push_subscription: JSON.stringify(subscription) })
@@ -73,8 +66,10 @@ export async function enableNotifications(userId) {
       return false;
     }
 
-    alert('Notifications Successfully Enable Ho Gayi Hain! 🎉');
-    console.log('Push Notifications Enabled Successfully!');
+    // Sirf tab alert dikhao jab user ne Button daba kar trigger kiya ho
+    if (isUserClick) {
+      alert('Notifications Successfully Enable Ho Gayi Hain! 🎉');
+    }
     return true;
 
   } catch (error) {
@@ -83,15 +78,12 @@ export async function enableNotifications(userId) {
   }
 }
 
-/**
- * Backward Compatibility Wrapper
- */
 export async function registerPushNotifications(userId) {
-  return await enableNotifications(userId);
+  return await enableNotifications(userId, false);
 }
 
 /**
- * B. Single User ko Edge Function se push bhejna
+ * Single User ko Push Bhejna
  */
 export async function sendWebPush({ targetUserId, title, message, url = '/' }) {
   try {
@@ -119,7 +111,7 @@ export async function sendWebPush({ targetUserId, title, message, url = '/' }) {
 }
 
 /**
- * C. BROADCAST: Board Members ko Push Bhejna
+ * BROADCAST: Board Members ko Push Bhejna
  */
 export async function broadcastToBoard({ boardMembers = [], currentUserId, title, message }) {
   if (!boardMembers || boardMembers.length === 0) return;
@@ -136,7 +128,7 @@ export async function broadcastToBoard({ boardMembers = [], currentUserId, title
 }
 
 /**
- * D. MENTIONS: Text me @User parse karke push bhejna
+ * MENTIONS: Text me @User parse karke push bhejna
  */
 export async function checkAndSendMentions({ text, taskTitle, boardMembers = [], currentUserId }) {
   if (!text || !text.includes('@')) return;

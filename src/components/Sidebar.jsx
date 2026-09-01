@@ -85,7 +85,9 @@ export default function Sidebar({
   // Strict check: Default board protection
   const isDefaultBoard = activeBoard?.name?.trim().toLowerCase() === "default";
   const inviteCode = activeBoard?.invite_code;
-  const hasValidCode = Boolean(!isDefaultBoard && inviteCode && inviteCode !== "XXXXXX");
+  const hasValidCode = Boolean(
+    !isDefaultBoard && inviteCode && inviteCode !== "XXXXXX",
+  );
 
   const displayCode = hasValidCode
     ? showCode
@@ -98,6 +100,12 @@ export default function Sidebar({
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleEnablePushNotification = async () => {
+    if (!user?.id) return;
+    // Second argument true bhejne se alert click par hi aayega
+    await enableNotifications(user.id, true);
   };
 
   return (
@@ -164,7 +172,8 @@ export default function Sidebar({
                 Your Workspaces
               </div>
               {boards.map((board) => {
-                const isBoardDefault = board.name?.trim().toLowerCase() === "default";
+                const isBoardDefault =
+                  board.name?.trim().toLowerCase() === "default";
                 return (
                   <div
                     key={board.id}
@@ -180,7 +189,10 @@ export default function Sidebar({
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
                       {isBoardDefault && (
-                        <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" title="Default Locked Board" />
+                        <Lock
+                          className="w-3.5 h-3.5 text-amber-400 shrink-0"
+                          title="Default Locked Board"
+                        />
                       )}
                       <span className="truncate">{board.name}</span>
                     </div>
@@ -189,7 +201,7 @@ export default function Sidebar({
                       {activeBoard?.id === board.id && (
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
                       )}
-                      
+
                       {!isBoardDefault && onDeleteBoard && (
                         <button
                           type="button"
@@ -296,7 +308,9 @@ export default function Sidebar({
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                     <div className="min-w-0 pr-2">
                       <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
-                        {activeBoard ? `${activeBoard.name} Code` : "Invite Code"}
+                        {activeBoard
+                          ? `${activeBoard.name} Code`
+                          : "Invite Code"}
                       </p>
                       <p
                         className={`text-xs font-mono font-semibold truncate ${
@@ -461,11 +475,11 @@ export default function Sidebar({
         {/* Enable Push Notifications Button */}
         <button
           type="button"
-          onClick={() => enableNotifications(user?.id)}
+          onClick={handleEnablePushNotification}
           disabled={!user?.id}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-blue-600/80 hover:bg-blue-600 border border-blue-500/30 text-white rounded-xl text-xs font-medium cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gray-200 hover:bg-gray-50 text-surface rounded-xl text-xs font-medium cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Bell className="w-4 h-4 text-blue-200" />
+          <Bell className="w-4 h-4 text-surface" />
           <span>Enable Notifications</span>
         </button>
 
