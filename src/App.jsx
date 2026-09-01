@@ -148,13 +148,15 @@ export default function App() {
     fetchBoards();
   }, [fetchBoards]);
 
-  //Notification Invoker
-
-  useEffect(() => {
-  if (user?.id) {
-    registerPushNotifications(user.id);
+ // Notification Invoker
+useEffect(() => {
+  if (user?.id && typeof window !== 'undefined' && 'Notification' in window) {
+    // Silent register tabhi hoga jab user pehle permission granted kar chuka ho
+    if (Notification.permission === 'granted') {
+      registerPushNotifications(user.id);
+    }
   }
-}, [user]);
+}, [user?.id]);
 
   // Realtime Sync Listener
   useEffect(() => {
