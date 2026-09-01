@@ -49,35 +49,34 @@ export function useTasks(boardId = null) {
     }
   }, [user, boardId]);
 
-  // 1. Fetch Board Specific or User Specific Tasks (FIXED WORKSPACE ISOLATION)
-  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-    // Board change ya fetch shuru hote hi purane tasks clear karo taaki lag/flicker na ho
-    setTasks([]);
-    setLoading(true);
-    try {
-      let query = supabase.from('todos').select('*').eq('user_id', userId);
+// 1. Fetch Board Specific or User Specific Tasks (FIXED FOR SHARED BOARDS)
+const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
+  setTasks([]);
+  setLoading(true);
+  try {
+    let query = supabase.from('todos').select('*');
 
-      if (currentBoardId) {
-        // Specific Custom Board Selected -> Strict match with board_id
-        query = query.eq('board_id', currentBoardId);
-      } else {
-        // Default Workspace Selected -> Strict match where board_id IS NULL or empty
-        query = query.is('board_id', null);
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching tasks:', error);
-      } else {
-        setTasks(filterValidTasks(data || []));
-      }
-    } catch (err) {
-      console.error('Fetch tasks exception:', err);
-    } finally {
-      setLoading(false);
+    if (currentBoardId) {
+      // Custom Workspace/Board: Show ALL tasks of this board regardless of who created them
+      query = query.eq('board_id', currentBoardId);
+    } else {
+      // Default Workspace: Show only tasks created by the current user without a board_id
+      query = query.eq('user_id', userId).is('board_id', null);
     }
-  }, [filterValidTasks]);
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching tasks:', error);
+    } else {
+      setTasks(filterValidTasks(data || []));
+    }
+  } catch (err) {
+    console.error('Fetch tasks exception:', err);
+  } finally {
+    setLoading(false);
+  }
+}, [filterValidTasks]);
 
   // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
