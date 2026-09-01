@@ -49,34 +49,34 @@ export function useTasks(boardId = null) {
     }
   }, [user, boardId]);
 
-// 1. Fetch Board Specific or User Specific Tasks (FIXED FOR SHARED BOARDS)
-const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-  setTasks([]);
-  setLoading(true);
-  try {
-    let query = supabase.from('todos').select('*');
+  // 1. Fetch Board Specific or User Specific Tasks (FIXED FOR SHARED BOARDS)
+  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
+    setTasks([]);
+    setLoading(true);
+    try {
+      let query = supabase.from('todos').select('*');
 
-    if (currentBoardId) {
-      // Custom Workspace/Board: Show ALL tasks of this board regardless of who created them
-      query = query.eq('board_id', currentBoardId);
-    } else {
-      // Default Workspace: Show only tasks created by the current user without a board_id
-      query = query.eq('user_id', userId).is('board_id', null);
+      if (currentBoardId) {
+        // Custom Workspace/Board: Show ALL tasks of this board regardless of who created them
+        query = query.eq('board_id', currentBoardId);
+      } else {
+        // Default Workspace: Show only tasks created by the current user without a board_id
+        query = query.eq('user_id', userId).is('board_id', null);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching tasks:', error);
+      } else {
+        setTasks(filterValidTasks(data || []));
+      }
+    } catch (err) {
+      console.error('Fetch tasks exception:', err);
+    } finally {
+      setLoading(false);
     }
-
-    const { data, error } = await query.order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching tasks:', error);
-    } else {
-      setTasks(filterValidTasks(data || []));
-    }
-  } catch (err) {
-    console.error('Fetch tasks exception:', err);
-  } finally {
-    setLoading(false);
-  }
-}, [filterValidTasks]);
+  }, [filterValidTasks]);
 
   // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
@@ -93,7 +93,7 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     }
   }, []);
 
-  // 3. Realtime Listener (FIXED CHANNEL ISOLATION)
+  // 3. Realtime Listener (OPTIMIZED FOR INSTANT MULTI-DEVICE SYNC)
   const setupRealtime = useCallback((userId, currentBoardId = null) => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -107,14 +107,38 @@ const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'todos' },
-        () => {
-          fetchTasks(userId, currentBoardId);
+        (payload) => {
+          const { eventType, new: newRow, old: oldRow } = payload;
+
+          if (eventType === 'INSERT') {
+            const matchesBoard = currentBoardId 
+              ? newRow.board_id === currentBoardId 
+              : (!newRow.board_id && newRow.user_id === userId);
+
+            if (matchesBoard) {
+              setTasks((prev) => {
+                const exists = prev.some((t) => t.id === newRow.id);
+                if (exists) return prev;
+                return filterValidTasks([newRow, ...prev]);
+              });
+            }
+          } 
+          else if (eventType === 'UPDATE') {
+            setTasks((prev) => 
+              filterValidTasks(
+                prev.map((t) => (t.id === newRow.id ? { ...t, ...newRow } : t))
+              )
+            );
+          } 
+          else if (eventType === 'DELETE') {
+            setTasks((prev) => prev.filter((t) => t.id !== oldRow.id));
+          }
         }
       )
       .subscribe();
 
     channelRef.current = channel;
-  }, [fetchTasks]);
+  }, [filterValidTasks]);
 
   // 4. Auth Session & Active Board Change Effect
   useEffect(() => {
