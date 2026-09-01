@@ -7,16 +7,22 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const fetchActivityLogs = async (currentBoardId) => {
-    // Edge-case safeguard: Skip execution for default board or invalid boardId
     if (!currentBoardId) {
       setLogs([]);
       return;
     }
 
     setLoading(true);
+    // Explicit Foreign Key Mapping for profiles
     const { data, error } = await supabase
       .from('activity_logs')
-      .select('*, profiles!user_id(email, full_name)')
+      .select(`
+        *,
+        profiles (
+          email,
+          full_name
+        )
+      `)
       .eq('board_id', currentBoardId)
       .order('created_at', { ascending: false });
 
@@ -30,7 +36,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
   useEffect(() => {
     if (isOpen && boardId) {
-      setLogs([]); // Drawer khulte hi purana cache reset karein
+      setLogs([]);
       fetchActivityLogs(boardId);
 
       // Realtime listener for custom board activity
@@ -44,8 +50,25 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             table: 'activity_logs',
             filter: `board_id=eq.${boardId}`,
           },
-          () => {
-            fetchActivityLogs(boardId);
+          async (payload) => {
+            // Naye log ke saath user Profile info join fetch karein
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('email, full_name')
+              .eq('id', payload.new.user_id)
+              .maybeSingle();
+
+            const newLogWithProfile = {
+              ...payload.new,
+              profiles: profileData || null,
+            };
+
+            // Prevent Duplicates in State
+            setLogs((prev) => {
+              const exists = prev.some((l) => l.id === newLogWithProfile.id);
+              if (exists) return prev;
+              return [newLogWithProfile, ...prev];
+            });
           }
         )
         .subscribe();
@@ -62,7 +85,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop Animation */}
+          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -73,7 +96,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
           />
 
-          {/* Drawer Panel Animation */}
+          {/* Drawer Panel */}
           <motion.div
             key="drawer"
             initial={{ x: '100%' }}
@@ -128,7 +151,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
-                        {/* Action Badge right next to User Name */}
+                        {/* Action Badge */}
                         <span
                           className={`uppercase text-[8px] font-code px-1.5 py-0.5 rounded-full font-semibold shrink-0 ${
                             log.action_type === 'CREATE' || log.action_type === 'CREATED'
