@@ -193,9 +193,7 @@ export default function Sidebar({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Kya aap "${board.name}" board aur iske saare tasks delete karna chahte hain?`)) {
-                              onDeleteBoard(board);
-                            }
+                            onDeleteBoard(board);
                           }}
                           title="Delete Workspace"
                           className="p-1 text-gray-400 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]"
