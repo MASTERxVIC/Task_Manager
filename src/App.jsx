@@ -151,9 +151,17 @@ export default function App() {
  // Notification Invoker
 useEffect(() => {
   if (user?.id && typeof window !== 'undefined' && 'Notification' in window) {
-    // Silent register tabhi hoga jab user pehle permission granted kar chuka ho
     if (Notification.permission === 'granted') {
-      registerPushNotifications(user.id);
+      // Check karein ki is session me pehle se trigger ho chuka hai ya nahi
+      const isAlreadyRegistered = sessionStorage.getItem(`push_registered_${user.id}`);
+
+      if (!isAlreadyRegistered) {
+        registerPushNotifications(user.id).then((success) => {
+          if (success) {
+            sessionStorage.setItem(`push_registered_${user.id}`, 'true');
+          }
+        });
+      }
     }
   }
 }, [user?.id]);
