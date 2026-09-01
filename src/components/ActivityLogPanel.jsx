@@ -13,12 +13,11 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
     }
 
     setLoading(true);
-    // Explicit Foreign Key Mapping for profiles
     const { data, error } = await supabase
       .from('activity_logs')
       .select(`
         *,
-        profiles (
+        profiles:user_id (
           email,
           full_name
         )
@@ -29,17 +28,18 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
     if (error) {
       console.error('Error fetching logs:', error);
     } else {
-      setLogs(data || []);
+      const uniqueLogs = (data || []).filter(
+        (log, index, self) => index === self.findIndex((l) => l.id === log.id)
+      );
+      setLogs(uniqueLogs);
     }
     setLoading(false);
   };
 
   useEffect(() => {
     if (isOpen && boardId) {
-      setLogs([]);
       fetchActivityLogs(boardId);
 
-      // Realtime listener for custom board activity
       const channel = supabase
         .channel(`board_activity_${boardId}`)
         .on(
@@ -51,7 +51,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             filter: `board_id=eq.${boardId}`,
           },
           async (payload) => {
-            // Naye log ke saath user Profile info join fetch karein
+            // Naye log ke saath specifically user Profile fetch karo
             const { data: profileData } = await supabase
               .from('profiles')
               .select('email, full_name')
@@ -63,7 +63,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               profiles: profileData || null,
             };
 
-            // Prevent Duplicates in State
+            // Prevent Duplicates safely in state with profile loaded
             setLogs((prev) => {
               const exists = prev.some((l) => l.id === newLogWithProfile.id);
               if (exists) return prev;
@@ -85,7 +85,6 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -96,7 +95,6 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
           />
 
-          {/* Drawer Panel */}
           <motion.div
             key="drawer"
             initial={{ x: '100%' }}
@@ -107,7 +105,6 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             aria-modal="true"
             className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-surface flex flex-col shadow-2xl"
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-line">
               <h2 className="font-display font-semibold text-lg text-white">
                 Board Activity
@@ -128,9 +125,8 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               </button>
             </div>
 
-            {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
-              {loading ? (
+              {loading && logs.length === 0 ? (
                 <div className="flex justify-center items-center py-10">
                   <p className="text-white text-xs font-medium">Loading activity logs...</p>
                 </div>
@@ -144,14 +140,12 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     key={log.id}
                     className="p-3.5 bg-white rounded-xl border border-line shadow-sm transition-all flex flex-col gap-1"
                   >
-                    {/* Top Row: User Name + Action Badge on left, Timestamp on right */}
                     <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="font-semibold md:text-sm text-xs text-surface truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
-                        {/* Action Badge */}
                         <span
                           className={`uppercase text-[8px] font-code px-1.5 py-0.5 rounded-full font-semibold shrink-0 ${
                             log.action_type === 'CREATE' || log.action_type === 'CREATED'
@@ -177,7 +171,6 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                       </span>
                     </div>
 
-                    {/* Bottom Row: Task Title */}
                     {log.task_title && (
                       <div className="text-xs font-code text-gray-600 break-words">
                         {log.task_title}
