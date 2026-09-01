@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabaseClient';
 
-// Real VAPID Public Key (Past generated key paste karein)
+// Real VAPID Public Key
 const VAPID_PUBLIC_KEY = 'BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY';
 
+/**
+ * Base64 VAPID Key Helper Function
+ */
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -24,16 +27,23 @@ function urlBase64ToUint8Array(base64String) {
  * @param {boolean} isUserClick - Manual button click check (Alerts control ke liye)
  */
 export async function enableNotifications(userId, isUserClick = false) {
-  if (!userId) return false;
+  console.log("👉 Step 1: Triggered for User ID:", userId);
+
+  if (!userId) {
+    console.error("❌ User ID missing hai!");
+    if (isUserClick) alert("User ID missing hai. Kripya reload karke try karein.");
+    return false;
+  }
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    if (isUserClick) alert('Push notifications is browser me supported nahi hain.');
+    if (isUserClick) alert('Push notifications aapke browser me supported nahi hain.');
     return false;
   }
 
   try {
     const permission = await Notification.requestPermission();
-    
+    console.log("👉 Step 2: Permission Status:", permission);
+
     if (permission === 'denied') {
       if (isUserClick) {
         alert('Notification permission blocked hai! Browser lock icon par click karke Allow karein.');
@@ -43,41 +53,52 @@ export async function enableNotifications(userId, isUserClick = false) {
 
     if (permission !== 'granted') return false;
 
-    // Service worker setup
+    // Service Worker Registration
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
+    console.log("👉 Step 3: Service Worker Ready!");
 
     const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
-    // Subscription Token generate
+    // Push Subscription Generation
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: convertedVapidKey,
     });
 
+    // Native PushSubscription ko plain JSON object me map karna
+    const subJson = subscription.toJSON();
+    console.log("👉 Step 4: Generated Push Subscription Object:", subJson);
+
     // Supabase DB Update
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
-      .update({ push_subscription: JSON.stringify(subscription) })
-      .eq('id', userId);
+      .update({ push_subscription: subJson })
+      .eq('id', userId)
+      .select();
 
     if (error) {
-      console.error('Subscription DB Update Error:', error);
+      console.error("❌ Step 5: Supabase DB Update Failed:", error.message);
+      if (isUserClick) alert('Database update error: ' + error.message);
       return false;
     }
 
-    // Sirf tab alert dikhao jab user ne Button daba kar trigger kiya ho
+    console.log("✅ Step 6: DB update success:", data);
     if (isUserClick) {
       alert('Notifications Successfully Enable Ho Gayi Hain! 🎉');
     }
     return true;
 
   } catch (error) {
-    console.error('Permission Request or Subscription Failed:', error);
+    console.error('❌ Notification Enabling Error:', error);
+    if (isUserClick) alert('Error: ' + error.message);
     return false;
   }
 }
 
+/**
+ * Auto-Register Function
+ */
 export async function registerPushNotifications(userId) {
   return await enableNotifications(userId, false);
 }
