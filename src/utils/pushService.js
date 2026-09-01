@@ -1,11 +1,28 @@
 import { supabase } from '../lib/supabaseClient';
 
-// Public VAPID Key ko yahan set karein ya env file se access karein
+// Public VAPID Key ko yahan set karein (ya env file se import karein)
 const VAPID_PUBLIC_KEY = 'YOUR_PUBLIC_VAPID_KEY';
 
 /**
+ * Helper function to convert base64url string to Uint8Array required by PushManager
+ */
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+/**
  * A. User Gesture / Click se invoke hone wala Push Notification Setup Function
- * Complete user gesture violation protection aur proper error handling ke sath.
  */
 export async function enableNotifications(userId) {
   if (!userId) {
@@ -14,7 +31,7 @@ export async function enableNotifications(userId) {
   }
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    alert('Push notifications this browser me supported nahi hain.');
+    alert('Push notifications is browser me supported nahi hain.');
     return false;
   }
 
@@ -22,8 +39,13 @@ export async function enableNotifications(userId) {
     // 1. Explicit User Interaction par permission demand
     const permission = await Notification.requestPermission();
     
+    if (permission === 'denied') {
+      alert('Notification permission blocked hai! URL bar ke lock icon par click karke Allow karein.');
+      return false;
+    }
+
     if (permission !== 'granted') {
-      console.warn('Notification permission denied by user.');
+      console.warn('Notification permission not granted.');
       return false;
     }
 
@@ -31,13 +53,16 @@ export async function enableNotifications(userId) {
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
 
-    // 3. Subscription Generate
+    // 3. Converting VAPID key to Uint8Array buffer to prevent InvalidCharacterError
+    const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+
+    // 4. Subscription Generate
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: VAPID_PUBLIC_KEY,
+      applicationServerKey: convertedVapidKey,
     });
 
-    // 4. Supabase Profiles table Update
+    // 5. Supabase Profiles table Update
     const { error } = await supabase
       .from('profiles')
       .update({ push_subscription: JSON.stringify(subscription) })
@@ -48,6 +73,7 @@ export async function enableNotifications(userId) {
       return false;
     }
 
+    alert('Notifications Successfully Enable Ho Gayi Hain! 🎉');
     console.log('Push Notifications Enabled Successfully!');
     return true;
 
@@ -59,8 +85,6 @@ export async function enableNotifications(userId) {
 
 /**
  * Backward Compatibility Wrapper
- * Agar aapne kahin purana `registerPushNotifications` import kiya hua hai, 
- * toh wo crush na ho aur naye `enableNotifications` ko call kare.
  */
 export async function registerPushNotifications(userId) {
   return await enableNotifications(userId);
