@@ -37,49 +37,50 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (isOpen && boardId) {
-      fetchActivityLogs(boardId);
+  if (isOpen && boardId) {
+    fetchActivityLogs(boardId);
 
-      const channel = supabase
-        .channel(`board_activity_${boardId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'activity_logs',
-            filter: `board_id=eq.${boardId}`,
-          },
-          async (payload) => {
-            // Naye log ke saath specifically user Profile fetch karo
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('email, full_name')
-              .eq('id', payload.new.user_id)
-              .maybeSingle();
+    const channel = supabase
+      .channel(`board_activity_${boardId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'activity_logs',
+          filter: `board_id=eq.${boardId}`,
+        },
+        async (payload) => {
+          // 1. New Log ke user_id se Specific Profile Fetch karo
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', payload.new.user_id)
+            .maybeSingle();
 
-            const newLogWithProfile = {
-              ...payload.new,
-              profiles: profileData || null,
-            };
+          // 2. Profile Details ko Log object ke saath merge karo
+          const newLogWithProfile = {
+            ...payload.new,
+            profiles: profileData || null,
+          };
 
-            // Prevent Duplicates safely in state with profile loaded
-            setLogs((prev) => {
-              const exists = prev.some((l) => l.id === newLogWithProfile.id);
-              if (exists) return prev;
-              return [newLogWithProfile, ...prev];
-            });
-          }
-        )
-        .subscribe();
+          // 3. Duplicate check karke safely Top par Add karo
+          setLogs((prev) => {
+            const exists = prev.some((l) => l.id === newLogWithProfile.id);
+            if (exists) return prev;
+            return [newLogWithProfile, ...prev];
+          });
+        }
+      )
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    } else {
-      setLogs([]);
-    }
-  }, [boardId, isOpen]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  } else {
+    setLogs([]);
+  }
+}, [boardId, isOpen]);
 
   return (
     <AnimatePresence>
