@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { supabase } from './supabaseClient';
+import { broadcastToBoard, checkAndSendMentions } from '../utils/pushService';
 import { urgency } from './date';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-export function useTasks(boardId = null) {
+export function useTasks(boardId = null, boardMembers = []) {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -217,14 +218,16 @@ export function useTasks(boardId = null) {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // 5. Add Task
+  // 5. Add Task (Integrated Push Triggers)
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
     if (!user) return;
     const newTaskId = crypto.randomUUID();
+    const targetBoardId = board_id || boardId || null;
+    
     const newTask = {
       id: newTaskId,
       user_id: user.id,
-      board_id: board_id || boardId || null,
+      board_id: targetBoardId,
       task,
       des,
       deadline,
@@ -236,15 +239,35 @@ export function useTasks(boardId = null) {
     const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
     if (!error && data) {
       setTasks((prev) => [data, ...prev]);
+      
       await logActivity({
         actionType: 'CREATED',
         todoId: data.id,
         taskTitle: task
       });
+
+      // --- PUSH NOTIFICATIONS ---
+      if (targetBoardId && boardMembers.length > 0) {
+        // 1. Broadcast push to all active board members
+        broadcastToBoard({
+          boardMembers,
+          currentUserId: user.id,
+          title: '📝 New Task Added',
+          message: `${user.email?.split('@')[0] || 'Member'} ne naya task add kiya: "${task}"`
+        });
+
+        // 2. Mention Push (Agar task title ya description me @user hai)
+        checkAndSendMentions({
+          text: `${task} ${des || ''}`,
+          taskTitle: task,
+          boardMembers,
+          currentUserId: user.id
+        });
+      }
     }
   };
 
-  // 6. Update Task
+  // 6. Update Task (Integrated Push Triggers)
   const updateTask = async (id, patch) => {
     const currentTask = tasks.find((t) => t.id === id);
     const { image, ...validPatch } = patch;
@@ -252,16 +275,37 @@ export function useTasks(boardId = null) {
     const { error } = await supabase.from('todos').update(validPatch).eq('id', id);
     if (!error) {
       setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+      
+      const taskName = patch.task || currentTask?.task || 'Task';
+
       await logActivity({
         actionType: 'UPDATED',
         todoId: id,
-        taskTitle: currentTask?.task || 'Unknown Task',
+        taskTitle: taskName,
         details: patch
       });
+
+      // --- PUSH NOTIFICATIONS ---
+      if (boardId && boardMembers.length > 0) {
+        broadcastToBoard({
+          boardMembers,
+          currentUserId: user.id,
+          title: '✏️ Task Updated',
+          message: `${user.email?.split('@')[0] || 'Member'} ne task "${taskName}" update kiya hai.`
+        });
+
+        const updatedText = `${patch.task || ''} ${patch.des || ''}`;
+        checkAndSendMentions({
+          text: updatedText,
+          taskTitle: taskName,
+          boardMembers,
+          currentUserId: user.id
+        });
+      }
     }
   };
 
-  // 7. Toggle Task
+  // 7. Toggle Task (Integrated Push Triggers)
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -283,27 +327,50 @@ export function useTasks(boardId = null) {
         )
       );
       
+      const actionName = nextCompleted ? 'COMPLETED' : 'UNDO';
+      
       await logActivity({
-        actionType: nextCompleted ? 'COMPLETED' : 'UNDO',
+        actionType: actionName,
         todoId: id,
         taskTitle: currentTask.task || 'Unknown Task',
         details: { completed: nextCompleted }
       });
+
+      // --- PUSH NOTIFICATIONS ---
+      if (boardId && boardMembers.length > 0) {
+        broadcastToBoard({
+          boardMembers,
+          currentUserId: user.id,
+          title: nextCompleted ? '✅ Task Completed' : '↩️ Task Reopened',
+          message: `${user.email?.split('@')[0] || 'Member'} ne task "${currentTask.task}" ko ${nextCompleted ? 'complete' : 'reopen'} kar diya.`
+        });
+      }
     }
   };
 
-  // 8. Delete Task
+  // 8. Delete Task (Integrated Push Triggers)
   const deleteTask = async (id) => {
     const taskToDelete = tasks.find((t) => t.id === id);
 
     const { error } = await supabase.from('todos').delete().eq('id', id);
     if (!error) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
+      
       await logActivity({
         actionType: 'DELETED',
         todoId: id,
         taskTitle: taskToDelete?.task || 'Unknown Task'
       });
+
+      // --- PUSH NOTIFICATIONS ---
+      if (boardId && boardMembers.length > 0) {
+        broadcastToBoard({
+          boardMembers,
+          currentUserId: user.id,
+          title: '🗑️ Task Deleted',
+          message: `${user.email?.split('@')[0] || 'Member'} ne task "${taskToDelete?.task || 'Unknown'}" delete kar diya.`
+        });
+      }
     }
   };
 

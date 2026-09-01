@@ -11,6 +11,7 @@ import CreateBoardModal from './components/CreateBoardModal';
 import ActivityLogPanel from './components/ActivityLogPanel';
 import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
+import { registerPushNotifications } from './utils/pushService';
 
 export default function App() {
   const [view, setView] = useState('all');
@@ -146,6 +147,14 @@ export default function App() {
   useEffect(() => {
     fetchBoards();
   }, [fetchBoards]);
+
+  //Notification Invoker
+
+  useEffect(() => {
+  if (user?.id) {
+    registerPushNotifications(user.id);
+  }
+}, [user]);
 
   // Realtime Sync Listener
   useEffect(() => {
