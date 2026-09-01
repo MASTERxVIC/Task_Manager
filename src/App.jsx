@@ -83,6 +83,7 @@ export default function App() {
   const fetchBoards = useCallback(async () => {
     if (!user?.id) return;
     try {
+      // Fetch boards where user is a member
       const { data: memberBoards, error: memberErr } = await supabase
         .from('board_members')
         .select('board_id, boards(*)')
@@ -90,35 +91,31 @@ export default function App() {
 
       if (memberErr) throw memberErr;
 
-      let userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
+      // Fetch boards created by user
+      const { data: createdBoards, error: createdErr } = await supabase
+        .from('boards')
+        .select('*')
+        .eq('created_by', user.id);
 
-      if (userBoards.length === 0) {
-        const { data: createdBoards } = await supabase
-          .from('boards')
-          .select('*')
-          .eq('created_by', user.id);
+      if (createdErr) throw createdErr;
 
-        if (createdBoards && createdBoards.length > 0) {
-          userBoards = createdBoards;
+      // Combine both arrays safely
+      const rawBoards = [
+        ...(memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : []),
+        ...(createdBoards || [])
+      ];
+
+      // Deduplicate boards by ID (Prevent duplicate keys/rendering)
+      const uniqueBoardsMap = new Map();
+      rawBoards.forEach((board) => {
+        if (board && board.id) {
+          uniqueBoardsMap.set(board.id, board);
         }
-      }
+      });
 
-      if (userBoards.length === 0) {
-        const { data: newBoard, error: createBoardErr } = await supabase
-          .from('boards')
-          .insert([{ name: 'Default', created_by: user.id }])
-          .select()
-          .single();
+      let userBoards = Array.from(uniqueBoardsMap.values());
 
-        if (!createBoardErr && newBoard) {
-          await supabase
-            .from('board_members')
-            .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
-            
-          userBoards = [newBoard];
-        }
-      }
-
+      // Sort: Default board on top
       userBoards.sort((a, b) => {
         const aIsDefault = a.is_default || a.name?.toLowerCase() === 'default';
         const bIsDefault = b.is_default || b.name?.toLowerCase() === 'default';
@@ -126,27 +123,6 @@ export default function App() {
       });
 
       setBoards(userBoards);
-
-      const savedBoardId = localStorage.getItem('tasked_active_board_id');
-
-      setActiveBoard((prevActive) => {
-        if (prevActive) {
-          const matched = userBoards.find((b) => b.id === prevActive.id);
-          if (matched) return matched;
-        }
-
-        if (savedBoardId) {
-          const savedBoard = userBoards.find((b) => b.id === savedBoardId);
-          if (savedBoard) return savedBoard;
-        }
-
-        const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') || userBoards[0];
-        if (defaultBoard?.id) {
-          localStorage.setItem('tasked_active_board_id', defaultBoard.id);
-        }
-        return defaultBoard || null;
-      });
-
     } catch (err) {
       console.error('Error fetching boards:', err);
     }
@@ -155,6 +131,38 @@ export default function App() {
   useEffect(() => {
     fetchBoards();
   }, [fetchBoards]);
+
+  // ISSUE 3 STEP B: Safe Realtime Listener for cross-device deletion & board sync
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const boardChannel = supabase
+      .channel(`realtime_app_boards_${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'boards' },
+        (payload) => {
+          // If active board was deleted on another device, fallback safely
+          if (payload.eventType === 'DELETE' && payload.old?.id === activeBoard?.id) {
+            setActiveBoard(null);
+            localStorage.removeItem('tasked_active_board_id');
+          }
+          fetchBoards();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'board_members', filter: `user_id=eq.${user.id}` },
+        () => {
+          fetchBoards();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(boardChannel);
+    };
+  }, [user?.id, activeBoard?.id, fetchBoards]);
 
   const handleBoardCreated = async (newBoard) => {
     setCreateModalOpen(false);
