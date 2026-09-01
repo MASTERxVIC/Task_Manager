@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
@@ -61,6 +61,23 @@ export default function Sidebar({
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
 
+  // Reference for click outside detection on the Board Dropdown
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsBoardDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
   // Strict check: Default board protection
@@ -108,7 +125,7 @@ export default function Sidebar({
       </div>
 
       {/* Boards Switcher Dropdown */}
-      <div className="relative mb-4 px-1">
+      <div className="relative mb-4 px-1" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsBoardDropdownOpen((prev) => !prev)}
