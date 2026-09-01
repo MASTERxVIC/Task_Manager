@@ -20,34 +20,53 @@ export function useTasks(boardId = null) {
     });
   }, []);
 
-  // Helper: Activity Logging Function
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
-    if (!user) return;
-    try {
-      if (boardId) {
-        const { data: boardData } = await supabase
-          .from('boards')
-          .select('is_default, name')
-          .eq('id', boardId)
-          .maybeSingle();
+  if (!user) return;
 
-        if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
-          return;
-        }
-      }
-
-      await supabase.from('activity_logs').insert([{
-        board_id: boardId || null,
-        todo_id: String(todoId),
-        user_id: user.id,
-        action_type: actionType,
-        task_title: taskTitle,
-        details: details
-      }]);
-    } catch (err) {
-      console.error('Failed to write activity log:', err);
+  try {
+    // 1. Agar boardId hi nahi hai, matlab default board/view hai -> Skip
+    if (!boardId) {
+      console.log('Activity Log Skipped: Default/No Board');
+      return;
     }
-  }, [user, boardId]);
+
+    // 2. Board ka details fetch karke confirm karein ki Default to nahi hai
+    const { data: boardData, error: boardError } = await supabase
+      .from('boards')
+      .select('is_default, name')
+      .eq('id', boardId)
+      .maybeSingle();
+
+    if (boardError) {
+      console.error('Board check error for logging:', boardError);
+      return;
+    }
+
+    // Default board condition check (is_default flag ya name 'default')
+    if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
+      console.log('Activity Log Skipped: Identified as Default Board');
+      return;
+    }
+
+    // 3. Custom boards ke liye log insert karein
+    const { data, error } = await supabase.from('activity_logs').insert([{
+      board_id: boardId,
+      todo_id: String(todoId),
+      user_id: user.id,
+      action_type: actionType,
+      task_title: taskTitle,
+      details: details
+    }]).select();
+
+    if (error) {
+      console.error('Supabase Activity Log Insert Error:', error);
+    } else {
+      console.log('Activity Log Created Successfully:', data);
+    }
+  } catch (err) {
+    console.error('Failed to write activity log:', err);
+  }
+}, [user, boardId]);
 
   // 1. Fetch Board Specific or User Specific Tasks (FIXED FOR SHARED BOARDS)
   const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
