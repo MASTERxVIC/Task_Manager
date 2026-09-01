@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 
 // Public VAPID Key ko yahan set karein (ya env file se import karein)
-const VAPID_PUBLIC_KEY = 'YOUR_PUBLIC_VAPID_KEY';
+const VAPID_PUBLIC_KEY = 'BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY';
 
 /**
  * Helper function to convert base64url string to Uint8Array required by PushManager
