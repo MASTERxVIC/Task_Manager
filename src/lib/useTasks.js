@@ -4,7 +4,6 @@ import { urgency } from './date';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Board ID support added
 export function useTasks(boardId = null) {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState(null);
@@ -21,11 +20,10 @@ export function useTasks(boardId = null) {
     });
   }, []);
 
-  // Helper: Activity Logging Function (Added safeguard to skip logging for default boards)
+  // Helper: Activity Logging Function
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
     if (!user) return;
     try {
-      // Agar active boardId diya hai, toh check karo kya wo default board hai?
       if (boardId) {
         const { data: boardData } = await supabase
           .from('boards')
@@ -33,7 +31,6 @@ export function useTasks(boardId = null) {
           .eq('id', boardId)
           .maybeSingle();
 
-        // Agar board default hai, toh log create mat karo
         if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
           return;
         }
@@ -52,32 +49,20 @@ export function useTasks(boardId = null) {
     }
   }, [user, boardId]);
 
-  // 1. Fetch Board Specific or User Specific Tasks
+  // 1. Fetch Board Specific or User Specific Tasks (FIXED WORKSPACE ISOLATION)
   const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-    // FIX: Board change ya fetch shuru hote hi purane tasks turant clear karo taaki mixing na ho
+    // Board change ya fetch shuru hote hi purane tasks clear karo taaki lag/flicker na ho
     setTasks([]);
     setLoading(true);
     try {
-      let query = supabase.from('todos').select('*');
+      let query = supabase.from('todos').select('*').eq('user_id', userId);
 
       if (currentBoardId) {
-        // 1. Agar specific board open hai
+        // Specific Custom Board Selected -> Strict match with board_id
         query = query.eq('board_id', currentBoardId);
       } else {
-        // 2. Main Dashboard (Personal + Joined Boards)
-        const { data: boardMemberships } = await supabase
-          .from('board_members')
-          .select('board_id')
-          .eq('user_id', userId);
-
-        const joinedBoardIds = boardMemberships ? boardMemberships.map((b) => b.board_id) : [];
-
-        if (joinedBoardIds.length > 0) {
-          // Query: User ke khud ke tasks OR joined boards ke saare tasks
-          query = query.or(`user_id.eq.${userId},board_id.in.(${joinedBoardIds.join(',')})`);
-        } else {
-          query = query.eq('user_id', userId);
-        }
+        // Default Workspace Selected -> Strict match where board_id IS NULL or empty
+        query = query.is('board_id', null);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -109,14 +94,14 @@ export function useTasks(boardId = null) {
     }
   }, []);
 
-  // 3. Realtime Listener
+  // 3. Realtime Listener (FIXED CHANNEL ISOLATION)
   const setupRealtime = useCallback((userId, currentBoardId = null) => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
 
-    const channelName = currentBoardId ? `rt-todos-board-${currentBoardId}` : `rt-todos-${userId}`;
+    const channelName = currentBoardId ? `rt-todos-board-${currentBoardId}` : `rt-todos-default-${userId}`;
 
     const channel = supabase
       .channel(channelName)
@@ -227,7 +212,7 @@ export function useTasks(boardId = null) {
     }
   };
 
-  // 7. Toggle Task (Fixed with Activity Logging)
+  // 7. Toggle Task
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -249,7 +234,6 @@ export function useTasks(boardId = null) {
         )
       );
       
-      // Log entry based on complete or uncomplete status
       await logActivity({
         actionType: nextCompleted ? 'COMPLETED' : 'UNDO',
         todoId: id,
@@ -280,7 +264,7 @@ export function useTasks(boardId = null) {
     if (boardId) {
       query = query.eq('board_id', boardId);
     } else {
-      query = query.eq('user_id', user.id);
+      query = query.eq('user_id', user.id).is('board_id', null);
     }
 
     const { error } = await query;
@@ -294,7 +278,7 @@ export function useTasks(boardId = null) {
     if (boardId) {
       query = query.eq('board_id', boardId);
     } else {
-      query = query.eq('user_id', user.id);
+      query = query.eq('user_id', user.id).is('board_id', null);
     }
 
     const { error } = await query;
