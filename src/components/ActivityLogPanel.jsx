@@ -7,7 +7,11 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const fetchActivityLogs = async (currentBoardId) => {
-    if (!currentBoardId) return;
+    // Edge-case safeguard: Skip execution for default board or invalid boardId
+    if (!currentBoardId) {
+      setLogs([]);
+      return;
+    }
 
     setLoading(true);
     const { data, error } = await supabase
@@ -26,9 +30,10 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
 
   useEffect(() => {
     if (isOpen && boardId) {
+      setLogs([]); // Drawer khulte hi purana cache reset karein
       fetchActivityLogs(boardId);
 
-      // Realtime listener
+      // Realtime listener for custom board activity
       const channel = supabase
         .channel(`board_activity_${boardId}`)
         .on(
@@ -48,6 +53,8 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
       return () => {
         supabase.removeChannel(channel);
       };
+    } else {
+      setLogs([]);
     }
   }, [boardId, isOpen]);
 
@@ -78,7 +85,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-surface flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-line ">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-line">
               <h2 className="font-display font-semibold text-lg text-white">
                 Board Activity
               </h2>
@@ -147,9 +154,9 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                       </span>
                     </div>
 
-                    {/* Bottom Row: Task Title taking full row width */}
+                    {/* Bottom Row: Task Title */}
                     {log.task_title && (
-                      <div className="text-xs font-code text-gray-600  break-words">
+                      <div className="text-xs font-code text-gray-600 break-words">
                         {log.task_title}
                       </div>
                     )}
