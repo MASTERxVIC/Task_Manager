@@ -40,7 +40,6 @@ export default function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
 
-  // Custom handler to safely update active board in state & localStorage
   const handleSelectBoard = (board) => {
     setActiveBoard(board);
     if (board?.id) {
@@ -50,13 +49,11 @@ export default function App() {
     }
   };
 
-  // 1. Board delete request handler (Trigger dialog)
   const requestDeleteBoard = (board) => {
     if (!board?.id) return;
     setConfirm({ type: 'deleteBoard', board });
   };
 
-  // 2. Actual board deletion execution
   const executeDeleteBoard = async (boardToDelete) => {
     try {
       const { error } = await supabase
@@ -83,11 +80,9 @@ export default function App() {
     }
   };
 
-  // Fetch all boards for the logged-in user with auto-creation fallback & persistent selection
   const fetchBoards = useCallback(async () => {
     if (!user?.id) return;
     try {
-      // 1. Fetch joined/created boards via board_members relation
       const { data: memberBoards, error: memberErr } = await supabase
         .from('board_members')
         .select('board_id, boards(*)')
@@ -96,8 +91,7 @@ export default function App() {
       if (memberErr) throw memberErr;
 
       let userBoards = memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : [];
-      
-      // Fallback: Agar member mapping nahi mili toh direct 'created_by' se search karein
+
       if (userBoards.length === 0) {
         const { data: createdBoards } = await supabase
           .from('boards')
@@ -109,7 +103,6 @@ export default function App() {
         }
       }
 
-      // Fallback Auto-Create: Agar user ka koi board DB me exist hi nahi karta, toh auto-create 'Default' board
       if (userBoards.length === 0) {
         const { data: newBoard, error: createBoardErr } = await supabase
           .from('boards')
@@ -118,7 +111,6 @@ export default function App() {
           .single();
 
         if (!createBoardErr && newBoard) {
-          // Add user to board_members for the new Default board
           await supabase
             .from('board_members')
             .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
@@ -127,7 +119,6 @@ export default function App() {
         }
       }
 
-      // Sort boards so 'is_default' or 'Default' name comes first
       userBoards.sort((a, b) => {
         const aIsDefault = a.is_default || a.name?.toLowerCase() === 'default';
         const bIsDefault = b.is_default || b.name?.toLowerCase() === 'default';
@@ -136,23 +127,19 @@ export default function App() {
 
       setBoards(userBoards);
 
-      // Persistent Active Board restoration logic
       const savedBoardId = localStorage.getItem('tasked_active_board_id');
 
       setActiveBoard((prevActive) => {
-        // Priority 1: Check if previous active state matches in list
         if (prevActive) {
           const matched = userBoards.find((b) => b.id === prevActive.id);
           if (matched) return matched;
         }
 
-        // Priority 2: Restore board saved in LocalStorage upon page refresh
         if (savedBoardId) {
           const savedBoard = userBoards.find((b) => b.id === savedBoardId);
           if (savedBoard) return savedBoard;
         }
 
-        // Priority 3: Fallback to Default or First Board
         const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') || userBoards[0];
         if (defaultBoard?.id) {
           localStorage.setItem('tasked_active_board_id', defaultBoard.id);
@@ -169,86 +156,18 @@ export default function App() {
     fetchBoards();
   }, [fetchBoards]);
 
-  if (loading) {
-    return (
-      <div className="h-dvh bg-void flex items-center justify-center text-gray-400">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span>Loading tasks...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
-
-  const openAddDrawer = () => {
-    setEditingTask(null);
-    setDrawerOpen(true);
-  };
-
-  const openEditDrawer = (task) => {
-    setEditingTask(task);
-    setDrawerOpen(true);
-  };
-
-  const closeDrawer = () => setDrawerOpen(false);
-
-  const handleSave = async (form) => {
-    try {
-      if (editingTask) {
-        await updateTask(editingTask.id, form);
-      } else {
-        const taskPayload = {
-          ...form,
-          ...(activeBoard?.id ? { board_id: activeBoard.id } : {})
-        };
-        await addTask(taskPayload);
-      }
-      setDrawerOpen(false);
-      if (refetchTasks) await refetchTasks();
-    } catch (err) {
-      console.error('Task save error:', err);
-    }
-  };
-
-  const requestDelete = (id) => setConfirm({ type: 'delete', id });
-  const requestClearAll = () => setConfirm({ type: 'clearAll' });
-
-  // Common Dialog Confirmation Logic
-  const handleConfirm = async () => {
-    if (confirm?.type === 'delete') {
-      await deleteTask(confirm.id);
-    } else if (confirm?.type === 'clearAll') {
-      await clearAll();
-    } else if (confirm?.type === 'deleteBoard') {
-      await executeDeleteBoard(confirm.board);
-    }
-    setConfirm(null);
-    if (refetchTasks) await refetchTasks();
-  };
-
   const handleBoardCreated = async (newBoard) => {
     setCreateModalOpen(false);
-    
-    // Ensure entry in board_members on frontend side if DB trigger missing
-    if (newBoard?.id && user?.id) {
-      await supabase
-        .from('board_members')
-        .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
+    if (newBoard?.id) {
+      handleSelectBoard(newBoard);
+      await fetchBoards();
+      if (refetchTasks) await refetchTasks();
     }
-
-    handleSelectBoard(newBoard);
-    await fetchBoards();
-    if (refetchTasks) await refetchTasks();
   };
 
   const handleJoinBoard = async (inviteCode) => {
     const cleanCode = inviteCode.trim();
 
-    // Case-insensitive match query (.ilike) so both lower & uppercase entries work reliably
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .select('id, name, invite_code')
@@ -300,9 +219,68 @@ export default function App() {
     if (refetchTasks) await refetchTasks();
   };
 
+  if (loading) {
+    return (
+      <div className="h-dvh bg-void flex items-center justify-center text-gray-400">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span>Loading tasks...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  const openAddDrawer = () => {
+    setEditingTask(null);
+    setDrawerOpen(true);
+  };
+
+  const openEditDrawer = (task) => {
+    setEditingTask(task);
+    setDrawerOpen(true);
+  };
+
+  const closeDrawer = () => setDrawerOpen(false);
+
+  const handleSave = async (form) => {
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, form);
+      } else {
+        const taskPayload = {
+          ...form,
+          ...(activeBoard?.id ? { board_id: activeBoard.id } : {})
+        };
+        await addTask(taskPayload);
+      }
+      setDrawerOpen(false);
+      if (refetchTasks) await refetchTasks();
+    } catch (err) {
+      console.error('Task save error:', err);
+    }
+  };
+
+  const requestDelete = (id) => setConfirm({ type: 'delete', id });
+  const requestClearAll = () => setConfirm({ type: 'clearAll' });
+
+  const handleConfirm = async () => {
+    if (confirm?.type === 'delete') {
+      await deleteTask(confirm.id);
+    } else if (confirm?.type === 'clearAll') {
+      await clearAll();
+    } else if (confirm?.type === 'deleteBoard') {
+      await executeDeleteBoard(confirm.board);
+    }
+    setConfirm(null);
+    if (refetchTasks) await refetchTasks();
+  };
+
   return (
     <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
-      {/* Desktop Sidebar */}
       <div className="hidden md:block w-64 shrink-0 h-full border-r border-line">
         <Sidebar 
           view={view} 
@@ -320,7 +298,6 @@ export default function App() {
         />
       </div>
 
-      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {mobileNavOpen && (
           <>
@@ -373,7 +350,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
         <div className="shrink-0 flex items-center justify-between pr-4">
           <div className="flex-1">
@@ -427,7 +403,6 @@ export default function App() {
         onJoin={handleJoinBoard}
       />
 
-      {/* Dynamic Confirm Dialog */}
       <ConfirmDialog
         open={!!confirm}
         title={

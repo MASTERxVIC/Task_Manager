@@ -15,7 +15,6 @@ export default function CreateBoardModal({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
-  // Clean state whenever modal opens or closes completely
   useEffect(() => {
     if (!open) {
       setBoardName("");
@@ -37,7 +36,6 @@ export default function CreateBoardModal({
       return;
     }
 
-    // Validation: Prevent creating a workspace named "Default"
     if (trimmedName.toLowerCase() === "default") {
       setError("Workspace name 'Default' is reserved. Please choose another name.");
       return;
@@ -52,6 +50,7 @@ export default function CreateBoardModal({
       setLoading(true);
       setError("");
 
+      // 1. Insert new board
       const { data: boardData, error: insertError } = await supabase
         .from("boards")
         .insert([
@@ -65,7 +64,21 @@ export default function CreateBoardModal({
 
       if (insertError) throw insertError;
 
-      // Local success card state update
+      // 2. Immediately link user in board_members as owner
+      const { error: memberError } = await supabase
+        .from("board_members")
+        .insert([
+          {
+            board_id: boardData.id,
+            user_id: user.id,
+            role: "owner",
+          },
+        ]);
+
+      if (memberError) {
+        console.warn("Manual board_members insertion warning:", memberError);
+      }
+
       setCreatedBoard(boardData);
     } catch (err) {
       console.error("Create board error:", err);
@@ -100,7 +113,6 @@ export default function CreateBoardModal({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -109,7 +121,6 @@ export default function CreateBoardModal({
             className="fixed inset-0 bg-void/80 backdrop-blur-sm"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -117,7 +128,6 @@ export default function CreateBoardModal({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-md bg-slate-900 border border-line rounded-2xl p-6 shadow-2xl z-10 text-white"
           >
-            {/* Close Button */}
             <button
               type="button"
               onClick={handleClose}
@@ -127,7 +137,6 @@ export default function CreateBoardModal({
             </button>
 
             {!createdBoard ? (
-              /* FORM: Create Board */
               <>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-xl bg-surface border border-surface/20">
@@ -185,7 +194,6 @@ export default function CreateBoardModal({
                 </form>
               </>
             ) : (
-              /* SUCCESS STATE: Display & Copy Invite Code */
               <div className="text-center py-2 space-y-4">
                 <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
                   <Sparkles className="w-6 h-6" />
@@ -200,7 +208,6 @@ export default function CreateBoardModal({
                   </p>
                 </div>
 
-                {/* Invite Code Card */}
                 <div className="p-4 bg-slate-800/80 border border-line rounded-xl flex items-center justify-between gap-3">
                   <div className="text-left">
                     <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block">
@@ -230,7 +237,6 @@ export default function CreateBoardModal({
                   </button>
                 </div>
 
-                {/* Done Button */}
                 <button
                   type="button"
                   onClick={handleClose}
