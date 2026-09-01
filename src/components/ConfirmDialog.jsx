@@ -21,12 +21,12 @@ export default function ConfirmDialog({ open, title, body, confirmLabel = 'Confi
             aria-modal="true"
             className="bg-surface border border-line rounded-2xl p-6 w-full max-w-sm"
           >
-            <h3 className="font-display font-semibold text-ink">{title}</h3>
-            <p className="text-sm text-muted mt-2">{body}</p>
+            <h3 className="font-display font-semibold text-white">{title}</h3>
+            <p className="text-sm text-gray-200 mt-2">{body}</p>
             <div className="flex gap-3 mt-6">
               <button
                 onClick={onCancel}
-                className="flex-1 py-2 rounded-xl text-sm font-medium text-muted hover:text-ink border border-line transition-colors"
+                className="flex-1 py-2 rounded-xl text-sm font-medium text- hover:text-white border border-line transition-colors"
               >
                 Cancel
               </button>
