@@ -6,6 +6,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Robust function to fetch logs + map user profiles guaranteed
   const fetchActivityLogs = async (currentBoardId) => {
     if (!currentBoardId) {
       setLogs([]);
@@ -13,74 +14,99 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
     }
 
     setLoading(true);
-    const { data, error } = await supabase
+
+    // 1. Fetch Raw Activity Logs
+    const { data: logData, error: logError } = await supabase
       .from('activity_logs')
-      .select(`
-        *,
-        profiles:user_id (
-          email,
-          full_name
-        )
-      `)
+      .select('*')
       .eq('board_id', currentBoardId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching logs:', error);
-    } else {
-      const uniqueLogs = (data || []).filter(
-        (log, index, self) => index === self.findIndex((l) => l.id === log.id)
-      );
-      setLogs(uniqueLogs);
+    if (logError) {
+      console.error('Error fetching logs:', logError);
+      setLoading(false);
+      return;
     }
+
+    if (!logData || logData.length === 0) {
+      setLogs([]);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Extract unique user_ids from logs
+    const userIds = [...new Set(logData.map((item) => item.user_id).filter(Boolean))];
+
+    // 3. Fetch profiles explicitly for all user_ids
+    let profilesMap = {};
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', userIds);
+
+      if (profilesData) {
+        profilesMap = profilesData.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {});
+      }
+    }
+
+    // 4. Attach profiles to each log entry explicitly
+    const mergedLogs = logData.map((log) => ({
+      ...log,
+      profiles: profilesMap[log.user_id] || null,
+    }));
+
+    setLogs(mergedLogs);
     setLoading(false);
   };
 
   useEffect(() => {
-  if (isOpen && boardId) {
-    fetchActivityLogs(boardId);
+    if (isOpen && boardId) {
+      fetchActivityLogs(boardId);
 
-    const channel = supabase
-      .channel(`board_activity_${boardId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'activity_logs',
-          filter: `board_id=eq.${boardId}`,
-        },
-        async (payload) => {
-          // 1. New Log ke user_id se Specific Profile Fetch karo
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('email, full_name')
-            .eq('id', payload.new.user_id)
-            .maybeSingle();
+      // Realtime channel setup
+      const channel = supabase
+        .channel(`board_activity_${boardId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'activity_logs',
+            filter: `board_id=eq.${boardId}`,
+          },
+          async (payload) => {
+            // Fetch profile specifically for the new log's user
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('id, email, full_name')
+              .eq('id', payload.new.user_id)
+              .maybeSingle();
 
-          // 2. Profile Details ko Log object ke saath merge karo
-          const newLogWithProfile = {
-            ...payload.new,
-            profiles: profileData || null,
-          };
+            const newLogWithProfile = {
+              ...payload.new,
+              profiles: profileData || null,
+            };
 
-          // 3. Duplicate check karke safely Top par Add karo
-          setLogs((prev) => {
-            const exists = prev.some((l) => l.id === newLogWithProfile.id);
-            if (exists) return prev;
-            return [newLogWithProfile, ...prev];
-          });
-        }
-      )
-      .subscribe();
+            setLogs((prev) => {
+              const exists = prev.some((l) => l.id === newLogWithProfile.id);
+              if (exists) return prev;
+              return [newLogWithProfile, ...prev];
+            });
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  } else {
-    setLogs([]);
-  }
-}, [boardId, isOpen]);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } else {
+      setLogs([]);
+    }
+  }, [boardId, isOpen]);
 
   return (
     <AnimatePresence>
