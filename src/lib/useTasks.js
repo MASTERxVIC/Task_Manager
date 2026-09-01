@@ -10,6 +10,9 @@ export function useTasks(boardId = null) {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef(null);
 
+  // DUPLICATE PREVENTER: Log deduplication tracker
+  const lastLoggedRef = useRef({ key: '', timestamp: 0 });
+
   // Helper: Expired completed tasks locally filter karne ke liye
   const filterValidTasks = useCallback((taskList) => {
     const now = Date.now();
@@ -21,54 +24,60 @@ export function useTasks(boardId = null) {
   }, []);
 
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
-  if (!user) return;
+    if (!user || !boardId) return;
 
-  try {
-    // 1. Agar boardId hi nahi hai, matlab default board/view hai -> Skip
-    if (!boardId) {
-      console.log('Activity Log Skipped: Default/No Board');
+    // PREVENT DUPLICATES: Check if identical action logged in last 1000ms
+    const logKey = `${actionType}_${todoId}`;
+    const now = Date.now();
+    if (
+      lastLoggedRef.current.key === logKey &&
+      now - lastLoggedRef.current.timestamp < 1000
+    ) {
+      console.log('Duplicate Activity Log Prevented:', logKey);
       return;
     }
 
-    // 2. Board ka details fetch karke confirm karein ki Default to nahi hai
-    const { data: boardData, error: boardError } = await supabase
-      .from('boards')
-      .select('is_default, name')
-      .eq('id', boardId)
-      .maybeSingle();
+    lastLoggedRef.current = { key: logKey, timestamp: now };
 
-    if (boardError) {
-      console.error('Board check error for logging:', boardError);
-      return;
+    try {
+      // Board details check
+      const { data: boardData, error: boardError } = await supabase
+        .from('boards')
+        .select('is_default, name')
+        .eq('id', boardId)
+        .maybeSingle();
+
+      if (boardError) {
+        console.error('Board check error for logging:', boardError);
+        return;
+      }
+
+      // Default board condition check
+      if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
+        return;
+      }
+
+      // Insert Log Record
+      const { data, error } = await supabase.from('activity_logs').insert([{
+        board_id: boardId,
+        todo_id: String(todoId),
+        user_id: user.id,
+        action_type: actionType,
+        task_title: taskTitle,
+        details: details
+      }]).select();
+
+      if (error) {
+        console.error('Supabase Activity Log Insert Error:', error);
+      } else {
+        console.log('Activity Log Created Successfully:', data);
+      }
+    } catch (err) {
+      console.error('Failed to write activity log:', err);
     }
+  }, [user, boardId]);
 
-    // Default board condition check (is_default flag ya name 'default')
-    if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
-      console.log('Activity Log Skipped: Identified as Default Board');
-      return;
-    }
-
-    // 3. Custom boards ke liye log insert karein
-    const { data, error } = await supabase.from('activity_logs').insert([{
-      board_id: boardId,
-      todo_id: String(todoId),
-      user_id: user.id,
-      action_type: actionType,
-      task_title: taskTitle,
-      details: details
-    }]).select();
-
-    if (error) {
-      console.error('Supabase Activity Log Insert Error:', error);
-    } else {
-      console.log('Activity Log Created Successfully:', data);
-    }
-  } catch (err) {
-    console.error('Failed to write activity log:', err);
-  }
-}, [user, boardId]);
-
-  // 1. Fetch Board Specific or User Specific Tasks (FIXED FOR SHARED BOARDS)
+  // 1. Fetch Board Specific or User Specific Tasks
   const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
     setTasks([]);
     setLoading(true);
@@ -76,10 +85,8 @@ export function useTasks(boardId = null) {
       let query = supabase.from('todos').select('*');
 
       if (currentBoardId) {
-        // Custom Workspace/Board: Show ALL tasks of this board regardless of who created them
         query = query.eq('board_id', currentBoardId);
       } else {
-        // Default Workspace: Show only tasks created by the current user without a board_id
         query = query.eq('user_id', userId).is('board_id', null);
       }
 
@@ -112,7 +119,7 @@ export function useTasks(boardId = null) {
     }
   }, []);
 
-  // 3. Realtime Listener (OPTIMIZED FOR INSTANT MULTI-DEVICE SYNC)
+  // 3. Realtime Listener
   const setupRealtime = useCallback((userId, currentBoardId = null) => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
