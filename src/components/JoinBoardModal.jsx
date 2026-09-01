@@ -9,6 +9,8 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Sirf outer whitespace clean ki gayi hai, casing untouched (Case-Sensitive) hai
     const cleanCode = code.trim();
 
     if (!cleanCode) {
@@ -25,12 +27,11 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
       setLoading(true);
       setError('');
       
-      // Call parent handle function (backend matching ke liye uppercase format pass ho rha h)
+      // Exact entered string pass ho rahi hai
       if (onJoin) {
-        await onJoin(cleanCode.toUpperCase());
+        await onJoin(cleanCode);
       }
 
-      // Reset & close on success
       setCode('');
       onClose();
     } catch (err) {
@@ -102,7 +103,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                       setCode(e.target.value);
                       if (error) setError('');
                     }}
-                    placeholder="e.g. TASKED-9988"
+                    placeholder="Enter invite code"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all"
                     autoFocus
                   />

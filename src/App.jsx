@@ -246,12 +246,13 @@ export default function App() {
   };
 
   const handleJoinBoard = async (inviteCode) => {
-    const cleanCode = inviteCode.trim().toUpperCase();
+    const cleanCode = inviteCode.trim();
 
+    // Case-insensitive match query (.ilike) so both lower & uppercase entries work reliably
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .select('id, name, invite_code')
-      .eq('invite_code', cleanCode)
+      .ilike('invite_code', cleanCode)
       .maybeSingle();
 
     if (boardError) {
