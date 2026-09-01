@@ -1,43 +1,87 @@
 import { supabase } from '../lib/supabaseClient';
 
-// A. App initial setup: User ko push notification ke liye subscribe karana
-export async function registerPushNotifications(userId) {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+// Public VAPID Key ko yahan set karein ya env file se access karein
+const VAPID_PUBLIC_KEY = 'YOUR_PUBLIC_VAPID_KEY';
+
+/**
+ * A. User Gesture / Click se invoke hone wala Push Notification Setup Function
+ * Complete user gesture violation protection aur proper error handling ke sath.
+ */
+export async function enableNotifications(userId) {
+  if (!userId) {
+    console.warn('User ID missing for enabling push notifications.');
+    return false;
+  }
+
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    alert('Push notifications this browser me supported nahi hain.');
+    return false;
+  }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    // 1. Explicit User Interaction par permission demand
     const permission = await Notification.requestPermission();
     
-    if (permission !== 'granted') return;
+    if (permission !== 'granted') {
+      console.warn('Notification permission denied by user.');
+      return false;
+    }
 
-    // Browser Push Token generate karein
+    // 2. Service Worker Ready / Register
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+
+    // 3. Subscription Generate
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: 'YOUR_PUBLIC_VAPID_KEY' // Step 1 me mili Public VAPID Key
+      applicationServerKey: VAPID_PUBLIC_KEY,
     });
 
-    // Token profiles table me save karein
-    await supabase.from('profiles').update({
-      push_subscription: JSON.stringify(subscription)
-    }).eq('id', userId);
+    // 4. Supabase Profiles table Update
+    const { error } = await supabase
+      .from('profiles')
+      .update({ push_subscription: JSON.stringify(subscription) })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Subscription DB Update Error:', error);
+      return false;
+    }
+
+    console.log('Push Notifications Enabled Successfully!');
+    return true;
 
   } catch (error) {
-    console.error('Push Registration Error:', error);
+    console.error('Permission Request or Subscription Failed:', error);
+    return false;
   }
 }
 
-// B. Single User ko Edge Function se push bhejna
+/**
+ * Backward Compatibility Wrapper
+ * Agar aapne kahin purana `registerPushNotifications` import kiya hua hai, 
+ * toh wo crush na ho aur naye `enableNotifications` ko call kare.
+ */
+export async function registerPushNotifications(userId) {
+  return await enableNotifications(userId);
+}
+
+/**
+ * B. Single User ko Edge Function se push bhejna
+ */
 export async function sendWebPush({ targetUserId, title, message, url = '/' }) {
   try {
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('push_subscription')
       .eq('id', targetUserId)
       .maybeSingle();
 
-    if (!profile || !profile.push_subscription) return;
+    if (error || !profile || !profile.push_subscription) return;
 
-    const subscriptionObj = JSON.parse(profile.push_subscription);
+    const subscriptionObj = typeof profile.push_subscription === 'string' 
+      ? JSON.parse(profile.push_subscription) 
+      : profile.push_subscription;
 
     await supabase.functions.invoke('send-push', {
       body: {
@@ -50,8 +94,12 @@ export async function sendWebPush({ targetUserId, title, message, url = '/' }) {
   }
 }
 
-// C. BROADCAST: Board Members ko Push Bhejna
+/**
+ * C. BROADCAST: Board Members ko Push Bhejna
+ */
 export async function broadcastToBoard({ boardMembers = [], currentUserId, title, message }) {
+  if (!boardMembers || boardMembers.length === 0) return;
+
   const otherMembers = boardMembers.filter((m) => m.id !== currentUserId);
 
   otherMembers.forEach((member) => {
@@ -63,7 +111,9 @@ export async function broadcastToBoard({ boardMembers = [], currentUserId, title
   });
 }
 
-// D. MENTIONS: Text me @User parse karke push bhejna
+/**
+ * D. MENTIONS: Text me @User parse karke push bhejna
+ */
 export async function checkAndSendMentions({ text, taskTitle, boardMembers = [], currentUserId }) {
   if (!text || !text.includes('@')) return;
 
