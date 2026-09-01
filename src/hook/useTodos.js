@@ -1,7 +1,47 @@
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-export const useTodos = () => {
-  
+export const useTodos = (activeBoardId) => {
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // 0. FETCH TODOS (With Strict Board Isolation Guard)
+  const fetchTodos = useCallback(async () => {
+    // Race Condition Guard: Jab tak board state pass/resolve na ho, execution hold rakhein
+    if (activeBoardId === undefined) return;
+
+    setLoading(true);
+    try {
+      let query = supabase.from('todos').select('*');
+
+      // Filter by Active Board Context
+      if (activeBoardId) {
+        query = query.eq('board_id', activeBoardId);
+      } else {
+        // Default Workspace Logic: Fetch only default tasks (where board_id is null)
+        query = query.is('board_id', null);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching todos:', error.message);
+      } else {
+        setTodos(data || []);
+      }
+    } catch (err) {
+      console.error('Fetch execution error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeBoardId]);
+
+  // Board switch hote hi purane state ko instantly clear karo
+  useEffect(() => {
+    setTodos([]);
+    fetchTodos();
+  }, [activeBoardId, fetchTodos]);
+
   // Helper to insert log (Default vs Custom board handles gracefully)
   const logActivity = async ({ boardId, userId, todoId, actionType, taskTitle, details = {} }) => {
     if (!boardId || !userId) {
@@ -56,6 +96,9 @@ export const useTodos = () => {
     }
 
     if (!error && data) {
+      // Optimistic UI update / Refetch
+      setTodos((prev) => [data, ...prev]);
+
       await logActivity({
         boardId: safeBoardId,
         userId,
@@ -81,6 +124,8 @@ export const useTodos = () => {
     }
 
     if (!error && data) {
+      setTodos((prev) => prev.map((t) => (t.id === todoId ? data : t)));
+
       let actionType = 'EDIT';
       if (typeof updates.completed === 'boolean') {
         actionType = updates.completed ? 'COMPLETED' : 'UNDO';
@@ -118,6 +163,8 @@ export const useTodos = () => {
     
     if (error) {
       console.error("Supabase Todo Delete Error:", error.message);
+    } else {
+      setTodos((prev) => prev.filter((t) => t.id !== todoId));
     }
 
     return { error };
@@ -142,6 +189,8 @@ export const useTodos = () => {
     }
 
     if (!error && data) {
+      setTodos((prev) => prev.map((t) => (t.id === todoId ? data : t)));
+
       const actionType = newStatus ? 'COMPLETED' : 'UNDO';
 
       const targetBoardId = boardId || data.board_id;
@@ -160,5 +209,5 @@ export const useTodos = () => {
     return { data, error };
   };
 
-  return { addTodo, updateTodo, deleteTodo, toggleTodoStatus };
+  return { todos, loading, refreshTodos: fetchTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus };
 };

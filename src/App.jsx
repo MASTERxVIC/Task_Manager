@@ -40,7 +40,17 @@ export default function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
 
-  // Fetch all boards for the logged-in user with auto-creation fallback
+  // Custom handler to safely update active board in state & localStorage
+  const handleSelectBoard = (board) => {
+    setActiveBoard(board);
+    if (board?.id) {
+      localStorage.setItem('tasked_active_board_id', board.id);
+    } else {
+      localStorage.removeItem('tasked_active_board_id');
+    }
+  };
+
+  // Fetch all boards for the logged-in user with auto-creation fallback & persistent selection
   const fetchBoards = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -93,16 +103,30 @@ export default function App() {
 
       setBoards(userBoards);
 
-      // Set Active Board logic
+      // Persistent Active Board restoration logic
+      const savedBoardId = localStorage.getItem('tasked_active_board_id');
+
       setActiveBoard((prevActive) => {
-        if (!prevActive) {
-          const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') || userBoards[0];
-          return defaultBoard || null;
+        // Priority 1: Check if previous active state matches in list
+        if (prevActive) {
+          const matched = userBoards.find((b) => b.id === prevActive.id);
+          if (matched) return matched;
         }
-        // Ensure prevActive matches updated list object reference
-        const matchedActive = userBoards.find((b) => b.id === prevActive.id);
-        return matchedActive || userBoards[0] || null;
+
+        // Priority 2: Restore board saved in LocalStorage upon page refresh
+        if (savedBoardId) {
+          const savedBoard = userBoards.find((b) => b.id === savedBoardId);
+          if (savedBoard) return savedBoard;
+        }
+
+        // Priority 3: Fallback to Default or First Board
+        const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default') || userBoards[0];
+        if (defaultBoard?.id) {
+          localStorage.setItem('tasked_active_board_id', defaultBoard.id);
+        }
+        return defaultBoard || null;
       });
+
     } catch (err) {
       console.error('Error fetching boards:', err);
     }
@@ -180,7 +204,7 @@ export default function App() {
         .insert([{ board_id: newBoard.id, user_id: user.id, role: 'owner' }]);
     }
 
-    setActiveBoard(newBoard);
+    handleSelectBoard(newBoard);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
   };
@@ -234,7 +258,7 @@ export default function App() {
     }
 
     setJoinModalOpen(false);
-    setActiveBoard(board);
+    handleSelectBoard(board);
     await fetchBoards();
     if (refetchTasks) await refetchTasks();
   };
@@ -250,7 +274,7 @@ export default function App() {
           user={user} 
           boards={boards}
           activeBoard={activeBoard}
-          onSelectBoard={(board) => setActiveBoard(board)}
+          onSelectBoard={(board) => handleSelectBoard(board)}
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
@@ -287,7 +311,7 @@ export default function App() {
                 boards={boards}
                 activeBoard={activeBoard}
                 onSelectBoard={(board) => {
-                  setActiveBoard(board);
+                  handleSelectBoard(board);
                   setMobileNavOpen(false);
                 }}
                 onLogout={logout}
