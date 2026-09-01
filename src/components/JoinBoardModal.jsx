@@ -9,7 +9,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const cleanCode = code.trim().toUpperCase();
+    const cleanCode = code.trim();
 
     if (!cleanCode) {
       setError('Please enter a valid invite code.');
@@ -25,7 +25,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
       setLoading(true);
       setError('');
       
-      // Call parent handle function (backend/supabase logic pass kar sakte hain yahan)
+      // Call parent handle function
       if (onJoin) {
         await onJoin(cleanCode);
       }
@@ -99,11 +99,11 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                     type="text"
                     value={code}
                     onChange={(e) => {
-                      setCode(e.target.value.toUpperCase());
+                      setCode(e.target.value);
                       if (error) setError('');
                     }}
                     placeholder="e.g. TASKED-9988"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all uppercase"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-line rounded-xl text-sm font-mono tracking-wider text-white placeholder:text-gray-500 placeholder:font-sans outline-none transition-all"
                     autoFocus
                   />
                 </div>
@@ -120,7 +120,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                   type="button"
                   onClick={handleClose}
                   disabled={loading}
-                  className="px-4 py-2 text-sm bg-white text-rose-800  hover:text-white hover:bg-rose-800  rounded-xl transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm bg-white text-rose-800 hover:text-white hover:bg-rose-800 rounded-xl transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
