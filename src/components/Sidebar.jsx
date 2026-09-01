@@ -176,10 +176,12 @@ export default function Sidebar({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onDeleteBoard(board);
+                            if (window.confirm(`Kya aap "${board.name}" board aur iske saare tasks delete karna chahte hain?`)) {
+                              onDeleteBoard(board);
+                            }
                           }}
                           title="Delete Workspace"
-                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-opacity cursor-pointer"
+                          className="p-1 text-gray-400 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
