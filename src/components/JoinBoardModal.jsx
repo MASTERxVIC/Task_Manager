@@ -25,9 +25,9 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
       setLoading(true);
       setError('');
       
-      // Call parent handle function
+      // Call parent handle function (backend matching ke liye uppercase format pass ho rha h)
       if (onJoin) {
-        await onJoin(cleanCode);
+        await onJoin(cleanCode.toUpperCase());
       }
 
       // Reset & close on success
