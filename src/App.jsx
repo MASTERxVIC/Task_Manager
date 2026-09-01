@@ -105,7 +105,7 @@ export default function App() {
         ...(createdBoards || [])
       ];
 
-      // Deduplicate boards by ID (Prevent duplicate keys/rendering)
+      // Deduplicate boards by ID
       const uniqueBoardsMap = new Map();
       rawBoards.forEach((board) => {
         if (board && board.id) {
@@ -123,6 +123,21 @@ export default function App() {
       });
 
       setBoards(userBoards);
+
+      // Auto Select Logic: Select Default Board if no board selected yet
+      if (userBoards.length > 0) {
+        const savedBoardId = localStorage.getItem('tasked_active_board_id');
+        const savedBoard = userBoards.find((b) => b.id === savedBoardId);
+        const defaultBoard = userBoards.find((b) => b.is_default || b.name?.toLowerCase() === 'default');
+
+        if (savedBoard) {
+          setActiveBoard(savedBoard);
+        } else if (defaultBoard) {
+          handleSelectBoard(defaultBoard);
+        } else {
+          handleSelectBoard(userBoards[0]);
+        }
+      }
     } catch (err) {
       console.error('Error fetching boards:', err);
     }
@@ -132,7 +147,7 @@ export default function App() {
     fetchBoards();
   }, [fetchBoards]);
 
-  // ISSUE 3 STEP B: Safe Realtime Listener for cross-device deletion & board sync
+  // Realtime Sync Listener
   useEffect(() => {
     if (!user?.id) return;
 
@@ -142,7 +157,6 @@ export default function App() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'boards' },
         (payload) => {
-          // If active board was deleted on another device, fallback safely
           if (payload.eventType === 'DELETE' && payload.old?.id === activeBoard?.id) {
             setActiveBoard(null);
             localStorage.removeItem('tasked_active_board_id');
