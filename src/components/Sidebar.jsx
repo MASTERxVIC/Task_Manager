@@ -63,7 +63,7 @@ export default function Sidebar({
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
-  // Strict check: Only board with exact name "Default" is protected
+  // Strict check: Default board protection
   const isDefaultBoard = activeBoard?.name?.trim().toLowerCase() === "default";
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(!isDefaultBoard && inviteCode && inviteCode !== "XXXXXX");
@@ -97,9 +97,10 @@ export default function Sidebar({
         </div>
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="lg:hidden text-white/70 hover:text-white p-1 cursor-pointer"
+            className="lg:hidden text-white/70 hover:text-white p-1 cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,6 +110,7 @@ export default function Sidebar({
       {/* Boards Switcher Dropdown */}
       <div className="relative mb-4 px-1">
         <button
+          type="button"
           onClick={() => setIsBoardDropdownOpen((prev) => !prev)}
           className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-line text-white hover:bg-slate-800 transition-all cursor-pointer"
         >
@@ -169,7 +171,6 @@ export default function Sidebar({
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
                       )}
                       
-                      {/* Delete Button - Hidden for "Default", Visible on Hover for Custom Boards */}
                       {!isBoardDefault && onDeleteBoard && (
                         <button
                           type="button"
@@ -200,6 +201,7 @@ export default function Sidebar({
           return (
             <button
               key={item.key}
+              type="button"
               onClick={() => setView(item.key)}
               className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
                 active
@@ -271,7 +273,6 @@ export default function Sidebar({
                 transition={{ duration: 0.2 }}
                 className="space-y-2 overflow-hidden"
               >
-                {/* Invite Box hidden if current workspace is "Default" */}
                 {!isDefaultBoard && (
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                     <div className="min-w-0 pr-2">
@@ -290,6 +291,7 @@ export default function Sidebar({
                     <div className="flex items-center gap-1 shrink-0">
                       {hasValidCode && (
                         <button
+                          type="button"
                           onClick={() => setShowCode((prev) => !prev)}
                           title={showCode ? "Hide Code" : "Show Code"}
                           className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer transition-colors"
@@ -303,6 +305,7 @@ export default function Sidebar({
                       )}
 
                       <button
+                        type="button"
                         onClick={handleCopyInvite}
                         disabled={!hasValidCode}
                         title={
@@ -327,6 +330,7 @@ export default function Sidebar({
                 )}
 
                 <button
+                  type="button"
                   onClick={onOpenJoinModal}
                   className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
                 >
@@ -335,6 +339,7 @@ export default function Sidebar({
                 </button>
 
                 <button
+                  type="button"
                   onClick={onOpenCreateModal}
                   className="glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium cursor-pointer transition-all"
                 >
@@ -378,12 +383,18 @@ export default function Sidebar({
                 className="space-y-2 overflow-hidden"
               >
                 <button
+                  type="button"
                   onClick={onOpenLogs}
-                  disabled={!activeBoard}
+                  disabled={!activeBoard || isDefaultBoard}
+                  title={
+                    !activeBoard || isDefaultBoard
+                      ? "Activity logs are disabled for Default Workspace"
+                      : "View Activity Logs"
+                  }
                   className={`glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium transition-all ${
-                    activeBoard
-                      ? "cursor-pointer hover:bg-white/10"
-                      : "opacity-50 cursor-not-allowed"
+                    !activeBoard || isDefaultBoard
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer hover:bg-white/10"
                   }`}
                 >
                   <History className="w-4 h-4" />
@@ -417,6 +428,7 @@ export default function Sidebar({
             </div>
 
             <button
+              type="button"
               onClick={onLogout}
               aria-label="Logout"
               title="Logout"
