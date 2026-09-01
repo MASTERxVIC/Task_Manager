@@ -6,6 +6,16 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Helper function to strictly deduplicate array items by ID
+  const removeDuplicates = (list) => {
+    const seen = new Set();
+    return list.filter((item) => {
+      if (!item || !item.id || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
+
   // Robust function to fetch logs + map user profiles guaranteed
   const fetchActivityLogs = async (currentBoardId) => {
     if (!currentBoardId) {
@@ -59,7 +69,8 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
       profiles: profilesMap[log.user_id] || null,
     }));
 
-    setLogs(mergedLogs);
+    // Deduplicate array before setting state
+    setLogs(removeDuplicates(mergedLogs));
     setLoading(false);
   };
 
@@ -91,11 +102,8 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
               profiles: profileData || null,
             };
 
-            setLogs((prev) => {
-              const exists = prev.some((l) => l.id === newLogWithProfile.id);
-              if (exists) return prev;
-              return [newLogWithProfile, ...prev];
-            });
+            // Safely deduplicate during realtime update
+            setLogs((prev) => removeDuplicates([newLogWithProfile, ...prev]));
           }
         )
         .subscribe();
