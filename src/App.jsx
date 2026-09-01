@@ -50,9 +50,14 @@ export default function App() {
     }
   };
 
-  // Board delete karne aur active board handle karne ka logic
-  const handleDeleteBoard = async (boardToDelete) => {
-    if (!boardToDelete?.id) return;
+  // 1. Board delete request handler (Trigger dialog)
+  const requestDeleteBoard = (board) => {
+    if (!board?.id) return;
+    setConfirm({ type: 'deleteBoard', board });
+  };
+
+  // 2. Actual board deletion execution
+  const executeDeleteBoard = async (boardToDelete) => {
     try {
       const { error } = await supabase
         .from('boards')
@@ -212,11 +217,14 @@ export default function App() {
   const requestDelete = (id) => setConfirm({ type: 'delete', id });
   const requestClearAll = () => setConfirm({ type: 'clearAll' });
 
+  // Common Dialog Confirmation Logic
   const handleConfirm = async () => {
     if (confirm?.type === 'delete') {
       await deleteTask(confirm.id);
     } else if (confirm?.type === 'clearAll') {
       await clearAll();
+    } else if (confirm?.type === 'deleteBoard') {
+      await executeDeleteBoard(confirm.board);
     }
     setConfirm(null);
     if (refetchTasks) await refetchTasks();
@@ -303,7 +311,7 @@ export default function App() {
           boards={boards}
           activeBoard={activeBoard}
           onSelectBoard={(board) => handleSelectBoard(board)}
-          onDeleteBoard={handleDeleteBoard}
+          onDeleteBoard={requestDeleteBoard}
           onLogout={logout} 
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
@@ -343,7 +351,7 @@ export default function App() {
                   handleSelectBoard(board);
                   setMobileNavOpen(false);
                 }}
-                onDeleteBoard={handleDeleteBoard}
+                onDeleteBoard={requestDeleteBoard}
                 onLogout={logout}
                 onClose={() => setMobileNavOpen(false)}
                 onOpenJoinModal={() => {
@@ -418,15 +426,30 @@ export default function App() {
         onJoin={handleJoinBoard}
       />
 
+      {/* Dynamic Confirm Dialog */}
       <ConfirmDialog
         open={!!confirm}
-        title={confirm?.type === 'clearAll' ? 'Clear all tasks?' : 'Delete this task?'}
+        title={
+          confirm?.type === 'clearAll'
+            ? 'Clear all tasks?'
+            : confirm?.type === 'deleteBoard'
+            ? `Delete "${confirm?.board?.name}" board?`
+            : 'Delete this task?'
+        }
         body={
           confirm?.type === 'clearAll'
             ? 'This removes every task permanently. This can’t be undone.'
+            : confirm?.type === 'deleteBoard'
+            ? 'This board and all tasks inside it will be permanently removed. This action cannot be undone.'
             : 'This task will be removed permanently.'
         }
-        confirmLabel={confirm?.type === 'clearAll' ? 'Clear all' : 'Delete'}
+        confirmLabel={
+          confirm?.type === 'clearAll'
+            ? 'Clear all'
+            : confirm?.type === 'deleteBoard'
+            ? 'Delete Board'
+            : 'Delete'
+        }
         onConfirm={handleConfirm}
         onCancel={() => setConfirm(null)}
       />
