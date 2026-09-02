@@ -66,7 +66,7 @@ export default function Auth() {
             {isSignUp ? 'Create your free account' : 'Welcome Back'}
           </h2>
           <p className="text-sm text-gray-400 mb-8">
-            {isSignUp ? 'Sign up to create your private task list. No credit card required.' : 'Log in to view your tasks and manage your boards.'}
+            {isSignUp ? 'Sign up to create your private task list.' : 'Log in to view your tasks and manage your boards.'}
           </p>
 
           {infoMsg && (
@@ -151,7 +151,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-surface text-white font-medium py-2.5 rounded-xl text-sm transition-colors cursor-pointer hover:opacity-90"
+              className="w-full bg-surface text-white font-medium py-2.5 rounded-full text-sm transition-colors cursor-pointer hover:opacity-90"
             >
               {loading ? 'Processing...' : isSignUp ? 'Continue' : 'Log In'}
             </button>
