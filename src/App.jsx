@@ -12,7 +12,7 @@ import ActivityLogPanel from './components/ActivityLogPanel';
 import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
 import { registerPushNotifications } from './utils/pushService';
-import { useBoardMembers } from './hooks/useBoardMembers';
+import { useBoardMembers } from './hook/useBoardMembers';
 
 export default function App() {
   const [view, setView] = useState('all');
