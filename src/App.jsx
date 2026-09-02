@@ -18,10 +18,10 @@ export default function App() {
   const [activeBoard, setActiveBoard] = useState(null);
   const [boards, setBoards] = useState([]);
   
-  // FIX 1: Board Members state add ki gayi hai
+  // Board Members state
   const [boardMembers, setBoardMembers] = useState([]);
 
-  // FIX 2: useTasks me activeBoard.id ke sath boardMembers pass kiya gaya hai
+  // Pass activeBoard.id and boardMembers to useTasks hook
   const { 
     user, 
     loading, 
@@ -45,7 +45,7 @@ export default function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
 
-  // FIX 3: Active Board ke members fetch karne ke liye Effect
+  // FIX: Schema-safe & Deduplicated Board Members Fetching
   useEffect(() => {
     async function fetchBoardMembers() {
       if (!activeBoard?.id) {
@@ -54,25 +54,40 @@ export default function App() {
       }
 
       try {
-        const { data, error } = await supabase
+        // Step 1: board_members table se user_ids fetch karo
+        const { data: members, error: memberErr } = await supabase
           .from('board_members')
-          .select('user_id, profiles(full_name, email)')
+          .select('user_id')
           .eq('board_id', activeBoard.id);
 
-        if (error) {
-          console.error('Error fetching board members:', error);
+        if (memberErr || !members || members.length === 0) {
+          if (memberErr) console.error('Error fetching board members:', memberErr);
           setBoardMembers([]);
           return;
         }
 
-        if (data) {
-          const formattedMembers = data.map((m) => ({
-            id: m.user_id,
-            full_name: m.profiles?.full_name || '',
-            email: m.profiles?.email || ''
-          }));
-          setBoardMembers(formattedMembers);
+        // Step 2: Set use karke unique user IDs extract karo (Deduplication)
+        const userIds = [...new Set(members.map((m) => m.user_id))];
+
+        // Step 3: Profiles table se details fetch karo
+        const { data: profiles, error: profileErr } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        if (profileErr) {
+          console.error('Error fetching profiles:', profileErr);
+          setBoardMembers([]);
+          return;
         }
+
+        const formattedMembers = profiles.map((p) => ({
+          id: p.id,
+          full_name: p.full_name || '',
+          email: p.email || ''
+        }));
+
+        setBoardMembers(formattedMembers);
       } catch (err) {
         console.error('Board members fetch exception:', err);
         setBoardMembers([]);
@@ -183,7 +198,7 @@ export default function App() {
     fetchBoards();
   }, [fetchBoards]);
 
-  // Notification Invoker
+  // Push Notification Invoker
   useEffect(() => {
     if (user?.id && typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') {
