@@ -58,7 +58,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-void px-4">
+    <div className="min-h-screen flex items-center justify-center task-bg px-4">
       <div className="max-w-sm w-full border-surface/50 p-6 rounded-2xl border-5 shadow-xl text-surface">
         <h2 className="text-2xl font-bold mb-2 text-center">
           {isSignUp ? 'Create Account' : 'Welcome Back'}
