@@ -32,13 +32,19 @@ export function useTasks(boardId = null, boardMembers = []) {
     );
   }, [user]);
 
-  // FIX 1: Target User IDs list me current user ko include rakha gaya hai
-  // taaki personal boards & multi-device testing par push notification trigger ho sake.
+  // FIX 1: Flexible mapping for board members (Supports both user_id and id)
   const targetUserIds = useMemo(() => {
     if (!boardMembers || boardMembers.length === 0) {
       return user?.id ? [user.id] : [];
     }
-    return boardMembers.map((m) => m.id);
+
+    // `user_id` ya `id` dono keys ko extract kar ke clean unique array banata hai
+    const extractedIds = boardMembers
+      .map((m) => m.user_id || m.id || (typeof m === "string" ? m : null))
+      .filter(Boolean);
+
+    // Duplicates remove karne ke liye Set use kiya hai
+    return [...new Set(extractedIds)];
   }, [boardMembers, user?.id]);
 
   const logActivity = useCallback(
@@ -99,7 +105,7 @@ export function useTasks(boardId = null, boardMembers = []) {
         console.error("Failed to write activity log:", err);
       }
     },
-    [user, boardId],
+    [user, boardId]
   );
 
   // 1. Fetch Board Specific or User Specific Tasks
@@ -131,7 +137,7 @@ export function useTasks(boardId = null, boardMembers = []) {
         setLoading(false);
       }
     },
-    [filterValidTasks],
+    [filterValidTasks]
   );
 
   // 2. Cleanup Routine
@@ -185,20 +191,20 @@ export function useTasks(boardId = null, boardMembers = []) {
               setTasks((prev) =>
                 filterValidTasks(
                   prev.map((t) =>
-                    t.id === newRow.id ? { ...t, ...newRow } : t,
-                  ),
-                ),
+                    t.id === newRow.id ? { ...t, ...newRow } : t
+                  )
+                )
               );
             } else if (eventType === "DELETE") {
               setTasks((prev) => prev.filter((t) => t.id !== oldRow.id));
             }
-          },
+          }
         )
         .subscribe();
 
       channelRef.current = channel;
     },
-    [filterValidTasks],
+    [filterValidTasks]
   );
 
   // 4. Auth Session & Active Board Change Effect
@@ -285,6 +291,7 @@ export function useTasks(boardId = null, boardMembers = []) {
       .insert([newTask])
       .select()
       .single();
+
     if (!error && data) {
       setTasks((prev) => [data, ...prev]);
 
@@ -294,11 +301,10 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: task,
       });
 
-      // FIX 2: Check ko simplify kar diya gaya hai (targetBoardId constraint remove karke)
       if (targetUserIds.length > 0) {
-        // 1. Multi-Device Push Broadcast
         console.log("Board Members in Hook:", boardMembers);
         console.log("Target User IDs:", targetUserIds);
+        
         notifyDataChange({
           action: "ADD",
           itemTitle: task,
@@ -307,7 +313,6 @@ export function useTasks(boardId = null, boardMembers = []) {
           url: "/",
         });
 
-        // 2. Mention Push (Agar task/description me @name mention hai)
         if (boardMembers && boardMembers.length > 0) {
           checkAndSendMentions({
             text: `${task} ${des || ""}`,
@@ -330,9 +335,10 @@ export function useTasks(boardId = null, boardMembers = []) {
       .from("todos")
       .update(validPatch)
       .eq("id", id);
+
     if (!error) {
       setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
       );
 
       const taskName = patch.task || currentTask?.task || "Task";
@@ -344,7 +350,6 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: patch,
       });
 
-      // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
           action: "EDIT",
@@ -388,8 +393,8 @@ export function useTasks(boardId = null, boardMembers = []) {
         prev.map((t) =>
           t.id === id
             ? { ...t, completed: nextCompleted, completed_at: completedAt }
-            : t,
-        ),
+            : t
+        )
       );
 
       const actionName = nextCompleted ? "COMPLETED" : "UNDO";
@@ -401,7 +406,6 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: { completed: nextCompleted },
       });
 
-      // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
           action: "EDIT",
@@ -428,7 +432,6 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: taskToDelete?.task || "Unknown Task",
       });
 
-      // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
           action: "DELETE",
@@ -472,7 +475,7 @@ export function useTasks(boardId = null, boardMembers = []) {
 
   const validTasks = useMemo(
     () => filterValidTasks(tasks),
-    [tasks, filterValidTasks],
+    [tasks, filterValidTasks]
   );
 
   const counts = useMemo(() => {
