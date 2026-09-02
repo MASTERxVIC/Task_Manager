@@ -56,6 +56,7 @@ export default function Sidebar({
   onOpenCreateModal,
   onOpenJoinModal,
   onOpenLogs,
+  boardMembers = [], // Added default prop to avoid undefined error
 }) {
   const [copied, setCopied] = useState(false);
   const [showCode, setShowCode] = useState(false);
@@ -63,7 +64,6 @@ export default function Sidebar({
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
 
-  // Reference for click outside detection on the Board Dropdown
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -82,11 +82,10 @@ export default function Sidebar({
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
-  // Strict check: Default board protection
   const isDefaultBoard = activeBoard?.name?.trim().toLowerCase() === "default";
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(
-    !isDefaultBoard && inviteCode && inviteCode !== "XXXXXX",
+    !isDefaultBoard && inviteCode && inviteCode !== "XXXXXX"
   );
 
   const displayCode = hasValidCode
@@ -104,7 +103,6 @@ export default function Sidebar({
 
   const handleEnablePushNotification = async () => {
     if (!user?.id) return;
-    // Second argument true bhejne se alert click par hi aayega
     await enableNotifications(user.id, true);
   };
 
@@ -158,7 +156,6 @@ export default function Sidebar({
           />
         </button>
 
-        {/* Dropdown Menu */}
         <AnimatePresence>
           {isBoardDropdownOpen && (
             <motion.div
@@ -210,7 +207,7 @@ export default function Sidebar({
                             onDeleteBoard(board);
                           }}
                           title="Delete Workspace"
-                          className="p-1 text-gray-400 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]"
+                          className="p-1 text-gray-400 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -262,9 +259,7 @@ export default function Sidebar({
               </span>
               <span
                 className={`font-mono text-[11px] px-1.5 py-0.5 rounded-md ${
-                  active
-                    ? "bg-void text-ink font-bold"
-                    : "bg-white/15 text-white"
+                  active ? "bg-void text-ink font-bold" : "bg-white/15 text-white"
                 }`}
               >
                 {count}
@@ -282,17 +277,11 @@ export default function Sidebar({
             <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase group-hover:text-white transition-colors">
               Collab
             </span>
-            <button
-              type="button"
-              className="p-1 rounded-md text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all cursor-pointer"
-              aria-label="Toggle Collab Section"
-            >
-              <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  isCollabOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+            <ChevronDown
+              className={`w-4 h-4 text-gray-400 group-hover:text-white transition-transform duration-200 ${
+                isCollabOpen ? "rotate-180" : ""
+              }`}
+            />
           </div>
 
           <AnimatePresence>
@@ -308,9 +297,7 @@ export default function Sidebar({
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                     <div className="min-w-0 pr-2">
                       <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
-                        {activeBoard
-                          ? `${activeBoard.name} Code`
-                          : "Invite Code"}
+                        {activeBoard ? `${activeBoard.name} Code` : "Invite Code"}
                       </p>
                       <p
                         className={`text-xs font-mono font-semibold truncate ${
@@ -341,11 +328,7 @@ export default function Sidebar({
                         type="button"
                         onClick={handleCopyInvite}
                         disabled={!hasValidCode}
-                        title={
-                          hasValidCode
-                            ? "Copy Invite Code"
-                            : "Select or create a custom board first"
-                        }
+                        title={hasValidCode ? "Copy Invite Code" : "Select board first"}
                         className={`p-1.5 rounded-lg transition-colors ${
                           hasValidCode
                             ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
@@ -391,56 +374,13 @@ export default function Sidebar({
             className="flex items-center justify-between cursor-pointer px-2 py-1 select-none group"
           >
             <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase group-hover:text-white transition-colors">
-              Logs
+              Logs & Members
             </span>
-            <button
-              type="button"
-              className="p-1 rounded-md text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all cursor-pointer"
-              aria-label="Toggle Logs Section"
-            >
-              <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  isLogsOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-          </div>
-          <div className="mt-4">
-            {/* Condition: Default workspace par members hide rahenge */}
-            {activeBoard?.name?.toLowerCase() !== "default" &&
-              !activeBoard?.is_default && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    <span>Members</span>
-                  </div>
-
-                  {/* Members Dropdown / List */}
-                  <div className="space-y-1 px-2">
-                    {boardMembers && boardMembers.length > 0 ? (
-                      boardMembers.map((member) => (
-                        <div
-                          key={member.user_id}
-                          className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 rounded-lg hover:bg-slate-800 transition-colors"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                          <span className="truncate">
-                            {member.profiles?.full_name ||
-                              member.profiles?.email ||
-                              "Team Member"}
-                          </span>
-                          <span className="ml-auto text-[10px] text-gray-500 capitalize">
-                            {member.role}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="px-2 text-xs text-gray-500 italic">
-                        No other members
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
+            <ChevronDown
+              className={`w-4 h-4 text-gray-400 group-hover:text-white transition-transform duration-200 ${
+                isLogsOpen ? "rotate-180" : ""
+              }`}
+            />
           </div>
 
           <AnimatePresence>
@@ -450,17 +390,36 @@ export default function Sidebar({
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-2 overflow-hidden"
+                className="space-y-3 overflow-hidden pt-1"
               >
+                {!isDefaultBoard && boardMembers?.length > 0 && (
+                  <div className="space-y-1 px-1">
+                    <p className="text-[10px] text-gray-400 font-semibold uppercase px-1">
+                      Members
+                    </p>
+                    {boardMembers.map((member) => (
+                      <div
+                        key={member.user_id}
+                        className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 rounded-lg hover:bg-slate-800 transition-colors"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                        <span className="truncate">
+                          {member.profiles?.full_name ||
+                            member.profiles?.email ||
+                            "Team Member"}
+                        </span>
+                        <span className="ml-auto text-[10px] text-gray-500 capitalize">
+                          {member.role}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={onOpenLogs}
                   disabled={!activeBoard || isDefaultBoard}
-                  title={
-                    !activeBoard || isDefaultBoard
-                      ? "Activity logs are disabled for Default Workspace"
-                      : "View Activity Logs"
-                  }
                   className={`glass-button w-full flex items-center justify-center gap-2 py-2 px-3 text-gray-100 rounded-xl text-xs font-medium transition-all ${
                     !activeBoard || isDefaultBoard
                       ? "opacity-50 cursor-not-allowed"
@@ -477,15 +436,15 @@ export default function Sidebar({
       </nav>
 
       {/* Bottom Footer Section */}
-      <div className="shrink-0 mt-auto pt-4 border-t border-white/20 flex flex-col gap-3">
+      <div className="shrink-0 mt-auto pt-3 border-t border-white/10 flex flex-col gap-2.5">
         {user && (
-          <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/10 border border-white/10">
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded-full bg-surface-raised border border-white/20 flex items-center justify-center font-mono text-xs font-semibold text-ink shrink-0">
                 {userInitial}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-white/60 leading-none mb-0.5">
+                <span className="text-[9px] uppercase font-mono tracking-wider text-white/50 leading-none mb-0.5">
                   Logged in
                 </span>
                 <span
@@ -497,30 +456,32 @@ export default function Sidebar({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onLogout}
-              aria-label="Logout"
-              title="Logout"
-              className="p-1.5 text-white/70 hover:bg-void hover:text-red-400 rounded-lg transition-colors shrink-0 cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              {/* Sleek Notification Bell Icon Button (Bina layout disturb kiye) */}
+              <button
+                type="button"
+                onClick={handleEnablePushNotification}
+                disabled={!user?.id}
+                title="Enable Push Notifications"
+                className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+              >
+                <Bell className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onLogout}
+                aria-label="Logout"
+                title="Logout"
+                className="p-1.5 text-white/70 hover:bg-void hover:text-red-400 rounded-lg transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Enable Push Notifications Button */}
-        <button
-          type="button"
-          onClick={handleEnablePushNotification}
-          disabled={!user?.id}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gray-200 hover:bg-gray-50 text-surface rounded-xl text-xs font-medium cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Bell className="w-4 h-4 text-surface" />
-          <span>Enable Notifications</span>
-        </button>
-
-        <p className="px-2 text-[11px] text-white/60 text-center">
+        <p className="px-2 text-[10px] text-white/40 text-center">
           &copy; {new Date().getFullYear()} Tasked
         </p>
       </div>
