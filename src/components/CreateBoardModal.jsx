@@ -37,7 +37,9 @@ export default function CreateBoardModal({
     }
 
     if (trimmedName.toLowerCase() === "default") {
-      setError("Workspace name 'Default' is reserved. Please choose another name.");
+      setError(
+        "Workspace name 'Default' is reserved. Please choose another name.",
+      );
       return;
     }
 
@@ -64,16 +66,21 @@ export default function CreateBoardModal({
 
       if (insertError) throw insertError;
 
-      // 2. Immediately link user in board_members as owner
+      // 2. Link user in board_members as owner (handling duplicates safely)
       const { error: memberError } = await supabase
         .from("board_members")
-        .insert([
+        .upsert(
+          [
+            {
+              board_id: boardData.id,
+              user_id: user.id,
+              role: "owner",
+            },
+          ],
           {
-            board_id: boardData.id,
-            user_id: user.id,
-            role: "owner",
+            onConflict: "board_id,user_id", // Yeh unique constraint column name hai
           },
-        ]);
+        );
 
       if (memberError) {
         console.warn("Manual board_members insertion warning:", memberError);
@@ -85,7 +92,7 @@ export default function CreateBoardModal({
       setError(
         typeof err === "string"
           ? err
-          : err?.message || "Failed to create board. Please try again."
+          : err?.message || "Failed to create board. Please try again.",
       );
     } finally {
       setLoading(false);
