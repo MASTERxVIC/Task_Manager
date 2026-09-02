@@ -116,9 +116,17 @@ export async function sendWebPushToUser({ targetUserId, title, message, url = '/
  * @param {string} params.itemTitle - Item/Data Name
  * @param {Array} params.targetUserIds - List of User IDs who should receive notification
  * @param {string} params.actorName - Performing User ka Name (e.g., "Atul Kumar")
+ * @param {string} [params.currentUserId] - Action perform karne wale user ki ID (taki use khud notification na jaye)
  */
-export async function notifyDataChange({ action, itemTitle, targetUserIds = [], actorName = 'A user', url = '/' }) {
+export async function notifyDataChange({ action, itemTitle, targetUserIds = [], actorName = 'A user', currentUserId = null, url = '/' }) {
   if (!targetUserIds || targetUserIds.length === 0) return;
+
+  // Sender/Actor ko target list se filter out kar dete hain taaki use apni notification khud na aaye
+  const filteredUserIds = currentUserId 
+    ? targetUserIds.filter(id => id !== currentUserId) 
+    : targetUserIds;
+
+  if (filteredUserIds.length === 0) return;
 
   let title = '📢 Data Update';
   let message = `${actorName} performed an action on "${itemTitle}"`;
@@ -134,8 +142,8 @@ export async function notifyDataChange({ action, itemTitle, targetUserIds = [], 
     message = `${actorName} ne item delete kar diya: "${itemTitle}"`;
   }
 
-  // Target User IDs ko Multi-Device Push Bhejein
-  targetUserIds.forEach((targetUserId) => {
+  // Sirf baaki ke filtered users ko Multi-Device Push Bhejein
+  filteredUserIds.forEach((targetUserId) => {
     sendWebPushToUser({
       targetUserId,
       title,
@@ -165,6 +173,7 @@ export async function checkAndSendMentions({ text, itemTitle, boardMembers = [],
       (u) => fullName.includes(u) || email.includes(u)
     );
 
+    // Sender ko mention karne par bhi notification nahi jayegi (member.id !== currentUserId)
     if (isMentioned && member.id !== currentUserId) {
       sendWebPushToUser({
         targetUserId: member.id,

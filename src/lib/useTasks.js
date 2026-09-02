@@ -310,6 +310,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: task,
           actorName,
           targetUserIds,
+          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
           url: "/",
         });
 
@@ -356,6 +357,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: taskName,
           actorName,
           targetUserIds,
+          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
           url: "/",
         });
 
@@ -412,6 +414,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: `${currentTask.task} (${nextCompleted ? "Completed" : "Reopened"})`,
           actorName,
           targetUserIds,
+          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
           url: "/",
         });
       }
@@ -438,6 +441,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: taskToDelete?.task || "Task",
           actorName,
           targetUserIds,
+          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
         });
       }
     }
