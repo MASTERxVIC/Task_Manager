@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { supabase } from './supabaseClient';
-import { notifyDataChange, checkAndSendMentions } from '../utils/pushService';
-import { urgency } from './date';
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { supabase } from "./supabaseClient";
+import { notifyDataChange, checkAndSendMentions } from "../utils/pushService";
+import { urgency } from "./date";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -12,7 +12,7 @@ export function useTasks(boardId = null, boardMembers = []) {
   const channelRef = useRef(null);
 
   // DUPLICATE PREVENTER: Log deduplication tracker
-  const lastLoggedRef = useRef({ key: '', timestamp: 0 });
+  const lastLoggedRef = useRef({ key: "", timestamp: 0 });
 
   // Helper: Expired completed tasks locally filter karne ke liye
   const filterValidTasks = useCallback((taskList) => {
@@ -26,8 +26,10 @@ export function useTasks(boardId = null, boardMembers = []) {
 
   // Current User ka display name nikalne ke liye helper
   const actorName = useMemo(() => {
-    if (!user) return 'A user';
-    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'A user';
+    if (!user) return "A user";
+    return (
+      user.user_metadata?.full_name || user.email?.split("@")[0] || "A user"
+    );
   }, [user]);
 
   // FIX 1: Target User IDs list me current user ko include rakha gaya hai
@@ -39,151 +41,174 @@ export function useTasks(boardId = null, boardMembers = []) {
     return boardMembers.map((m) => m.id);
   }, [boardMembers, user?.id]);
 
-  const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
-    if (!user || !boardId) return;
+  const logActivity = useCallback(
+    async ({ actionType, todoId, taskTitle, details = {} }) => {
+      if (!user || !boardId) return;
 
-    const logKey = `${actionType}_${todoId}`;
-    const now = Date.now();
-    if (
-      lastLoggedRef.current.key === logKey &&
-      now - lastLoggedRef.current.timestamp < 1000
-    ) {
-      console.log('Duplicate Activity Log Prevented:', logKey);
-      return;
-    }
-
-    lastLoggedRef.current = { key: logKey, timestamp: now };
-
-    try {
-      const { data: boardData, error: boardError } = await supabase
-        .from('boards')
-        .select('is_default, name')
-        .eq('id', boardId)
-        .maybeSingle();
-
-      if (boardError) {
-        console.error('Board check error for logging:', boardError);
+      const logKey = `${actionType}_${todoId}`;
+      const now = Date.now();
+      if (
+        lastLoggedRef.current.key === logKey &&
+        now - lastLoggedRef.current.timestamp < 1000
+      ) {
+        console.log("Duplicate Activity Log Prevented:", logKey);
         return;
       }
 
-      if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
-        return;
-      }
+      lastLoggedRef.current = { key: logKey, timestamp: now };
 
-      const { data, error } = await supabase.from('activity_logs').insert([{
-        board_id: boardId,
-        todo_id: String(todoId),
-        user_id: user.id,
-        action_type: actionType,
-        task_title: taskTitle,
-        details: details
-      }]).select();
+      try {
+        const { data: boardData, error: boardError } = await supabase
+          .from("boards")
+          .select("is_default, name")
+          .eq("id", boardId)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Supabase Activity Log Insert Error:', error);
-      } else {
-        console.log('Activity Log Created Successfully:', data);
+        if (boardError) {
+          console.error("Board check error for logging:", boardError);
+          return;
+        }
+
+        if (
+          boardData &&
+          (boardData.is_default || boardData.name?.toLowerCase() === "default")
+        ) {
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("activity_logs")
+          .insert([
+            {
+              board_id: boardId,
+              todo_id: String(todoId),
+              user_id: user.id,
+              action_type: actionType,
+              task_title: taskTitle,
+              details: details,
+            },
+          ])
+          .select();
+
+        if (error) {
+          console.error("Supabase Activity Log Insert Error:", error);
+        } else {
+          console.log("Activity Log Created Successfully:", data);
+        }
+      } catch (err) {
+        console.error("Failed to write activity log:", err);
       }
-    } catch (err) {
-      console.error('Failed to write activity log:', err);
-    }
-  }, [user, boardId]);
+    },
+    [user, boardId],
+  );
 
   // 1. Fetch Board Specific or User Specific Tasks
-  const fetchTasks = useCallback(async (userId, currentBoardId = null) => {
-    setTasks([]);
-    setLoading(true);
-    try {
-      let query = supabase.from('todos').select('*');
+  const fetchTasks = useCallback(
+    async (userId, currentBoardId = null) => {
+      setTasks([]);
+      setLoading(true);
+      try {
+        let query = supabase.from("todos").select("*");
 
-      if (currentBoardId) {
-        query = query.eq('board_id', currentBoardId);
-      } else {
-        query = query.eq('user_id', userId).is('board_id', null);
+        if (currentBoardId) {
+          query = query.eq("board_id", currentBoardId);
+        } else {
+          query = query.eq("user_id", userId).is("board_id", null);
+        }
+
+        const { data, error } = await query.order("created_at", {
+          ascending: false,
+        });
+
+        if (error) {
+          console.error("Error fetching tasks:", error);
+        } else {
+          setTasks(filterValidTasks(data || []));
+        }
+      } catch (err) {
+        console.error("Fetch tasks exception:", err);
+      } finally {
+        setLoading(false);
       }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching tasks:', error);
-      } else {
-        setTasks(filterValidTasks(data || []));
-      }
-    } catch (err) {
-      console.error('Fetch tasks exception:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filterValidTasks]);
+    },
+    [filterValidTasks],
+  );
 
   // 2. Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
     try {
       const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
       await supabase
-        .from('todos')
+        .from("todos")
         .delete()
-        .eq('user_id', userId)
-        .eq('completed', true)
-        .lt('completed_at', sevenDaysAgo);
+        .eq("user_id", userId)
+        .eq("completed", true)
+        .lt("completed_at", sevenDaysAgo);
     } catch (err) {
-      console.error('Cleanup tasks exception:', err);
+      console.error("Cleanup tasks exception:", err);
     }
   }, []);
 
   // 3. Realtime Listener
-  const setupRealtime = useCallback((userId, currentBoardId = null) => {
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+  const setupRealtime = useCallback(
+    (userId, currentBoardId = null) => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
 
-    const channelName = currentBoardId ? `rt-todos-board-${currentBoardId}` : `rt-todos-default-${userId}`;
+      const channelName = currentBoardId
+        ? `rt-todos-board-${currentBoardId}`
+        : `rt-todos-default-${userId}`;
 
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'todos' },
-        (payload) => {
-          const { eventType, new: newRow, old: oldRow } = payload;
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "todos" },
+          (payload) => {
+            const { eventType, new: newRow, old: oldRow } = payload;
 
-          if (eventType === 'INSERT') {
-            const matchesBoard = currentBoardId 
-              ? newRow.board_id === currentBoardId 
-              : (!newRow.board_id && newRow.user_id === userId);
+            if (eventType === "INSERT") {
+              const matchesBoard = currentBoardId
+                ? newRow.board_id === currentBoardId
+                : !newRow.board_id && newRow.user_id === userId;
 
-            if (matchesBoard) {
-              setTasks((prev) => {
-                const exists = prev.some((t) => t.id === newRow.id);
-                if (exists) return prev;
-                return filterValidTasks([newRow, ...prev]);
-              });
+              if (matchesBoard) {
+                setTasks((prev) => {
+                  const exists = prev.some((t) => t.id === newRow.id);
+                  if (exists) return prev;
+                  return filterValidTasks([newRow, ...prev]);
+                });
+              }
+            } else if (eventType === "UPDATE") {
+              setTasks((prev) =>
+                filterValidTasks(
+                  prev.map((t) =>
+                    t.id === newRow.id ? { ...t, ...newRow } : t,
+                  ),
+                ),
+              );
+            } else if (eventType === "DELETE") {
+              setTasks((prev) => prev.filter((t) => t.id !== oldRow.id));
             }
-          } 
-          else if (eventType === 'UPDATE') {
-            setTasks((prev) => 
-              filterValidTasks(
-                prev.map((t) => (t.id === newRow.id ? { ...t, ...newRow } : t))
-              )
-            );
-          } 
-          else if (eventType === 'DELETE') {
-            setTasks((prev) => prev.filter((t) => t.id !== oldRow.id));
-          }
-        }
-      )
-      .subscribe();
+          },
+        )
+        .subscribe();
 
-    channelRef.current = channel;
-  }, [filterValidTasks]);
+      channelRef.current = channel;
+    },
+    [filterValidTasks],
+  );
 
   // 4. Auth Session & Active Board Change Effect
   useEffect(() => {
     let isMounted = true;
 
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!isMounted) return;
 
       const currentUser = session?.user ?? null;
@@ -200,16 +225,18 @@ export function useTasks(boardId = null, boardMembers = []) {
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
 
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      if (event === 'SIGNED_IN' && currentUser) {
+      if (event === "SIGNED_IN" && currentUser) {
         fetchTasks(currentUser.id, boardId);
         setupRealtime(currentUser.id, boardId);
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === "SIGNED_OUT") {
         setTasks([]);
         if (channelRef.current) {
           supabase.removeChannel(channelRef.current);
@@ -230,11 +257,17 @@ export function useTasks(boardId = null, boardMembers = []) {
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
   // 5. Add Task (Multi-Device & Name Mention Integrated)
-  const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
+  const addTask = async ({
+    task,
+    des,
+    deadline,
+    priority,
+    board_id = null,
+  }) => {
     if (!user) return;
     const newTaskId = crypto.randomUUID();
     const targetBoardId = board_id || boardId || null;
-    
+
     const newTask = {
       id: newTaskId,
       user_id: user.id,
@@ -242,40 +275,46 @@ export function useTasks(boardId = null, boardMembers = []) {
       task,
       des,
       deadline,
-      priority: priority || 'normal',
+      priority: priority || "normal",
       completed: false,
       completed_at: null,
     };
 
-    const { data, error } = await supabase.from('todos').insert([newTask]).select().single();
+    const { data, error } = await supabase
+      .from("todos")
+      .insert([newTask])
+      .select()
+      .single();
     if (!error && data) {
       setTasks((prev) => [data, ...prev]);
-      
+
       await logActivity({
-        actionType: 'CREATED',
+        actionType: "CREATED",
         todoId: data.id,
-        taskTitle: task
+        taskTitle: task,
       });
 
       // FIX 2: Check ko simplify kar diya gaya hai (targetBoardId constraint remove karke)
       if (targetUserIds.length > 0) {
         // 1. Multi-Device Push Broadcast
+        console.log("Board Members in Hook:", boardMembers);
+        console.log("Target User IDs:", targetUserIds);
         notifyDataChange({
-          action: 'ADD',
+          action: "ADD",
           itemTitle: task,
           actorName,
           targetUserIds,
-          url: '/'
+          url: "/",
         });
 
         // 2. Mention Push (Agar task/description me @name mention hai)
         if (boardMembers && boardMembers.length > 0) {
           checkAndSendMentions({
-            text: `${task} ${des || ''}`,
+            text: `${task} ${des || ""}`,
             itemTitle: task,
             boardMembers,
             currentUserId: user.id,
-            actorName
+            actorName,
           });
         }
       }
@@ -287,37 +326,42 @@ export function useTasks(boardId = null, boardMembers = []) {
     const currentTask = tasks.find((t) => t.id === id);
     const { image, ...validPatch } = patch;
 
-    const { error } = await supabase.from('todos').update(validPatch).eq('id', id);
+    const { error } = await supabase
+      .from("todos")
+      .update(validPatch)
+      .eq("id", id);
     if (!error) {
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-      
-      const taskName = patch.task || currentTask?.task || 'Task';
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+      );
+
+      const taskName = patch.task || currentTask?.task || "Task";
 
       await logActivity({
-        actionType: 'UPDATED',
+        actionType: "UPDATED",
         todoId: id,
         taskTitle: taskName,
-        details: patch
+        details: patch,
       });
 
       // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
-          action: 'EDIT',
+          action: "EDIT",
           itemTitle: taskName,
           actorName,
           targetUserIds,
-          url: '/'
+          url: "/",
         });
 
-        const updatedText = `${patch.task || ''} ${patch.des || ''}`;
+        const updatedText = `${patch.task || ""} ${patch.des || ""}`;
         if (boardMembers && boardMembers.length > 0) {
           checkAndSendMentions({
             text: updatedText,
             itemTitle: taskName,
             boardMembers,
             currentUserId: user.id,
-            actorName
+            actorName,
           });
         }
       }
@@ -333,36 +377,38 @@ export function useTasks(boardId = null, boardMembers = []) {
     const completedAt = nextCompleted ? new Date().toISOString() : null;
 
     const { error } = await supabase
-      .from('todos')
+      .from("todos")
       .update({ completed: nextCompleted, completed_at: completedAt })
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) {
-      console.error('Error toggling task:', error);
+      console.error("Error toggling task:", error);
     } else {
       setTasks((prev) =>
         prev.map((t) =>
-          t.id === id ? { ...t, completed: nextCompleted, completed_at: completedAt } : t
-        )
+          t.id === id
+            ? { ...t, completed: nextCompleted, completed_at: completedAt }
+            : t,
+        ),
       );
-      
-      const actionName = nextCompleted ? 'COMPLETED' : 'UNDO';
-      
+
+      const actionName = nextCompleted ? "COMPLETED" : "UNDO";
+
       await logActivity({
         actionType: actionName,
         todoId: id,
-        taskTitle: currentTask.task || 'Unknown Task',
-        details: { completed: nextCompleted }
+        taskTitle: currentTask.task || "Unknown Task",
+        details: { completed: nextCompleted },
       });
 
       // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
-          action: 'EDIT',
-          itemTitle: `${currentTask.task} (${nextCompleted ? 'Completed' : 'Reopened'})`,
+          action: "EDIT",
+          itemTitle: `${currentTask.task} (${nextCompleted ? "Completed" : "Reopened"})`,
           actorName,
           targetUserIds,
-          url: '/'
+          url: "/",
         });
       }
     }
@@ -372,23 +418,23 @@ export function useTasks(boardId = null, boardMembers = []) {
   const deleteTask = async (id) => {
     const taskToDelete = tasks.find((t) => t.id === id);
 
-    const { error } = await supabase.from('todos').delete().eq('id', id);
+    const { error } = await supabase.from("todos").delete().eq("id", id);
     if (!error) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      
+
       await logActivity({
-        actionType: 'DELETED',
+        actionType: "DELETED",
         todoId: id,
-        taskTitle: taskToDelete?.task || 'Unknown Task'
+        taskTitle: taskToDelete?.task || "Unknown Task",
       });
 
       // FIX 2: Guard check simplify kar diya gaya hai
       if (targetUserIds.length > 0) {
         notifyDataChange({
-          action: 'DELETE',
-          itemTitle: taskToDelete?.task || 'Task',
+          action: "DELETE",
+          itemTitle: taskToDelete?.task || "Task",
           actorName,
-          targetUserIds
+          targetUserIds,
         });
       }
     }
@@ -396,44 +442,53 @@ export function useTasks(boardId = null, boardMembers = []) {
 
   const clearAll = async () => {
     if (!user) return;
-    let query = supabase.from('todos').delete();
+    let query = supabase.from("todos").delete();
     if (boardId) {
-      query = query.eq('board_id', boardId);
+      query = query.eq("board_id", boardId);
     } else {
-      query = query.eq('user_id', user.id).is('board_id', null);
+      query = query.eq("user_id", user.id).is("board_id", null);
     }
 
     const { error } = await query;
-    if (error) console.error('Error clearing tasks:', error);
+    if (error) console.error("Error clearing tasks:", error);
     else setTasks([]);
   };
 
   const clearCompleted = async () => {
     if (!user) return;
-    let query = supabase.from('todos').delete().eq('completed', true);
+    let query = supabase.from("todos").delete().eq("completed", true);
     if (boardId) {
-      query = query.eq('board_id', boardId);
+      query = query.eq("board_id", boardId);
     } else {
-      query = query.eq('user_id', user.id).is('board_id', null);
+      query = query.eq("user_id", user.id).is("board_id", null);
     }
 
     const { error } = await query;
-    if (error) console.error('Error clearing completed tasks:', error);
+    if (error) console.error("Error clearing completed tasks:", error);
     else setTasks((prev) => prev.filter((t) => !t.completed));
   };
 
   const logout = () => supabase.auth.signOut();
 
-  const validTasks = useMemo(() => filterValidTasks(tasks), [tasks, filterValidTasks]);
+  const validTasks = useMemo(
+    () => filterValidTasks(tasks),
+    [tasks, filterValidTasks],
+  );
 
   const counts = useMemo(() => {
-    const c = { all: validTasks.length, today: 0, upcoming: 0, completed: 0, overdue: 0 };
+    const c = {
+      all: validTasks.length,
+      today: 0,
+      upcoming: 0,
+      completed: 0,
+      overdue: 0,
+    };
     validTasks.forEach((t) => {
       const u = urgency(t);
       if (t.completed) c.completed += 1;
-      else if (u === 'today') c.today += 1;
-      else if (u === 'upcoming') c.upcoming += 1;
-      else if (u === 'overdue') c.overdue += 1;
+      else if (u === "today") c.today += 1;
+      else if (u === "upcoming") c.upcoming += 1;
+      else if (u === "overdue") c.overdue += 1;
     });
     return c;
   }, [validTasks]);
