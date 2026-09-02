@@ -405,6 +405,43 @@ export default function Sidebar({
               />
             </button>
           </div>
+          <div className="mt-4">
+            {/* Condition: Default workspace par members hide rahenge */}
+            {activeBoard?.name?.toLowerCase() !== "default" &&
+              !activeBoard?.is_default && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <span>Members</span>
+                  </div>
+
+                  {/* Members Dropdown / List */}
+                  <div className="space-y-1 px-2">
+                    {boardMembers && boardMembers.length > 0 ? (
+                      boardMembers.map((member) => (
+                        <div
+                          key={member.user_id}
+                          className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 rounded-lg hover:bg-slate-800 transition-colors"
+                        >
+                          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                          <span className="truncate">
+                            {member.profiles?.full_name ||
+                              member.profiles?.email ||
+                              "Team Member"}
+                          </span>
+                          <span className="ml-auto text-[10px] text-gray-500 capitalize">
+                            {member.role}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="px-2 text-xs text-gray-500 italic">
+                        No other members
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+          </div>
 
           <AnimatePresence>
             {isLogsOpen && (
