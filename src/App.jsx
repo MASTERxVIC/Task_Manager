@@ -17,7 +17,11 @@ export default function App() {
   const [view, setView] = useState('all');
   const [activeBoard, setActiveBoard] = useState(null);
   const [boards, setBoards] = useState([]);
+  
+  // FIX 1: Board Members state add ki gayi hai
+  const [boardMembers, setBoardMembers] = useState([]);
 
+  // FIX 2: useTasks me activeBoard.id ke sath boardMembers pass kiya gaya hai
   const { 
     user, 
     loading, 
@@ -30,7 +34,7 @@ export default function App() {
     clearAll, 
     counts,
     refetchTasks
-  } = useTasks(activeBoard?.id);
+  } = useTasks(activeBoard?.id, boardMembers);
 
   const [search, setSearch] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -40,6 +44,43 @@ export default function App() {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
+
+  // FIX 3: Active Board ke members fetch karne ke liye Effect
+  useEffect(() => {
+    async function fetchBoardMembers() {
+      if (!activeBoard?.id) {
+        setBoardMembers([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('board_members')
+          .select('user_id, profiles(full_name, email)')
+          .eq('board_id', activeBoard.id);
+
+        if (error) {
+          console.error('Error fetching board members:', error);
+          setBoardMembers([]);
+          return;
+        }
+
+        if (data) {
+          const formattedMembers = data.map((m) => ({
+            id: m.user_id,
+            full_name: m.profiles?.full_name || '',
+            email: m.profiles?.email || ''
+          }));
+          setBoardMembers(formattedMembers);
+        }
+      } catch (err) {
+        console.error('Board members fetch exception:', err);
+        setBoardMembers([]);
+      }
+    }
+
+    fetchBoardMembers();
+  }, [activeBoard?.id]);
 
   const handleSelectBoard = (board) => {
     setActiveBoard(board);
@@ -84,7 +125,6 @@ export default function App() {
   const fetchBoards = useCallback(async () => {
     if (!user?.id) return;
     try {
-      // Fetch boards where user is a member
       const { data: memberBoards, error: memberErr } = await supabase
         .from('board_members')
         .select('board_id, boards(*)')
@@ -92,7 +132,6 @@ export default function App() {
 
       if (memberErr) throw memberErr;
 
-      // Fetch boards created by user
       const { data: createdBoards, error: createdErr } = await supabase
         .from('boards')
         .select('*')
@@ -100,13 +139,11 @@ export default function App() {
 
       if (createdErr) throw createdErr;
 
-      // Combine both arrays safely
       const rawBoards = [
         ...(memberBoards ? memberBoards.map((m) => m.boards).filter(Boolean) : []),
         ...(createdBoards || [])
       ];
 
-      // Deduplicate boards by ID
       const uniqueBoardsMap = new Map();
       rawBoards.forEach((board) => {
         if (board && board.id) {
@@ -116,7 +153,6 @@ export default function App() {
 
       let userBoards = Array.from(uniqueBoardsMap.values());
 
-      // Sort: Default board on top
       userBoards.sort((a, b) => {
         const aIsDefault = a.is_default || a.name?.toLowerCase() === 'default';
         const bIsDefault = b.is_default || b.name?.toLowerCase() === 'default';
@@ -125,7 +161,6 @@ export default function App() {
 
       setBoards(userBoards);
 
-      // Auto Select Logic: Select Default Board if no board selected yet
       if (userBoards.length > 0) {
         const savedBoardId = localStorage.getItem('tasked_active_board_id');
         const savedBoard = userBoards.find((b) => b.id === savedBoardId);
@@ -148,23 +183,22 @@ export default function App() {
     fetchBoards();
   }, [fetchBoards]);
 
- // Notification Invoker
-useEffect(() => {
-  if (user?.id && typeof window !== 'undefined' && 'Notification' in window) {
-    if (Notification.permission === 'granted') {
-      // Check karein ki is session me pehle se trigger ho chuka hai ya nahi
-      const isAlreadyRegistered = sessionStorage.getItem(`push_registered_${user.id}`);
+  // Notification Invoker
+  useEffect(() => {
+    if (user?.id && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        const isAlreadyRegistered = sessionStorage.getItem(`push_registered_${user.id}`);
 
-      if (!isAlreadyRegistered) {
-        registerPushNotifications(user.id).then((success) => {
-          if (success) {
-            sessionStorage.setItem(`push_registered_${user.id}`, 'true');
-          }
-        });
+        if (!isAlreadyRegistered) {
+          registerPushNotifications(user.id).then((success) => {
+            if (success) {
+              sessionStorage.setItem(`push_registered_${user.id}`, 'true');
+            }
+          });
+        }
       }
     }
-  }
-}, [user?.id]);
+  }, [user?.id]);
 
   // Realtime Sync Listener
   useEffect(() => {
