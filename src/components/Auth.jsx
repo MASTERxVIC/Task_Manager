@@ -58,7 +58,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-void overflow-hidden fixed inset-0">
+    <div className="min-h-screen w-full flex task-bg overflow-hidden fixed inset-0">
       {/* Left Side: Login / Signup Form */}
       <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-12 overflow-y-auto no-scrollbar bg-void z-10">
         <div className="max-w-md w-full mx-auto my-auto">
