@@ -51,7 +51,6 @@ export async function enableNotifications(userId, isUserClick = false) {
     const subJson = subscription.toJSON();
     const deviceId = getDeviceId();
 
-    // Multi-device Table me Save/Upsert karein
     const { error } = await supabase
       .from('user_push_subscriptions')
       .upsert(
@@ -83,45 +82,35 @@ export async function registerPushNotifications(userId) {
 }
 
 /**
- * Direct User / Multi-Device Push Invoker Function
+ * Batch Push Invoker Function (Edge Function ke through RLS bypass karega)
  */
-export async function sendWebPushToUser({ targetUserId, title, message, url = '/' }) {
+export async function sendWebPushToUsers({ targetUserIds, title, message, url = '/' }) {
+  if (!targetUserIds || targetUserIds.length === 0) return;
+
   try {
-    // User ke saare registered devices/tokens fetch karein
-    const { data: subs, error } = await supabase
-      .from('user_push_subscriptions')
-      .select('subscription')
-      .eq('user_id', targetUserId);
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: {
+        targetUserIds,
+        payload: { title, message, url },
+      },
+    });
 
-    if (error || !subs || subs.length === 0) return;
-
-    // Har device par Push Notification Send karein
-    for (const row of subs) {
-      await supabase.functions.invoke('send-push', {
-        body: {
-          userSubscription: row.subscription,
-          payload: { title, message, url },
-        },
-      });
+    if (error) {
+      console.error('Edge Function Invoke Error:', error);
+    } else {
+      console.log('Push Success Response:', data);
     }
   } catch (err) {
-    console.error('Push Send Error:', err);
+    console.error('Push Send Exception:', err);
   }
 }
 
 /**
  * ACTION NOTIFICATION: ADD, EDIT, DELETE Data Update Trigger
- * @param {Object} params
- * @param {'ADD'|'EDIT'|'DELETE'} params.action - Operation performed
- * @param {string} params.itemTitle - Item/Data Name
- * @param {Array} params.targetUserIds - List of User IDs who should receive notification
- * @param {string} params.actorName - Performing User ka Name (e.g., "Atul Kumar")
- * @param {string} [params.currentUserId] - Action perform karne wale user ki ID (taki use khud notification na jaye)
  */
 export async function notifyDataChange({ action, itemTitle, targetUserIds = [], actorName = 'A user', currentUserId = null, url = '/' }) {
   if (!targetUserIds || targetUserIds.length === 0) return;
 
-  // Sender/Actor ko target list se filter out kar dete hain taaki use apni notification khud na aaye
   const filteredUserIds = currentUserId 
     ? targetUserIds.filter(id => id !== currentUserId) 
     : targetUserIds;
@@ -142,14 +131,11 @@ export async function notifyDataChange({ action, itemTitle, targetUserIds = [], 
     message = `${actorName} ne item delete kar diya: "${itemTitle}"`;
   }
 
-  // Sirf baaki ke filtered users ko Multi-Device Push Bhejein
-  filteredUserIds.forEach((targetUserId) => {
-    sendWebPushToUser({
-      targetUserId,
-      title,
-      message,
-      url,
-    });
+  await sendWebPushToUsers({
+    targetUserIds: filteredUserIds,
+    title,
+    message,
+    url,
   });
 }
 
@@ -163,23 +149,26 @@ export async function checkAndSendMentions({ text, itemTitle, boardMembers = [],
   if (!matches) return;
 
   const mentionedUsernames = matches.map((m) => m.substring(1).toLowerCase());
+  const targetUserIds = [];
 
   boardMembers.forEach((member) => {
     const fullName = (member.full_name || '').toLowerCase();
     const email = (member.email || '').toLowerCase();
 
-    // Check karein ki Mentioned Name se Match hota h ya nahi
     const isMentioned = mentionedUsernames.some(
       (u) => fullName.includes(u) || email.includes(u)
     );
 
-    // Sender ko mention karne par bhi notification nahi jayegi (member.id !== currentUserId)
     if (isMentioned && member.id !== currentUserId) {
-      sendWebPushToUser({
-        targetUserId: member.id,
-        title: '🚨 Mentioned You!',
-        message: `${actorName} ne aapko "${itemTitle}" me mention kiya.`,
-      });
+      targetUserIds.push(member.id);
     }
   });
+
+  if (targetUserIds.length > 0) {
+    await sendWebPushToUsers({
+      targetUserIds,
+      title: '🚨 Mentioned You!',
+      message: `${actorName} ne aapko "${itemTitle}" me mention kiya.`,
+    });
+  }
 }
