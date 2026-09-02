@@ -85,7 +85,7 @@ export default function Sidebar({
   const isDefaultBoard = activeBoard?.name?.trim().toLowerCase() === "default";
   const inviteCode = activeBoard?.invite_code;
   const hasValidCode = Boolean(
-    !isDefaultBoard && inviteCode && inviteCode !== "XXXXXX"
+    !isDefaultBoard && inviteCode && inviteCode !== "XXXXXX",
   );
 
   const displayCode = hasValidCode
@@ -259,7 +259,9 @@ export default function Sidebar({
               </span>
               <span
                 className={`font-mono text-[11px] px-1.5 py-0.5 rounded-md ${
-                  active ? "bg-void text-ink font-bold" : "bg-white/15 text-white"
+                  active
+                    ? "bg-void text-ink font-bold"
+                    : "bg-white/15 text-white"
                 }`}
               >
                 {count}
@@ -297,7 +299,9 @@ export default function Sidebar({
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
                     <div className="min-w-0 pr-2">
                       <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
-                        {activeBoard ? `${activeBoard.name} Code` : "Invite Code"}
+                        {activeBoard
+                          ? `${activeBoard.name} Code`
+                          : "Invite Code"}
                       </p>
                       <p
                         className={`text-xs font-mono font-semibold truncate ${
@@ -328,7 +332,11 @@ export default function Sidebar({
                         type="button"
                         onClick={handleCopyInvite}
                         disabled={!hasValidCode}
-                        title={hasValidCode ? "Copy Invite Code" : "Select board first"}
+                        title={
+                          hasValidCode
+                            ? "Copy Invite Code"
+                            : "Select board first"
+                        }
                         className={`p-1.5 rounded-lg transition-colors ${
                           hasValidCode
                             ? "bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer"
@@ -404,9 +412,7 @@ export default function Sidebar({
                       >
                         <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                         <span className="truncate">
-                          {member.profiles?.full_name ||
-                            member.profiles?.email ||
-                            "Team Member"}
+                          {member.full_name || member.email || "Team Member"}
                         </span>
                         <span className="ml-auto text-[10px] text-gray-500 capitalize">
                           {member.role}
