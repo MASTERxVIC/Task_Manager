@@ -30,10 +30,13 @@ export function useTasks(boardId = null, boardMembers = []) {
     return user.user_metadata?.full_name || user.email?.split('@')[0] || 'A user';
   }, [user]);
 
-  // Target User IDs list filter karna (Current user ko exclude karke)
+  // FIX 1: Target User IDs list me current user ko include rakha gaya hai
+  // taaki personal boards & multi-device testing par push notification trigger ho sake.
   const targetUserIds = useMemo(() => {
-    if (!boardMembers || boardMembers.length === 0) return [];
-    return boardMembers.map((m) => m.id).filter((id) => id !== user?.id);
+    if (!boardMembers || boardMembers.length === 0) {
+      return user?.id ? [user.id] : [];
+    }
+    return boardMembers.map((m) => m.id);
   }, [boardMembers, user?.id]);
 
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
@@ -254,8 +257,8 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: task
       });
 
-      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
-      if (targetBoardId && targetUserIds.length > 0) {
+      // FIX 2: Check ko simplify kar diya gaya hai (targetBoardId constraint remove karke)
+      if (targetUserIds.length > 0) {
         // 1. Multi-Device Push Broadcast
         notifyDataChange({
           action: 'ADD',
@@ -266,13 +269,15 @@ export function useTasks(boardId = null, boardMembers = []) {
         });
 
         // 2. Mention Push (Agar task/description me @name mention hai)
-        checkAndSendMentions({
-          text: `${task} ${des || ''}`,
-          itemTitle: task,
-          boardMembers,
-          currentUserId: user.id,
-          actorName
-        });
+        if (boardMembers && boardMembers.length > 0) {
+          checkAndSendMentions({
+            text: `${task} ${des || ''}`,
+            itemTitle: task,
+            boardMembers,
+            currentUserId: user.id,
+            actorName
+          });
+        }
       }
     }
   };
@@ -295,8 +300,8 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: patch
       });
 
-      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
-      if (boardId && targetUserIds.length > 0) {
+      // FIX 2: Guard check simplify kar diya gaya hai
+      if (targetUserIds.length > 0) {
         notifyDataChange({
           action: 'EDIT',
           itemTitle: taskName,
@@ -306,13 +311,15 @@ export function useTasks(boardId = null, boardMembers = []) {
         });
 
         const updatedText = `${patch.task || ''} ${patch.des || ''}`;
-        checkAndSendMentions({
-          text: updatedText,
-          itemTitle: taskName,
-          boardMembers,
-          currentUserId: user.id,
-          actorName
-        });
+        if (boardMembers && boardMembers.length > 0) {
+          checkAndSendMentions({
+            text: updatedText,
+            itemTitle: taskName,
+            boardMembers,
+            currentUserId: user.id,
+            actorName
+          });
+        }
       }
     }
   };
@@ -348,10 +355,10 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: { completed: nextCompleted }
       });
 
-      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
-      if (boardId && targetUserIds.length > 0) {
+      // FIX 2: Guard check simplify kar diya gaya hai
+      if (targetUserIds.length > 0) {
         notifyDataChange({
-          action: nextCompleted ? 'EDIT' : 'EDIT',
+          action: 'EDIT',
           itemTitle: `${currentTask.task} (${nextCompleted ? 'Completed' : 'Reopened'})`,
           actorName,
           targetUserIds,
@@ -375,8 +382,8 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: taskToDelete?.task || 'Unknown Task'
       });
 
-      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
-      if (boardId && targetUserIds.length > 0) {
+      // FIX 2: Guard check simplify kar diya gaya hai
+      if (targetUserIds.length > 0) {
         notifyDataChange({
           action: 'DELETE',
           itemTitle: taskToDelete?.task || 'Task',
