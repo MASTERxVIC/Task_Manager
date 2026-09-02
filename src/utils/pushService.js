@@ -1,13 +1,12 @@
-import { supabase } from '../lib/supabaseClient';
-import { getDeviceId } from '../utils/deviceHelper';
+import { supabase } from "../lib/supabaseClient";
+import { getDeviceId } from "../utils/deviceHelper";
 
-const VAPID_PUBLIC_KEY = 'BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY';
+const VAPID_PUBLIC_KEY =
+  "BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY";
 
 function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -24,21 +23,24 @@ function urlBase64ToUint8Array(base64String) {
 export async function enableNotifications(userId, isUserClick = false) {
   if (!userId) return false;
 
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    if (isUserClick) alert('Push notifications aapke browser me supported nahi hain.');
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    if (isUserClick)
+      alert("Push notifications are not supported in your browser.");
     return false;
   }
 
   try {
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      if (isUserClick && permission === 'denied') {
-        alert('Notification permission blocked hai! Browser lock icon se allow karein.');
+    if (permission !== "granted") {
+      if (isUserClick && permission === "denied") {
+        alert(
+          "Notification Permission Blocked\nPlease enable notifications from the browser lock icon.",
+        );
       }
       return false;
     }
 
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register("/sw.js");
     await navigator.serviceWorker.ready;
 
     const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
@@ -51,28 +53,25 @@ export async function enableNotifications(userId, isUserClick = false) {
     const subJson = subscription.toJSON();
     const deviceId = getDeviceId();
 
-    const { error } = await supabase
-      .from('user_push_subscriptions')
-      .upsert(
-        {
-          user_id: userId,
-          device_id: deviceId,
-          subscription: subJson,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id, device_id' }
-      );
+    const { error } = await supabase.from("user_push_subscriptions").upsert(
+      {
+        user_id: userId,
+        device_id: deviceId,
+        subscription: subJson,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id, device_id" },
+    );
 
     if (error) {
-      console.error('Multi-device token save error:', error.message);
+      console.error("Multi-device token save error:", error.message);
       return false;
     }
 
-    if (isUserClick) alert('Notifications Successfully Enabled on this Device! 🎉');
+    if (isUserClick) alert("Notifications Enabled Successfully");
     return true;
-
   } catch (error) {
-    console.error('Notification Error:', error);
+    console.error("Notification Error:", error);
     return false;
   }
 }
@@ -84,11 +83,16 @@ export async function registerPushNotifications(userId) {
 /**
  * Batch Push Invoker Function (Edge Function ke through RLS bypass karega)
  */
-export async function sendWebPushToUsers({ targetUserIds, title, message, url = '/' }) {
+export async function sendWebPushToUsers({
+  targetUserIds,
+  title,
+  message,
+  url = "/",
+}) {
   if (!targetUserIds || targetUserIds.length === 0) return;
 
   try {
-    const { data, error } = await supabase.functions.invoke('send-push', {
+    const { data, error } = await supabase.functions.invoke("send-push", {
       body: {
         targetUserIds,
         payload: { title, message, url },
@@ -96,39 +100,46 @@ export async function sendWebPushToUsers({ targetUserIds, title, message, url = 
     });
 
     if (error) {
-      console.error('Edge Function Invoke Error:', error);
+      console.error("Edge Function Invoke Error:", error);
     } else {
-      console.log('Push Success Response:', data);
+      console.log("Push Success Response:", data);
     }
   } catch (err) {
-    console.error('Push Send Exception:', err);
+    console.error("Push Send Exception:", err);
   }
 }
 
 /**
  * ACTION NOTIFICATION: ADD, EDIT, DELETE Data Update Trigger
  */
-export async function notifyDataChange({ action, itemTitle, targetUserIds = [], actorName = 'A user', currentUserId = null, url = '/' }) {
+export async function notifyDataChange({
+  action,
+  itemTitle,
+  targetUserIds = [],
+  actorName = "A user",
+  currentUserId = null,
+  url = "/",
+}) {
   if (!targetUserIds || targetUserIds.length === 0) return;
 
-  const filteredUserIds = currentUserId 
-    ? targetUserIds.filter(id => id !== currentUserId) 
+  const filteredUserIds = currentUserId
+    ? targetUserIds.filter((id) => id !== currentUserId)
     : targetUserIds;
 
   if (filteredUserIds.length === 0) return;
 
-  let title = '📢 Data Update';
+  let title = "Data Update";
   let message = `${actorName} performed an action on "${itemTitle}"`;
 
-  if (action === 'ADD') {
-    title = '➕ New Item Created';
-    message = `${actorName} ne naya item create kiya: "${itemTitle}"`;
-  } else if (action === 'EDIT') {
-    title = '✏️ Item Updated';
-    message = `${actorName} ne item update kiya: "${itemTitle}"`;
-  } else if (action === 'DELETE') {
-    title = '🗑️ Item Deleted';
-    message = `${actorName} ne item delete kar diya: "${itemTitle}"`;
+  if (action === "ADD") {
+    title = "New Task Added";
+    message = `${actorName} created a new task: "${itemTitle}"`;
+  } else if (action === "EDIT") {
+    title = "Task Updated";
+    message = `${actorName} updated the task: "${itemTitle}"`;
+  } else if (action === "DELETE") {
+    title = "Task Deleted";
+    message = `${actorName} deleted the task: "${itemTitle}"`;
   }
 
   await sendWebPushToUsers({
@@ -142,8 +153,14 @@ export async function notifyDataChange({ action, itemTitle, targetUserIds = [], 
 /**
  * MENTIONS NOTIFICATION: @UserName Mention Notification Trigger
  */
-export async function checkAndSendMentions({ text, itemTitle, boardMembers = [], currentUserId, actorName = 'Someone' }) {
-  if (!text || !text.includes('@')) return;
+export async function checkAndSendMentions({
+  text,
+  itemTitle,
+  boardMembers = [],
+  currentUserId,
+  actorName = "Someone",
+}) {
+  if (!text || !text.includes("@")) return;
 
   const matches = text.match(/@(\w+)/g);
   if (!matches) return;
@@ -152,11 +169,11 @@ export async function checkAndSendMentions({ text, itemTitle, boardMembers = [],
   const targetUserIds = [];
 
   boardMembers.forEach((member) => {
-    const fullName = (member.full_name || '').toLowerCase();
-    const email = (member.email || '').toLowerCase();
+    const fullName = (member.full_name || "").toLowerCase();
+    const email = (member.email || "").toLowerCase();
 
     const isMentioned = mentionedUsernames.some(
-      (u) => fullName.includes(u) || email.includes(u)
+      (u) => fullName.includes(u) || email.includes(u),
     );
 
     if (isMentioned && member.id !== currentUserId) {
@@ -167,8 +184,8 @@ export async function checkAndSendMentions({ text, itemTitle, boardMembers = [],
   if (targetUserIds.length > 0) {
     await sendWebPushToUsers({
       targetUserIds,
-      title: '🚨 Mentioned You!',
-      message: `${actorName} ne aapko "${itemTitle}" me mention kiya.`,
+      title: "New Mention",
+      message: `${actorName} mentioned you in "${itemTitle}"`,
     });
   }
 }
