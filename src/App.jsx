@@ -12,14 +12,15 @@ import ActivityLogPanel from './components/ActivityLogPanel';
 import { useTasks } from './lib/useTasks';
 import { supabase } from './lib/supabaseClient';
 import { registerPushNotifications } from './utils/pushService';
+import { useBoardMembers } from './hooks/useBoardMembers';
 
 export default function App() {
   const [view, setView] = useState('all');
   const [activeBoard, setActiveBoard] = useState(null);
   const [boards, setBoards] = useState([]);
   
-  // Board Members state
-  const [boardMembers, setBoardMembers] = useState([]);
+  // Custom Hook for Board Members
+  const { members: boardMembers, loading: membersLoading } = useBoardMembers(activeBoard?.id);
 
   // Pass activeBoard.id and boardMembers to useTasks hook
   const { 
@@ -44,58 +45,6 @@ export default function App() {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [logsOpen, setLogsOpen] = useState(false);
-
-  // FIX: Schema-safe & Deduplicated Board Members Fetching
-  useEffect(() => {
-    async function fetchBoardMembers() {
-      if (!activeBoard?.id) {
-        setBoardMembers([]);
-        return;
-      }
-
-      try {
-        // Step 1: board_members table se user_ids fetch karo
-        const { data: members, error: memberErr } = await supabase
-          .from('board_members')
-          .select('user_id')
-          .eq('board_id', activeBoard.id);
-
-        if (memberErr || !members || members.length === 0) {
-          if (memberErr) console.error('Error fetching board members:', memberErr);
-          setBoardMembers([]);
-          return;
-        }
-
-        // Step 2: Set use karke unique user IDs extract karo (Deduplication)
-        const userIds = [...new Set(members.map((m) => m.user_id))];
-
-        // Step 3: Profiles table se details fetch karo
-        const { data: profiles, error: profileErr } = await supabase
-          .from('profiles')
-          .select('id, full_name, email')
-          .in('id', userIds);
-
-        if (profileErr) {
-          console.error('Error fetching profiles:', profileErr);
-          setBoardMembers([]);
-          return;
-        }
-
-        const formattedMembers = profiles.map((p) => ({
-          id: p.id,
-          full_name: p.full_name || '',
-          email: p.email || ''
-        }));
-
-        setBoardMembers(formattedMembers);
-      } catch (err) {
-        console.error('Board members fetch exception:', err);
-        setBoardMembers([]);
-      }
-    }
-
-    fetchBoardMembers();
-  }, [activeBoard?.id]);
 
   const handleSelectBoard = (board) => {
     setActiveBoard(board);
@@ -385,6 +334,7 @@ export default function App() {
           onOpenJoinModal={() => setJoinModalOpen(true)}
           onOpenCreateModal={() => setCreateModalOpen(true)}
           onOpenLogs={() => setLogsOpen(true)}
+          boardMembers={boardMembers} 
         />
       </div>
 
@@ -434,6 +384,7 @@ export default function App() {
                   setMobileNavOpen(false);
                   setLogsOpen(true);
                 }}
+                boardMembers={boardMembers}
               />
             </motion.div>
           </>

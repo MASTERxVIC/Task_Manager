@@ -24,8 +24,16 @@ export function useBoardMembers(boardId) {
 
       if (error) {
         console.error("Error fetching board members:", error);
+        setMembers([]);
       } else {
-        setMembers(data || []);
+        // Clean and format the data
+        const formatted = (data || []).map((m) => ({
+          id: m.profiles?.id || m.user_id,
+          full_name: m.profiles?.full_name || '',
+          email: m.profiles?.email || '',
+          role: m.role
+        }));
+        setMembers(formatted);
       }
       setLoading(false);
     };
@@ -33,5 +41,6 @@ export function useBoardMembers(boardId) {
     fetchMembers();
   }, [boardId]);
 
-  return { members, loading };
+  const rawMembers = members; // keep it simple
+  return { members: rawMembers, loading };
 }
