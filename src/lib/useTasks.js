@@ -11,6 +11,9 @@ export function useTasks(boardId = null, boardMembers = []) {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef(null);
 
+  // FIX: Fallback state taaki agar component se boardMembers na mile, toh DB se fetch ho jaye
+  const [fetchedBoardMembers, setFetchedBoardMembers] = useState([]);
+
   // DUPLICATE PREVENTER: Log deduplication tracker
   const lastLoggedRef = useRef({ key: "", timestamp: 0 });
 
@@ -32,20 +35,51 @@ export function useTasks(boardId = null, boardMembers = []) {
     );
   }, [user]);
 
-  // FIX 1: Flexible mapping for board members (Supports both user_id and id)
-  const targetUserIds = useMemo(() => {
-    if (!boardMembers || boardMembers.length === 0) {
-      return user?.id ? [user.id] : [];
+  // Board members fetch karne ka effect
+  useEffect(() => {
+    let isMounted = true;
+    const fetchBoardMembers = async () => {
+      if (!boardId) {
+        setFetchedBoardMembers([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('board_members')
+        .select('user_id')
+        .eq('board_id', boardId);
+
+      if (!error && data && isMounted) {
+        setFetchedBoardMembers(data.map(m => m.user_id));
+      }
+    };
+
+    if ((!boardMembers || boardMembers.length === 0) && boardId) {
+      fetchBoardMembers();
+    } else {
+      setFetchedBoardMembers([]);
     }
 
-    // `user_id` ya `id` dono keys ko extract kar ke clean unique array banata hai
-    const extractedIds = boardMembers
-      .map((m) => m.user_id || m.id || (typeof m === "string" ? m : null))
-      .filter(Boolean);
+    return () => { isMounted = false; };
+  }, [boardId, boardMembers]);
 
-    // Duplicates remove karne ke liye Set use kiya hai
-    return [...new Set(extractedIds)];
-  }, [boardMembers, user?.id]);
+  // FIX 1 & Fallback: Flexible mapping for board members (Supports props and database fetch)
+  const targetUserIds = useMemo(() => {
+    // 1. Agar props mein boardMembers hain toh unhe use karo
+    if (boardMembers && boardMembers.length > 0) {
+      const extractedIds = boardMembers
+        .map((m) => m.user_id || m.id || (typeof m === "string" ? m : null))
+        .filter(Boolean);
+      if (extractedIds.length > 0) return [...new Set(extractedIds)];
+    }
+
+    // 2. Agar fetched board members hain toh unhe use karo
+    if (fetchedBoardMembers.length > 0) {
+      return [...new Set(fetchedBoardMembers)];
+    }
+
+    // 3. Last option: sirf current user
+    return user?.id ? [user.id] : [];
+  }, [boardMembers, fetchedBoardMembers, user?.id]);
 
   const logActivity = useCallback(
     async ({ actionType, todoId, taskTitle, details = {} }) => {
@@ -310,7 +344,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: task,
           actorName,
           targetUserIds,
-          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
+          currentUserId: user.id,
           url: "/",
         });
 
@@ -357,7 +391,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: taskName,
           actorName,
           targetUserIds,
-          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
+          currentUserId: user.id,
           url: "/",
         });
 
@@ -414,7 +448,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: `${currentTask.task} (${nextCompleted ? "Completed" : "Reopened"})`,
           actorName,
           targetUserIds,
-          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
+          currentUserId: user.id,
           url: "/",
         });
       }
@@ -441,7 +475,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           itemTitle: taskToDelete?.task || "Task",
           actorName,
           targetUserIds,
-          currentUserId: user.id, // <-- Sender ko skip karne ke liye add kiya
+          currentUserId: user.id,
         });
       }
     }
