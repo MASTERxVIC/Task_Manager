@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { supabase } from './supabaseClient';
-import { broadcastToBoard, checkAndSendMentions } from '../utils/pushService';
+import { notifyDataChange, checkAndSendMentions } from '../utils/pushService';
 import { urgency } from './date';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -24,10 +24,21 @@ export function useTasks(boardId = null, boardMembers = []) {
     });
   }, []);
 
+  // Current User ka display name nikalne ke liye helper
+  const actorName = useMemo(() => {
+    if (!user) return 'A user';
+    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'A user';
+  }, [user]);
+
+  // Target User IDs list filter karna (Current user ko exclude karke)
+  const targetUserIds = useMemo(() => {
+    if (!boardMembers || boardMembers.length === 0) return [];
+    return boardMembers.map((m) => m.id).filter((id) => id !== user?.id);
+  }, [boardMembers, user?.id]);
+
   const logActivity = useCallback(async ({ actionType, todoId, taskTitle, details = {} }) => {
     if (!user || !boardId) return;
 
-    // PREVENT DUPLICATES: Check if identical action logged in last 1000ms
     const logKey = `${actionType}_${todoId}`;
     const now = Date.now();
     if (
@@ -41,7 +52,6 @@ export function useTasks(boardId = null, boardMembers = []) {
     lastLoggedRef.current = { key: logKey, timestamp: now };
 
     try {
-      // Board details check
       const { data: boardData, error: boardError } = await supabase
         .from('boards')
         .select('is_default, name')
@@ -53,12 +63,10 @@ export function useTasks(boardId = null, boardMembers = []) {
         return;
       }
 
-      // Default board condition check
       if (boardData && (boardData.is_default || boardData.name?.toLowerCase() === 'default')) {
         return;
       }
 
-      // Insert Log Record
       const { data, error } = await supabase.from('activity_logs').insert([{
         board_id: boardId,
         todo_id: String(todoId),
@@ -218,7 +226,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // 5. Add Task (Integrated Push Triggers)
+  // 5. Add Task (Multi-Device & Name Mention Integrated)
   const addTask = async ({ task, des, deadline, priority, board_id = null }) => {
     if (!user) return;
     const newTaskId = crypto.randomUUID();
@@ -246,28 +254,30 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: task
       });
 
-      // --- PUSH NOTIFICATIONS ---
-      if (targetBoardId && boardMembers.length > 0) {
-        // 1. Broadcast push to all active board members
-        broadcastToBoard({
-          boardMembers,
-          currentUserId: user.id,
-          title: '📝 New Task Added',
-          message: `${user.email?.split('@')[0] || 'Member'} ne naya task add kiya: "${task}"`
+      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
+      if (targetBoardId && targetUserIds.length > 0) {
+        // 1. Multi-Device Push Broadcast
+        notifyDataChange({
+          action: 'ADD',
+          itemTitle: task,
+          actorName,
+          targetUserIds,
+          url: '/'
         });
 
-        // 2. Mention Push (Agar task title ya description me @user hai)
+        // 2. Mention Push (Agar task/description me @name mention hai)
         checkAndSendMentions({
           text: `${task} ${des || ''}`,
-          taskTitle: task,
+          itemTitle: task,
           boardMembers,
-          currentUserId: user.id
+          currentUserId: user.id,
+          actorName
         });
       }
     }
   };
 
-  // 6. Update Task (Integrated Push Triggers)
+  // 6. Update Task (Multi-Device & Name Mention Integrated)
   const updateTask = async (id, patch) => {
     const currentTask = tasks.find((t) => t.id === id);
     const { image, ...validPatch } = patch;
@@ -285,27 +295,29 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: patch
       });
 
-      // --- PUSH NOTIFICATIONS ---
-      if (boardId && boardMembers.length > 0) {
-        broadcastToBoard({
-          boardMembers,
-          currentUserId: user.id,
-          title: '✏️ Task Updated',
-          message: `${user.email?.split('@')[0] || 'Member'} ne task "${taskName}" update kiya hai.`
+      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
+      if (boardId && targetUserIds.length > 0) {
+        notifyDataChange({
+          action: 'EDIT',
+          itemTitle: taskName,
+          actorName,
+          targetUserIds,
+          url: '/'
         });
 
         const updatedText = `${patch.task || ''} ${patch.des || ''}`;
         checkAndSendMentions({
           text: updatedText,
-          taskTitle: taskName,
+          itemTitle: taskName,
           boardMembers,
-          currentUserId: user.id
+          currentUserId: user.id,
+          actorName
         });
       }
     }
   };
 
-  // 7. Toggle Task (Integrated Push Triggers)
+  // 7. Toggle Task
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -336,19 +348,20 @@ export function useTasks(boardId = null, boardMembers = []) {
         details: { completed: nextCompleted }
       });
 
-      // --- PUSH NOTIFICATIONS ---
-      if (boardId && boardMembers.length > 0) {
-        broadcastToBoard({
-          boardMembers,
-          currentUserId: user.id,
-          title: nextCompleted ? '✅ Task Completed' : '↩️ Task Reopened',
-          message: `${user.email?.split('@')[0] || 'Member'} ne task "${currentTask.task}" ko ${nextCompleted ? 'complete' : 'reopen'} kar diya.`
+      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
+      if (boardId && targetUserIds.length > 0) {
+        notifyDataChange({
+          action: nextCompleted ? 'EDIT' : 'EDIT',
+          itemTitle: `${currentTask.task} (${nextCompleted ? 'Completed' : 'Reopened'})`,
+          actorName,
+          targetUserIds,
+          url: '/'
         });
       }
     }
   };
 
-  // 8. Delete Task (Integrated Push Triggers)
+  // 8. Delete Task
   const deleteTask = async (id) => {
     const taskToDelete = tasks.find((t) => t.id === id);
 
@@ -362,13 +375,13 @@ export function useTasks(boardId = null, boardMembers = []) {
         taskTitle: taskToDelete?.task || 'Unknown Task'
       });
 
-      // --- PUSH NOTIFICATIONS ---
-      if (boardId && boardMembers.length > 0) {
-        broadcastToBoard({
-          boardMembers,
-          currentUserId: user.id,
-          title: '🗑️ Task Deleted',
-          message: `${user.email?.split('@')[0] || 'Member'} ne task "${taskToDelete?.task || 'Unknown'}" delete kar diya.`
+      // --- MULTI-DEVICE PUSH NOTIFICATIONS ---
+      if (boardId && targetUserIds.length > 0) {
+        notifyDataChange({
+          action: 'DELETE',
+          itemTitle: taskToDelete?.task || 'Task',
+          actorName,
+          targetUserIds
         });
       }
     }

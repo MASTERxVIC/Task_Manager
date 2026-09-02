@@ -1,11 +1,8 @@
 import { supabase } from '../lib/supabaseClient';
+import { getDeviceId } from '../utils/deviceHelper';
 
-// Real VAPID Public Key
 const VAPID_PUBLIC_KEY = 'BCdnuHtm-6G__RHN1_OKZGWYGRGVhMnnuPnIGe_r-DNsTsnw2LYvs0zdwkWEUiHBx4VtzaYUKt6At_t3pOvujkY';
 
-/**
- * Base64 VAPID Key Helper Function
- */
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -22,18 +19,10 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 /**
- * Push Notification Enable Function
- * @param {string} userId - Current logged in user ID
- * @param {boolean} isUserClick - Manual button click check (Alerts control ke liye)
+ * Multi-Device Push Subscription Register/Update
  */
 export async function enableNotifications(userId, isUserClick = false) {
-  console.log("👉 Step 1: Triggered for User ID:", userId);
-
-  if (!userId) {
-    console.error("❌ User ID missing hai!");
-    if (isUserClick) alert("User ID missing hai. Kripya reload karke try karein.");
-    return false;
-  }
+  if (!userId) return false;
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     if (isUserClick) alert('Push notifications aapke browser me supported nahi hain.');
@@ -42,132 +31,145 @@ export async function enableNotifications(userId, isUserClick = false) {
 
   try {
     const permission = await Notification.requestPermission();
-    console.log("👉 Step 2: Permission Status:", permission);
-
-    if (permission === 'denied') {
-      if (isUserClick) {
-        alert('Notification permission blocked hai! Browser lock icon par click karke Allow karein.');
+    if (permission !== 'granted') {
+      if (isUserClick && permission === 'denied') {
+        alert('Notification permission blocked hai! Browser lock icon se allow karein.');
       }
       return false;
     }
 
-    if (permission !== 'granted') return false;
-
-    // Service Worker Registration
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
-    console.log("👉 Step 3: Service Worker Ready!");
 
     const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
-    // Push Subscription Generation
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: convertedVapidKey,
     });
 
-    // Native PushSubscription ko plain JSON object me map karna
     const subJson = subscription.toJSON();
-    console.log("👉 Step 4: Generated Push Subscription Object:", subJson);
+    const deviceId = getDeviceId();
 
-    // Supabase DB Update
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ push_subscription: subJson })
-      .eq('id', userId)
-      .select();
+    // Multi-device Table me Save/Upsert karein
+    const { error } = await supabase
+      .from('user_push_subscriptions')
+      .upsert(
+        {
+          user_id: userId,
+          device_id: deviceId,
+          subscription: subJson,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id, device_id' }
+      );
 
     if (error) {
-      console.error("❌ Step 5: Supabase DB Update Failed:", error.message);
-      if (isUserClick) alert('Database update error: ' + error.message);
+      console.error('Multi-device token save error:', error.message);
       return false;
     }
 
-    console.log("✅ Step 6: DB update success:", data);
-    if (isUserClick) {
-      alert('Notifications Successfully Enable Ho Gayi Hain! 🎉');
-    }
+    if (isUserClick) alert('Notifications Successfully Enabled on this Device! 🎉');
     return true;
 
   } catch (error) {
-    console.error('❌ Notification Enabling Error:', error);
-    if (isUserClick) alert('Error: ' + error.message);
+    console.error('Notification Error:', error);
     return false;
   }
 }
 
-/**
- * Auto-Register Function
- */
 export async function registerPushNotifications(userId) {
   return await enableNotifications(userId, false);
 }
 
 /**
- * Single User ko Push Bhejna
+ * Direct User / Multi-Device Push Invoker Function
  */
-export async function sendWebPush({ targetUserId, title, message, url = '/' }) {
+export async function sendWebPushToUser({ targetUserId, title, message, url = '/' }) {
   try {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('push_subscription')
-      .eq('id', targetUserId)
-      .maybeSingle();
+    // User ke saare registered devices/tokens fetch karein
+    const { data: subs, error } = await supabase
+      .from('user_push_subscriptions')
+      .select('subscription')
+      .eq('user_id', targetUserId);
 
-    if (error || !profile || !profile.push_subscription) return;
+    if (error || !subs || subs.length === 0) return;
 
-    const subscriptionObj = typeof profile.push_subscription === 'string' 
-      ? JSON.parse(profile.push_subscription) 
-      : profile.push_subscription;
-
-    await supabase.functions.invoke('send-push', {
-      body: {
-        userSubscription: subscriptionObj,
-        payload: { title, message, url },
-      },
-    });
+    // Har device par Push Notification Send karein
+    for (const row of subs) {
+      await supabase.functions.invoke('send-push', {
+        body: {
+          userSubscription: row.subscription,
+          payload: { title, message, url },
+        },
+      });
+    }
   } catch (err) {
-    console.error('Push Invoke Error:', err);
+    console.error('Push Send Error:', err);
   }
 }
 
 /**
- * BROADCAST: Board Members ko Push Bhejna
+ * ACTION NOTIFICATION: ADD, EDIT, DELETE Data Update Trigger
+ * @param {Object} params
+ * @param {'ADD'|'EDIT'|'DELETE'} params.action - Operation performed
+ * @param {string} params.itemTitle - Item/Data Name
+ * @param {Array} params.targetUserIds - List of User IDs who should receive notification
+ * @param {string} params.actorName - Performing User ka Name (e.g., "Atul Kumar")
  */
-export async function broadcastToBoard({ boardMembers = [], currentUserId, title, message }) {
-  if (!boardMembers || boardMembers.length === 0) return;
+export async function notifyDataChange({ action, itemTitle, targetUserIds = [], actorName = 'A user', url = '/' }) {
+  if (!targetUserIds || targetUserIds.length === 0) return;
 
-  const otherMembers = boardMembers.filter((m) => m.id !== currentUserId);
+  let title = '📢 Data Update';
+  let message = `${actorName} performed an action on "${itemTitle}"`;
 
-  otherMembers.forEach((member) => {
-    sendWebPush({
-      targetUserId: member.id,
-      title: title || '📢 Board Activity',
-      message: message,
+  if (action === 'ADD') {
+    title = '➕ New Item Created';
+    message = `${actorName} ne naya item create kiya: "${itemTitle}"`;
+  } else if (action === 'EDIT') {
+    title = '✏️ Item Updated';
+    message = `${actorName} ne item update kiya: "${itemTitle}"`;
+  } else if (action === 'DELETE') {
+    title = '🗑️ Item Deleted';
+    message = `${actorName} ne item delete kar diya: "${itemTitle}"`;
+  }
+
+  // Target User IDs ko Multi-Device Push Bhejein
+  targetUserIds.forEach((targetUserId) => {
+    sendWebPushToUser({
+      targetUserId,
+      title,
+      message,
+      url,
     });
   });
 }
 
 /**
- * MENTIONS: Text me @User parse karke push bhejna
+ * MENTIONS NOTIFICATION: @UserName Mention Notification Trigger
  */
-export async function checkAndSendMentions({ text, taskTitle, boardMembers = [], currentUserId }) {
+export async function checkAndSendMentions({ text, itemTitle, boardMembers = [], currentUserId, actorName = 'Someone' }) {
   if (!text || !text.includes('@')) return;
 
   const matches = text.match(/@(\w+)/g);
   if (!matches) return;
 
-  const usernames = matches.map((m) => m.substring(1).toLowerCase());
+  const mentionedUsernames = matches.map((m) => m.substring(1).toLowerCase());
 
   boardMembers.forEach((member) => {
-    const name = (member.full_name || member.email || '').toLowerCase();
-    const isMentioned = usernames.some((u) => name.includes(u));
+    const fullName = (member.full_name || '').toLowerCase();
+    const email = (member.email || '').toLowerCase();
+
+    // Check karein ki Mentioned Name se Match hota h ya nahi
+    const isMentioned = mentionedUsernames.some(
+      (u) => fullName.includes(u) || email.includes(u)
+    );
 
     if (isMentioned && member.id !== currentUserId) {
-      sendWebPush({
+      sendWebPushToUser({
         targetUserId: member.id,
         title: '🚨 Mentioned You!',
-        message: `Aapko task "${taskTitle}" me mention kiya gaya hai.`,
+        message: `${actorName} ne aapko "${itemTitle}" me mention kiya.`,
       });
     }
   });
