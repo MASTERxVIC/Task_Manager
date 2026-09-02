@@ -18,7 +18,7 @@ export function useBoardMembers(boardId) {
         .select(`
           user_id,
           role,
-          profiles:user_id (id, full_name, email)
+          profiles:user_id!left (id, full_name, email)
         `)
         .eq("board_id", boardId);
 
