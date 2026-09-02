@@ -85,7 +85,7 @@ export default function Auth() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 bg-surface hover:bg-white border-2 hover:border-surface text-white hover:text-surface font-medium py-2.5 rounded-xl text-sm transition-colors mb-4 cursor-pointer"
+            className="w-full flex items-center justify-center gap-3 bg-surface-raised border-2 hover:border-surface text-white hover:text-surface font-medium py-2.5 rounded-xl text-sm transition-colors mb-4 cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
