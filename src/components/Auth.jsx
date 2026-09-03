@@ -56,25 +56,16 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-      
-      {/* Top-Left Corner SVG */}
+      {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
+      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
+        
+      {/* Top-Left Corner Direct SVG */}
       <div className="absolute top-0 left-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
         <svg viewBox="-300 -300 600 600" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <path d="M216.768-212.263c68.9 56.3 137.3 107.3 139.9 167.3 2.7 60-60.3 129.2-98.9 193.4s-52.7 123.4-90.2 151.1c-37.4 27.7-98.2 23.7-155.8 19.4s-112-9-169.6-30.1c-57.5-21.2-118.1-58.7-157.1-117.8-39.1-59-56.5-139.4-27-196.7 29.5-57.2 106-91.3 172.3-148.5 66.2-57.3 122.3-137.6 185.1-146.9s132.3 52.4 201.3 108.8" fill="#fec62f"/>
         </svg>
       </div>
 
-      {/* Bottom-Right Corner Direct SVG */}
-      <div className="absolute bottom-0 right-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
-        <svg viewBox="-300 -300 600 600" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <g transform="translate(871.8168563822678 414.7951641447935)">
-            <path d="M205.2 -64.5C269 -8 325.9 106.5 290.6 205.7C255.2 304.8 127.6 388.7 46.7 361.7C-34.1 334.7 -68.2 196.9 -93.5 103.5C-118.7 10.2 -135.1 -38.6 -118.1 -68.2C-101 -97.7 -50.5 -107.8 10.1 -113.7C70.7 -119.5 141.5 -121 205.2 -64.5" fill="#FEC62F"></path>
-          </g>
-        </svg>
-      </div>
-
-      {/* Left Side: Form Container */}
-      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           
           {/* Header Title & Subtitle */}
@@ -170,6 +161,16 @@ export default function Auth() {
             </button>
           </div>
         </div>
+
+        {/* Bottom-Right Corner SVG from public folder */}
+       <div className="absolute bottom-0 right-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
+        <svg viewBox="-300 -300 600 600" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(871.8168563822678 414.7951641447935)">
+            <path d="M205.2 -64.5C269 -8 325.9 106.5 290.6 205.7C255.2 304.8 127.6 388.7 46.7 361.7C-34.1 334.7 -68.2 196.9 -93.5 103.5C-118.7 10.2 -135.1 -38.6 -118.1 -68.2C-101 -97.7 -50.5 -107.8 10.1 -113.7C70.7 -119.5 141.5 -121 205.2 -64.5" fill="#FEC62F"></path>
+          </g>
+        </svg>
+      </div>
+
       </div>
 
       {/* Right Side: Single Static Image (Completely untouched) */}
