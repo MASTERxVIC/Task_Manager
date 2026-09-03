@@ -193,17 +193,18 @@ export default function Auth() {
             </button>
           </div>
         </div>   
-      </div>
-
-      {/* Bottom-Right Corner SVG from public folder */}
+         {/* Bottom-Right Corner SVG from public folder */}
       <div className="absolute bottom-0 right-0 pointer-events-none z-10 w-80 h-80 overflow-hidden">
-        <svg viewBox="100 100 -10 -10" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="-100 -100 100 100" xmlns="http://www.w3.org/2000/svg">
           <path
             fill="#FEC62F"
             d="M46.6,-53.7C59.1,-45.1,67.1,-29.2,68.1,-13.5C69.1,2.2,63.1,17.6,55.4,32.9C47.6,48.2,38.1,63.4,25.5,66.3C12.9,69.3,-2.8,60,-21.9,55.2C-41.1,50.4,-63.8,50.2,-76.7,38.9C-89.7,27.6,-92.9,5.3,-88.5,-14.9C-84,-35,-71.9,-53.1,-55.9,-61.2C-39.8,-69.3,-19.9,-67.3,-1.4,-65.6C17.1,-63.9,34.1,-62.4,46.6,-53.7Z"
           />
         </svg>
       </div>
+      </div>
+
+     
 
       {/* Right Side: Single Static Image (Completely untouched) */}
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#FDFBF7] relative overflow-hidden">
