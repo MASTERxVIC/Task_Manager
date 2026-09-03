@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Anta&family=Big+Shoulders+Inline:opsz,wght@10..72,100..900&family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Fredoka:wght@300..700&family=Inder&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Righteous&family=Space+Grotesk:wght@300..700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anta&family=Archivo:ital,wght@0,100..900;1,100..900&family=Big+Shoulders+Inline:opsz,wght@10..72,100..900&family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Fredoka:wght@300..700&family=Inder&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Righteous&family=Space+Grotesk:wght@300..700&family=Space+Mono:wght@400;700&display=swap');
 
 @theme {
   /* Structural — Custom Palette */
@@ -38,6 +38,7 @@
   --font-inder: 'Inder', sans-serif;
   --font-stencil: 'Big Shoulders Stencil', cursive;
   --font-inline: 'Big Shoulders Inline', cursive;
+  --font-archivo: 'Archivo', sans-serif;
 }
 
 * {
@@ -96,6 +97,7 @@ body {
 .font-righteous { font-family: var(--font-righteous); }
 .font-fredoka { font-family: var(--font-fredoka); }
 .font-inter { font-family: var(--font-inter); }
+.font-archivo { font-family: var(--font-archivo); }
 
 .grad-text {
   background: linear-gradient(120deg, var(--color-high), var(--color-surface));
