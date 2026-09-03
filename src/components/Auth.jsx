@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
+  // Public folder wali images ka array yahan define karde bhai
+const mockupImages = [
+  '/img1.jpg',
+  '/img2.jpg',
+  '/img3.jpg',
+  '/img4.jpg',
+  '/img5.jpg'
+];
+
+
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -8,6 +18,23 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [infoMsg, setInfoMsg] = useState(null);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+
+  // 5 seconds interval to randomly change image
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImgIndex((prevIndex) => {
+        let nextIndex;
+        do {
+          nextIndex = Math.floor(Math.random() * mockupImages.length);
+        } while (nextIndex === prevIndex && mockupImages.length > 1);
+        return nextIndex;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Email/Password Auth Handler
   const handleAuth = async (e) => {
@@ -173,42 +200,15 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Right Side: UI Mockup Showcase (Like reference image) */}
+      {/* Right Side: Dynamic Image Rotator */}
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#0a0a0a] relative overflow-hidden items-center justify-center p-12">
-        <div className="absolute inset-0 opacity-40 flex gap-6 rotate-[-10deg] scale-125 pointer-events-none select-none">
-          {/* Column 1 */}
-          <div className="flex flex-col gap-6 animate-none">
-            <div className="w-64 h-[400px] bg-gradient-to-b from-purple-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl flex flex-col gap-3">
-              <div className="w-full h-8 bg-white/10 rounded-lg"></div>
-              <div className="w-3/4 h-6 bg-white/10 rounded-lg"></div>
-              <div className="w-full h-48 bg-white/5 rounded-xl mt-auto"></div>
-            </div>
-            <div className="w-64 h-[300px] bg-gradient-to-b from-blue-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl">
-              <div className="w-full h-6 bg-white/10 rounded-lg mb-3"></div>
-              <div className="w-full h-32 bg-white/5 rounded-xl"></div>
-            </div>
-          </div>
-
-          {/* Column 2 */}
-          <div className="flex flex-col gap-6 pt-12">
-            <div className="w-64 h-[350px] bg-gradient-to-b from-amber-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl">
-              <div className="w-1/2 h-6 bg-white/10 rounded-lg mb-4"></div>
-              <div className="w-full h-40 bg-white/5 rounded-xl"></div>
-            </div>
-            <div className="w-64 h-[400px] bg-gradient-to-b from-emerald-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl">
-              <div className="w-full h-32 bg-white/5 rounded-xl mb-3"></div>
-              <div className="w-3/4 h-6 bg-white/10 rounded-lg"></div>
-            </div>
-          </div>
-
-          {/* Column 3 */}
-          <div className="flex flex-col gap-6 pt-6">
-            <div className="w-64 h-[380px] bg-gradient-to-b from-rose-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl">
-              <div className="w-full h-48 bg-white/5 rounded-xl mb-4"></div>
-              <div className="w-full h-6 bg-white/10 rounded-lg"></div>
-            </div>
-            <div className="w-64 h-[300px] bg-gradient-to-b from-indigo-900/40 to-gray-900 border border-white/10 rounded-3xl p-4 shadow-2xl"></div>
-          </div>
+        <div className="w-full h-full max-w-lg max-h-[600px] relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center bg-black/40">
+          <img
+            key={currentImgIndex}
+            src={mockupImages[currentImgIndex]}
+            alt="App Preview Showcase"
+            className="w-full h-full object-cover transition-opacity duration-1000 animate-fadeIn"
+          />
         </div>
       </div>
     </div>
