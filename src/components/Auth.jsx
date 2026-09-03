@@ -80,10 +80,10 @@ export default function Auth() {
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           {/* Header Title & Subtitle */}
           <div className="space-y-1.5">
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#1E1E24]">
+            <h2 className="text-3xl font-sans font-extrabold tracking-tight text-[#1E1E24]">
               {isSignUp ? "Create an account" : "Welcome back"}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm font-sans text-gray-600">
               {isSignUp
                 ? "Sign up to create your private task list."
                 : "Log in to view your tasks and manage your boards."}

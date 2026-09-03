@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anta&family=Big+Shoulders+Inline:opsz,wght@10..72,100..900&family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Fredoka:wght@300..700&family=Inder&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Righteous&family=Space+Grotesk:wght@300..700&family=Space+Mono:wght@400;700&display=swap');
 
 @theme {
   /* Structural — Custom Palette */
@@ -25,11 +25,19 @@
   --color-amber: #CCDC69;
   --color-mint: #CCDC69;
 
-  /* Fonts */
-  --font-display: 'Iosevka Charon Mono', monospace;
-  --font-body: 'Iosevka Charon Mono', monospace;
-  --font-mono: 'Iosevka Charon Mono', monospace;
-  --font-code: 'Space Grotesk', sans-serif;
+  /* Font Mappings — Sabhi fonts custom variables par available hain */
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-inter: 'Inter', sans-serif;
+  --font-manrope: 'Manrope', sans-serif;
+  --font-fredoka: 'Fredoka', cursive;
+  --font-righteous: 'Righteous', cursive;
+  --font-anta: 'Anta', sans-serif;
+  --font-inder: 'Inder', sans-serif;
+  --font-stencil: 'Big Shoulders Stencil', cursive;
+  --font-inline: 'Big Shoulders Inline', cursive;
 }
 
 * {
@@ -57,7 +65,7 @@ body, #root {
 body {
   background: var(--color-void);
   color: var(--color-ink);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -webkit-touch-callout: none;
 }
@@ -82,13 +90,12 @@ body {
   border-radius: 2px;
 }
 
-.font-display {
-  font-family: var(--font-display);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
+/* Font Classes for Quick Utility Access */
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+.font-righteous { font-family: var(--font-righteous); }
+.font-fredoka { font-family: var(--font-fredoka); }
+.font-inter { font-family: var(--font-inter); }
 
 .grad-text {
   background: linear-gradient(120deg, var(--color-high), var(--color-surface));
