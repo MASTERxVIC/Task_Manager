@@ -237,7 +237,7 @@ export default function Sidebar({
               onClick={() => setView(item.key)}
               className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
                 active
-                  ? "bg-surface-raised text-ink font-semibold shadow-sm"
+                  ? "bg-[#FDD739] text-ink font-semibold shadow-sm"
                   : "text-white/90 hover:text-white hover:bg-white/10"
               }`}
             >
@@ -245,7 +245,7 @@ export default function Sidebar({
                 <span
                   className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
                     active
-                      ? "grad-ring text-white"
+                      ? "text-white"
                       : "bg-white/10 text-white/80 group-hover:text-white"
                   }`}
                 >
