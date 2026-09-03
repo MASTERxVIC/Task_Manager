@@ -56,19 +56,14 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-      
-      {/* Top-Left Corner SVG (Parent se bahar direct screen ke corner par) */}
-      <div className="absolute top-0 left-0 pointer-events-none z-30">
-        <img src="/ltcr.svg" alt="Top Left Decor" className="w-24 h-24 md:w-48 md:h-48 object-contain" />
-      </div>
-
-      {/* Bottom-Left Corner SVG (Parent se bahar direct screen ke corner par) */}
-      <div className="absolute bottom-0 left-0 pointer-events-none z-30">
-        <img src="/rtcr.svg" alt="Bottom Left Decor" className="w-24 h-24 md:w-48 md:h-48 object-contain" />
-      </div>
-
-      {/* Left Side: Form Container */}
+      {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
       <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
+        
+        {/* Top-Left Corner SVG from public folder */}
+        <div className="absolute top-6 left-6 pointer-events-none">
+          <img src="/ltcr.svg" alt="Top Left Decor" className="w-68 h-68 object-contain" />
+        </div>
+
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           
           {/* Header Title & Subtitle */}
@@ -164,6 +159,12 @@ export default function Auth() {
             </button>
           </div>
         </div>
+
+        {/* Bottom-Right Corner SVG from public folder */}
+        <div className="absolute bottom-6 right-6 pointer-events-none">
+          <img src="/rtcr.svg" alt="Bottom Right Decor" className="w-68 h-68 object-contain" />
+        </div>
+
       </div>
 
       {/* Right Side: Single Static Image (Completely untouched) */}
