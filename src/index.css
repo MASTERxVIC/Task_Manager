@@ -7,7 +7,7 @@
   --color-surface: #7C6ACC;
   --color-surface-raised: #F3F8FC;
   --color-ink: #2E3D72;
-  --color-muted: #2E3D72;
+  --color-muted: #FDD739;
   --color-muted-dim: #92A3CB;
   --color-line: #D0DCED;
 
@@ -99,18 +99,6 @@ body {
 .font-inter { font-family: var(--font-inter); }
 .font-archivo { font-family: var(--font-archivo); }
 
-.grad-text {
-  background: linear-gradient(120deg, var(--color-high), var(--color-surface));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.grad-ring {
-  background: linear-gradient(160deg, var(--color-surface), var(--color-normal));
-  box-shadow: 0 4px 24px -6px rgba(124, 106, 204, 0.35);
-  color: #FFFFFF;
-}
 
 /* Default Scrollbar Styling */
 ::-webkit-scrollbar {

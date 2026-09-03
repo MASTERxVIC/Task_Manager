@@ -85,7 +85,7 @@ export default function Topbar({
         {/* New Task Button */}
         <button
           onClick={onAddClick}
-          className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 grad-ring bg-[#FDFBF7] text-[#1E1E24] font-semibold text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
+          className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 bg-[#FDD739] text-[#1E1E24] font-semibold text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path
