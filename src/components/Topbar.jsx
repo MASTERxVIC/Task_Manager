@@ -68,7 +68,7 @@ export default function Topbar({
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
             style={{ outline: "none", boxShadow: "none" }}
-            className="w-full bg-transparent pl-2 sm:pl-2.5 text-xs sm:text-sm text-ink placeholder:text-muted/60 border-0 focus:border-0 focus:ring-0 focus-visible:ring-0"
+            className="w-full bg-transparent pl-2 sm:pl-2.5 text-xs sm:text-sm text-[#1E1E24] placeholder:text-[#1E1E24]/80 border-0 focus:border-0 focus:ring-0 focus-visible:ring-0"
           />
         </div>
 
@@ -85,7 +85,7 @@ export default function Topbar({
         {/* New Task Button */}
         <button
           onClick={onAddClick}
-          className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 grad-ring text-void font-semibold text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
+          className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 grad-ring bg-[#FDFBF7] text-[#1E1E24] font-semibold text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path
