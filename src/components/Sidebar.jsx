@@ -111,11 +111,7 @@ export default function Sidebar({
       {/* Header - App Brand */}
       <div className="flex items-center justify-between mb-4 shrink-0 px-2">
         <div className="flex items-center gap-2">
-          <img
-            src="/Logo.svg"
-            alt="CollabUS Logo"
-            className="w-6 h-6"
-          />
+          <img src="/Logo.svg" alt="CollabUS Logo" className="w-6 h-6" />
           <span className="font-archivo font-semibold text-lg text-[#FDFBF7]">
             Collab<span className="text-[#FDD739]">US</span>
           </span>
@@ -187,7 +183,9 @@ export default function Sidebar({
                     <div className="flex items-center gap-2 truncate pr-2">
                       {isBoardDefault && (
                         <Lock
-                          className="w-3.5 h-3.5 text-[#2F2F2F] shrink-0"
+                          className={`w-3.5 h-3.5 shrink-0 ${
+                            isSelected ? "text-[#2F2F2F]" : "text-[#FDFBF7]"
+                          }`}
                           title="Default Locked Board"
                         />
                       )}
@@ -196,7 +194,7 @@ export default function Sidebar({
 
                     <div className="flex items-center gap-2 shrink-0">
                       {activeBoard?.id === board.id && (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-[#2F2F2F]" />
                       )}
 
                       {!isBoardDefault && onDeleteBoard && (
@@ -207,7 +205,7 @@ export default function Sidebar({
                             onDeleteBoard(board);
                           }}
                           title="Delete Workspace"
-                          className="p-1 text-gray-400 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer"
+                          className="p-1 text-gray-50 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
