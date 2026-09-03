@@ -1,14 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { supabase } from '../lib/supabaseClient';
-
-  // Public folder wali images ka array yahan define karde bhai
-const mockupImages = [
-  '/img1.jpg',
-  '/img2.jpg',
-  '/img3.jpg',
-  '/img4.jpg',
-  '/img5.jpg'
-];
 
 
 export default function Auth() {
@@ -21,22 +12,7 @@ export default function Auth() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
 
-  // 5 seconds interval to randomly change image
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImgIndex((prevIndex) => {
-        let nextIndex;
-        do {
-          nextIndex = Math.floor(Math.random() * mockupImages.length);
-        } while (nextIndex === prevIndex && mockupImages.length > 1);
-        return nextIndex;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Email/Password Auth Handler
+    // Email/Password Auth Handler
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -200,13 +176,12 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Right Side: Full Space Image Rotator */}
+     {/* Right Side: Single Static Image */}
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#0a0a0a] relative overflow-hidden">
         <img
-          key={currentImgIndex}
-          src={mockupImages[currentImgIndex]}
+          src="/img.jpg"
           alt="App Preview Showcase"
-          className="w-full h-full object-cover transition-opacity duration-5000"
+          className="w-full h-full object-cover"
         />
       </div>
     </div>
