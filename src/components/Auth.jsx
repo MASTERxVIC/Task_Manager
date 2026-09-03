@@ -56,8 +56,14 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-      {/* Left Side: Warm & Friendly Form */}
-      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10">
+      {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
+      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
+        
+        {/* Top-Left Corner SVG from public folder */}
+        <div className="absolute top-6 left-6 pointer-events-none">
+          <img src="/ltcr.svg" alt="Top Left Decor" className="w-12 h-12 object-contain" />
+        </div>
+
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           
           {/* Header Title & Subtitle */}
@@ -153,9 +159,15 @@ export default function Auth() {
             </button>
           </div>
         </div>
+
+        {/* Bottom-Right Corner SVG from public folder */}
+        <div className="absolute bottom-6 right-6 pointer-events-none">
+          <img src="/rtcr.svg" alt="Bottom Right Decor" className="w-12 h-12 object-contain" />
+        </div>
+
       </div>
 
-      {/* Right Side: Single Static Image matching the warm tone */}
+      {/* Right Side: Single Static Image (Completely untouched) */}
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#FDFBF7] relative overflow-hidden">
         <img
           src="/img.jpg"
