@@ -171,8 +171,3 @@ input[type='date']::-webkit-calendar-picker-indicator {
   color: #2F2F2F !important;
   box-shadow: none !important;
 }
-
-.task-bg {
-  background-color: #8d7ed3;
-  background-image: linear-gradient(0deg, #8d7ed3 0%, #6354a6 14%, #000000 63%, #000000 100%);
-}

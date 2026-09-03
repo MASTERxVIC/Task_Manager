@@ -76,7 +76,7 @@ export default function Topbar({
         {hasTasks && (
           <button
             onClick={onClearAll}
-            className="shrink-0 inline-flex items-center text-[11px] sm:text-xs font-medium text-muted-dim hover:text-coral border border-line hover:border-coral rounded-xl px-2.5 py-2 transition-colors bg-white whitespace-nowrap shadow-sm"
+            className="shrink-0 inline-flex items-center font-semibold text-[#1E1E24] hover:text-coral border border-[#FDD739] text-xs sm:text-sm px-3 sm:px-4 py-2 hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             Clear all
           </button>
