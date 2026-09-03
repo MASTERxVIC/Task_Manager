@@ -64,7 +64,7 @@ export default function Auth() {
 
        {/* Top-Left Corner Direct SVG */}
       <div className="absolute top-0 left-0 pointer-events-none z-10 w-80 h-80 overflow-hidden">
-  <svg viewBox="-90 -90 180 180" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+  <svg viewBox="-10 -10 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
     <path
       fill="#FEC62F"
       d="M50.6,-36.3C64.4,-23.1,73.6,-2.1,71.1,19C68.5,40.1,54.1,61.4,36.6,66C19,70.7,-1.8,58.8,-24.1,48.6C-46.4,38.4,-70.3,30,-75.1,15.3C-80,0.6,-65.8,-20.2,-50.1,-33.9C-34.4,-47.6,-17.2,-54.1,0.6,-54.6C18.4,-55.1,36.8,-49.5,50.6,-36.3Z"
