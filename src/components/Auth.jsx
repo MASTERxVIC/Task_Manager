@@ -200,16 +200,14 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Right Side: Dynamic Image Rotator */}
-      <div className="hidden lg:flex lg:w-1/2 h-full bg-[#0a0a0a] relative overflow-hidden items-center justify-center p-12">
-        <div className="w-full h-full max-w-lg max-h-[600px] relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center bg-black/40">
-          <img
-            key={currentImgIndex}
-            src={mockupImages[currentImgIndex]}
-            alt="App Preview Showcase"
-            className="w-full h-full object-cover transition-opacity duration-1000 animate-fadeIn"
-          />
-        </div>
+      {/* Right Side: Full Space Image Rotator */}
+      <div className="hidden lg:flex lg:w-1/2 h-full bg-[#0a0a0a] relative overflow-hidden">
+        <img
+          key={currentImgIndex}
+          src={mockupImages[currentImgIndex]}
+          alt="App Preview Showcase"
+          className="w-full h-full object-cover transition-opacity duration-5000"
+        />
       </div>
     </div>
   );
