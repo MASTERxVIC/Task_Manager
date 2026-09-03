@@ -320,7 +320,8 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
-      <div className="hidden md:block w-64 shrink-0 h-full border-r border-line">
+      {/* Desktop Sidebar: Set to w-80 or w-72 as per your design */}
+      <div className="hidden md:block w-80 shrink-0 h-full border-r border-line z-30 bg-void">
         <Sidebar 
           view={view} 
           setView={setView} 
@@ -353,7 +354,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-y-0 left-0 z-50 w-72 h-full md:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-80 h-full md:hidden"
             >
               <Sidebar
                 view={view}
@@ -391,20 +392,18 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
-        <div className="shrink-0 flex items-center justify-between pr-4">
-          <div className="flex-1">
-            <Topbar
-              view={view}
-              search={search}
-              setSearch={setSearch}
-              onAddClick={openAddDrawer}
-              onMenuClick={() => setMobileNavOpen(true)}
-              onClearAll={requestClearAll}
-              hasTasks={tasks?.length > 0}
-            />
-          </div>
-        </div>
+        {/* Topbar: Rendered directly inside flex container to seamlessly adjust width */}
+        <Topbar
+          view={view}
+          search={search}
+          setSearch={setSearch}
+          onAddClick={openAddDrawer}
+          onMenuClick={() => setMobileNavOpen(true)}
+          onClearAll={requestClearAll}
+          hasTasks={tasks?.length > 0}
+        />
 
         <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-8 py-6 max-w-3xl w-full mx-auto">
           <TaskList

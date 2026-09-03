@@ -107,7 +107,7 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="flex flex-col h-full w-full lg:w-80 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
+    <aside className="flex flex-col h-full w-full lg:w-78 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
       {/* Header - App Brand */}
       <div className="flex items-center justify-between mb-4 shrink-0 px-2">
         <div className="flex items-center gap-2">
