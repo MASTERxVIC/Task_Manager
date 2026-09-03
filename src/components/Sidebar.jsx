@@ -107,17 +107,17 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="flex flex-col h-full w-full lg:w-64 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
+    <aside className="flex flex-col h-full w-full lg:w-80 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
       {/* Header - App Brand */}
       <div className="flex items-center justify-between mb-4 shrink-0 px-2">
         <div className="flex items-center gap-2">
           <img
             src="/Logo.svg"
-            alt="Tasked Logo"
-            className="w-6 h-6 rounded-lg object-contain"
+            alt="CollabUS Logo"
+            className="w-6 h-6"
           />
           <span className="font-display font-semibold text-lg text-white">
-            Tasked
+            CollabUS
           </span>
         </div>
         {onClose && (
