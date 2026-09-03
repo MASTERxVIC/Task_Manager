@@ -141,7 +141,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
     inset 0 0 20px 10px rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .glass-button::before {
@@ -152,6 +152,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  transition: opacity 0.2s ease;
 }
 
 .glass-button::after {
@@ -162,11 +163,12 @@ input[type='date']::-webkit-calendar-picker-indicator {
   width: 1px;
   height: 100%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), transparent, rgba(255, 255, 255, 0.3));
+  transition: opacity 0.2s ease;
 }
 
 .glass-button:hover {
-  background: #ffffff !important;
-  color: #0f172a !important;
+  background: #FDD739 !important;
+  color: #2F2F2F !important;
   box-shadow: none !important;
 }
 
