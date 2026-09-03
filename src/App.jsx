@@ -319,7 +319,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full flex bg-void overflow-hidden fixed inset-0">
+    <div className="h-[100dvh] w-full flex bg-[#FDFBF7] overflow-hidden fixed inset-0">
       {/* Desktop Sidebar: Set to w-80 or w-72 as per your design */}
       <div className="hidden md:block w-78 shrink-0 h-full border-r border-line z-30 bg-void">
         <Sidebar 

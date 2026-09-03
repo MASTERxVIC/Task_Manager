@@ -107,7 +107,7 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="flex flex-col h-full w-full lg:w-78 shrink-0 bg-surface border-r border-line p-4 overflow-hidden select-none">
+    <aside className="flex flex-col h-full w-full lg:w-78 shrink-0 bg-[#1E1E24] border-r border-[#FDFBF7] p-4 overflow-hidden select-none">
       {/* Header - App Brand */}
       <div className="flex items-center justify-between mb-4 shrink-0 px-2">
         <div className="flex items-center gap-2">
@@ -116,8 +116,8 @@ export default function Sidebar({
             alt="CollabUS Logo"
             className="w-6 h-6"
           />
-          <span className="font-display font-semibold text-lg text-white">
-            CollabUS
+          <span className="font-display font-semibold text-lg text-[#FDFBF7]">
+            Collab<span className="text-[#FDD739]">US</span>
           </span>
         </div>
         {onClose && (
@@ -125,7 +125,7 @@ export default function Sidebar({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="lg:hidden text-white/70 hover:text-white p-1 cursor-pointer transition-colors"
+            className="lg:hidden text-white/70 hover:text-[#FDFBF7] p-1 cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
