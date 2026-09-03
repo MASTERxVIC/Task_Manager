@@ -114,7 +114,7 @@ export default function Sidebar({
           <img
             src="/Logo.svg"
             alt="CollabUS Logo"
-            className="w-6 h-6"
+            className="w-6 h-6 bg-[#FDD739] rounded-t-full"
           />
           <span className="font-display font-semibold text-lg text-[#FDFBF7]">
             Collab<span className="text-[#FDD739]">US</span>
