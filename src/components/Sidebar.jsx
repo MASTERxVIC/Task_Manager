@@ -180,14 +180,14 @@ export default function Sidebar({
                     }}
                     className={`group flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
                       activeBoard?.id === board.id
-                        ? "bg-surface text-ink font-semibold"
+                        ? "bg-[#FDD739] text-[#2F2F2F] font-semibold"
                         : "text-gray-300 hover:bg-white/10"
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
                       {isBoardDefault && (
                         <Lock
-                          className="w-3.5 h-3.5 text-amber-400 shrink-0"
+                          className="w-3.5 h-3.5 text-[#2F2F2F] shrink-0"
                           title="Default Locked Board"
                         />
                       )}
