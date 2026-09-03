@@ -61,10 +61,9 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-      {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
-      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
-        {/* Top-Left Corner Direct SVG */}
-        <div className="absolute top-0 left-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
+
+       {/* Top-Left Corner Direct SVG */}
+      <div className="absolute top-0 left-0 pointer-events-none z-11 w-80 h-80 overflow-hidden">
           <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
             <path
               fill="#FEC62F"
@@ -74,6 +73,10 @@ export default function Auth() {
           </svg>
         </div>
 
+      {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
+      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
+       
+        
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           {/* Header Title & Subtitle */}
           <div className="space-y-1.5">
