@@ -264,8 +264,8 @@ export default function Sidebar({
               <span
                 className={`font-mono text-[11px] px-1.5 py-0.5 rounded-md ${
                   active
-                    ? "bg-void text-ink font-bold"
-                    : "bg-white/15 text-white"
+                    ? "bg-[#FDFBF7] text-[#2F2F2F] font-bold"
+                    : "bg-white/15 text-[#FDFBF7]"
                 }`}
               >
                 {count}
@@ -300,16 +300,16 @@ export default function Sidebar({
                 className="space-y-2 overflow-hidden"
               >
                 {!isDefaultBoard && (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 border border-line">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#2F2F2F] border border-line">
                     <div className="min-w-0 pr-2">
                       <p className="text-[10px] text-gray-400 font-medium uppercase truncate">
                         {activeBoard
-                          ? `${activeBoard.name} Code`
+                          ? `${activeBoard.name} -Code`
                           : "Invite Code"}
                       </p>
                       <p
                         className={`text-xs font-mono font-semibold truncate ${
-                          hasValidCode ? "text-emerald-400" : "text-gray-500"
+                          hasValidCode ? "text-[#FDD739]" : "text-gray-500"
                         }`}
                       >
                         {displayCode}
@@ -325,7 +325,7 @@ export default function Sidebar({
                           className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-300 hover:text-white cursor-pointer transition-colors"
                         >
                           {showCode ? (
-                            <EyeOff className="w-4 h-4 text-emerald-400" />
+                            <EyeOff className="w-4 h-4 text-[#FDD739]" />
                           ) : (
                             <Eye className="w-4 h-4 text-gray-400" />
                           )}
@@ -348,7 +348,7 @@ export default function Sidebar({
                         }`}
                       >
                         {copied ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <CheckCircle2 className="w-4 h-4 text-[#FDD739]" />
                         ) : (
                           <Copy className="w-4 h-4" />
                         )}
