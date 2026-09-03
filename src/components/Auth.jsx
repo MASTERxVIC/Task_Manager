@@ -61,30 +61,22 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-
-       {/* Top-Left Corner Direct SVG */}
+      {/* Top-Left Corner Direct SVG */}
       <div className="absolute top-0 left-0 pointer-events-none z-10 w-80 h-80 overflow-hidden">
-  <svg viewBox="-10 -10 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    {/* Bada wala path (Original) */}
-    <path
-      fill="#FEC62F"
-      d="M50.6,-36.3C64.4,-23.1,73.6,-2.1,71.1,19C68.5,40.1,54.1,61.4,36.6,66C19,70.7,-1.8,58.8,-24.1,48.6C-46.4,38.4,-70.3,30,-75.1,15.3C-80,0.6,-65.8,-20.2,-50.1,-33.9C-34.4,-47.6,-17.2,-54.1,0.6,-54.6C18.4,-55.1,36.8,-49.5,50.6,-36.3Z"
-    />
-    
-    {/* Chota wala path (Scale karke thoda chota kar diya hai aur color bhi thoda dark/light adjust kar sakta hai) */}
-    <g transform="translate(40, 35) scale(0.65)">
-      <path
-        fill="#3B3A41"
-        d="M50.6,-36.3C64.4,-23.1,73.6,-2.1,71.1,19C68.5,40.1,54.1,61.4,36.6,66C19,70.7,-1.8,58.8,-24.1,48.6C-46.4,38.4,-70.3,30,-75.1,15.3C-80,0.6,-65.8,-20.2,-50.1,-33.9C-34.4,-47.6,-17.2,-54.1,0.6,-54.6C18.4,-55.1,36.8,-49.5,50.6,-36.3Z"
-      />
-    </g>
-  </svg>
-</div>
+        <svg
+          viewBox="-10 -10 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-full"
+        >
+          <path
+            fill="#FEC62F"
+            d="M50.6,-36.3C64.4,-23.1,73.6,-2.1,71.1,19C68.5,40.1,54.1,61.4,36.6,66C19,70.7,-1.8,58.8,-24.1,48.6C-46.4,38.4,-70.3,30,-75.1,15.3C-80,0.6,-65.8,-20.2,-50.1,-33.9C-34.4,-47.6,-17.2,-54.1,0.6,-54.6C18.4,-55.1,36.8,-49.5,50.6,-36.3Z"
+          />
+        </svg>
+      </div>
 
       {/* Left Side: Warm & Friendly Form with SVGs in Corners */}
       <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
-       
-        
         <div className="max-w-md w-full mx-auto my-auto space-y-6">
           {/* Header Title & Subtitle */}
           <div className="space-y-1.5">
@@ -200,16 +192,17 @@ export default function Auth() {
                 : "Don't have an account? Sign Up"}
             </button>
           </div>
-        </div>
+        </div>   
+      </div>
 
-        {/* Bottom-Right Corner SVG from public folder */}
-        {/* <div className="absolute bottom-0 right-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
-        <svg viewBox="-300 -300 600 600" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <g transform="translate(871.8168563822678 414.7951641447935)">
-            <path d="M205.2 -64.5C269 -8 325.9 106.5 290.6 205.7C255.2 304.8 127.6 388.7 46.7 361.7C-34.1 334.7 -68.2 196.9 -93.5 103.5C-118.7 10.2 -135.1 -38.6 -118.1 -68.2C-101 -97.7 -50.5 -107.8 10.1 -113.7C70.7 -119.5 141.5 -121 205.2 -64.5" fill="#FEC62F"></path>
-          </g>
+      {/* Bottom-Right Corner SVG from public folder */}
+      <div className="absolute bottom-0 right-0 pointer-events-none z-10 w-80 h-80 overflow-hidden">
+        <svg viewBox="100 100 -10 -10" xmlns="http://www.w3.org/2000/svg">
+          <path
+            fill="#FEC62F"
+            d="M46.6,-53.7C59.1,-45.1,67.1,-29.2,68.1,-13.5C69.1,2.2,63.1,17.6,55.4,32.9C47.6,48.2,38.1,63.4,25.5,66.3C12.9,69.3,-2.8,60,-21.9,55.2C-41.1,50.4,-63.8,50.2,-76.7,38.9C-89.7,27.6,-92.9,5.3,-88.5,-14.9C-84,-35,-71.9,-53.1,-55.9,-61.2C-39.8,-69.3,-19.9,-67.3,-1.4,-65.6C17.1,-63.9,34.1,-62.4,46.6,-53.7Z"
+          />
         </svg>
-      </div> */}
       </div>
 
       {/* Right Side: Single Static Image (Completely untouched) */}
