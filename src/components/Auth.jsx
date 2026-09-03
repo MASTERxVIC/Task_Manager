@@ -163,13 +163,13 @@ export default function Auth() {
         </div>
 
         {/* Bottom-Right Corner SVG from public folder */}
-       <div className="absolute bottom-0 right-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
+       {/* <div className="absolute bottom-0 right-0 pointer-events-none z-30 w-68 h-68 overflow-hidden">
         <svg viewBox="-300 -300 600 600" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <g transform="translate(871.8168563822678 414.7951641447935)">
             <path d="M205.2 -64.5C269 -8 325.9 106.5 290.6 205.7C255.2 304.8 127.6 388.7 46.7 361.7C-34.1 334.7 -68.2 196.9 -93.5 103.5C-118.7 10.2 -135.1 -38.6 -118.1 -68.2C-101 -97.7 -50.5 -107.8 10.1 -113.7C70.7 -119.5 141.5 -121 205.2 -64.5" fill="#FEC62F"></path>
           </g>
         </svg>
-      </div>
+      </div> */}
 
       </div>
 
