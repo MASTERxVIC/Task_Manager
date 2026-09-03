@@ -207,7 +207,11 @@ export default function Sidebar({
                             onDeleteBoard(board);
                           }}
                           title="Delete Workspace"
-                          className="p-1 text-gray-50 opacity-30 group-hover:opacity-70 hover:!opacity-100 hover:text-red-400 hover:scale-110 transition-all duration-200 cursor-pointer"
+                          className={`p-1 transition-all duration-200 cursor-pointer hover:text-red-400 hover:scale-110 ${
+                            activeBoard?.id === board.id
+                              ? "text-[#2F2F2F] opacity-70 hover:!opacity-100"
+                              : "text-gray-50 opacity-30 group-hover:opacity-70 hover:!opacity-100"
+                          }`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
