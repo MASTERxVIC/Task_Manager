@@ -184,7 +184,9 @@ export default function Sidebar({
                       {isBoardDefault && (
                         <Lock
                           className={`w-3.5 h-3.5 shrink-0 ${
-                            isSelected ? "text-[#2F2F2F]" : "text-[#FDFBF7]"
+                            activeBoard?.id === board.id
+                              ? "text-[#2F2F2F]"
+                              : "text-[#FDFBF7]"
                           }`}
                           title="Default Locked Board"
                         />
