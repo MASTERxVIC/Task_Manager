@@ -56,16 +56,20 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden fixed inset-0 bg-[#FDFBF7]">
-      {/* Left Side: Container with relative positioning */}
-      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between overflow-y-auto no-scrollbar z-10 relative">
-        
-        {/* Top-Left Corner SVG: Absolute to the exact corner */}
-        <div className="absolute top-0 left-0 pointer-events-none">
-          <img src="/ltcr.svg" alt="Top Left Decor" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
-        </div>
+      
+      {/* Top-Left Corner SVG (Parent se bahar direct screen ke corner par) */}
+      <div className="absolute top-0 left-0 pointer-events-none z-30">
+        <img src="/ltcr.svg" alt="Top Left Decor" className="w-24 h-24 md:w-48 md:h-48 object-contain" />
+      </div>
 
-        {/* Center Content Wrapper (Padding is given here so form doesn't overlap corner SVGs) */}
-        <div className="max-w-md w-full mx-auto my-auto space-y-6 p-8 sm:p-12 z-20">
+      {/* Bottom-Left Corner SVG (Parent se bahar direct screen ke corner par) */}
+      <div className="absolute bottom-0 left-0 pointer-events-none z-30">
+        <img src="/rtcr.svg" alt="Bottom Left Decor" className="w-24 h-24 md:w-48 md:h-48 object-contain" />
+      </div>
+
+      {/* Left Side: Form Container */}
+      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-8 sm:p-14 overflow-y-auto no-scrollbar z-10 relative">
+        <div className="max-w-md w-full mx-auto my-auto space-y-6">
           
           {/* Header Title & Subtitle */}
           <div className="space-y-1.5">
@@ -160,15 +164,9 @@ export default function Auth() {
             </button>
           </div>
         </div>
-
-        {/* Bottom-Right Corner SVG: Absolute to the exact corner */}
-        <div className="absolute bottom-0 right-0 pointer-events-none">
-          <img src="/rtcr.svg" alt="Bottom Right Decor" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
-        </div>
-
       </div>
 
-      {/* Right Side: Single Static Image (Untouched) */}
+      {/* Right Side: Single Static Image (Completely untouched) */}
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#FDFBF7] relative overflow-hidden">
         <img
           src="/img.jpg"
