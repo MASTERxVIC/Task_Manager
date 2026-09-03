@@ -206,7 +206,7 @@ export default function Auth() {
           key={currentImgIndex}
           src={mockupImages[currentImgIndex]}
           alt="App Preview Showcase"
-          className="w-full h-full object-fill transition-opacity duration-5000"
+          className="w-full h-full object-cover transition-opacity duration-5000"
         />
       </div>
     </div>
