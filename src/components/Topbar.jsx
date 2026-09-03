@@ -16,13 +16,13 @@ export default function Topbar({
   hasTasks,
 }) {
   return (
-    <div className="sticky top-0 z-20 bg-void/85 backdrop-blur border-b border-line px-3 sm:px-8 py-3.5 sm:py-4">
+    <div className="sticky top-0 z-20 bg-[#1E1E24] backdrop-blur border-b border-line px-3 sm:px-8 py-3.5 sm:py-4">
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Menu Toggle (Mobile/Tablet) */}
         <button
           onClick={onMenuClick}
           aria-label="Open menu"
-          className="lg:hidden text-muted hover:text-ink p-1 -ml-1 shrink-0"
+          className="lg:hidden text-[#FDFBF7] p-1 -ml-1 shrink-0"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path
@@ -35,18 +35,18 @@ export default function Topbar({
         </button>
 
         {/* View Title */}
-        <h1 className="font-display font-semibold text-xl text-surface mr-1 hidden lg:block shrink-0">
+        <h1 className="font-display font-semibold text-xl text-[#FDFBF7] mr-1 hidden lg:block shrink-0">
           {VIEW_TITLES[view]}
         </h1>
 
         {/* Search Input (Squeezes on mobile automatically) */}
-        <div className="flex-1 min-w-[110px] relative flex items-center bg-white border border-line rounded-xl px-2.5 sm:px-3 py-2 transition-all duration-200 focus-within:border-surface focus-within:shadow-[0_0_15px_rgba(124,106,204,0.25)] shadow-sm">
+        <div className="flex-1 min-w-[110px] relative flex items-center bg-white border border-line rounded-xl px-2.5 sm:px-3 py-2 transition-all duration-200 focus-within:border-[#FDFBF7] focus-within:shadow-[0_0_15px_rgba(124,106,204,0.25)] shadow-sm">
           <svg
             width="15"
             height="15"
             viewBox="0 0 24 24"
             fill="none"
-            className="shrink-0 text-muted"
+            className="shrink-0 text-[#1E1E24]"
           >
             <circle
               cx="11"
