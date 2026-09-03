@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
   // Public folder wali images ka array yahan define karde bhai
