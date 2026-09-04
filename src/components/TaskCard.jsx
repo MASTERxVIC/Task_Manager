@@ -133,7 +133,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
             <div className="flex items-center gap-2 mt-auto flex-wrap">
               <span
-                className={`px-3.5 py-1 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                className={`px-3.5 py-1 rounded-full text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
               >
                 {task.deadline ? formatDeadline(task.deadline) : "No Date"}
               </span>
@@ -197,7 +197,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onToggle(task.id)}
-              className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all ${
+              className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all opacity-40 hover:opacity-100 ${
                 task.completed
                   ? "border-gray-400 bg-transparent text-gray-300"
                   : "border-gray-400 hover:border-gray-200 bg-transparent text-transparent"
