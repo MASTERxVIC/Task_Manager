@@ -43,10 +43,7 @@ const CATEGORY_THEME = {
 // Helper: Get actual category even if task is completed
 function getTaskCategory(task) {
   if (task.category) return task.category;
-  
-  // Calculate category based on deadline manually if completed
   if (!task.deadline) return 'none';
-  
   const rawUrgency = urgency({ ...task, completed: false });
   return rawUrgency || 'none';
 }
@@ -76,11 +73,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -12, transition: { duration: 0.15 } }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative group w-[336px] select-none shrink-0"
+        className="relative group w-full max-w-[348px] select-none"
       >
-        {/* MAIN CARD BODY */}
+        {/* MAIN CARD BODY - Width ko w-full kar diya hai taaki overlap issue na ho */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-full h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? 'opacity-60' : 'opacity-100'
           }`}
         >
