@@ -12,15 +12,82 @@ function getRemainingDays(completedAt) {
   return `Deletes in ${daysLeft}d`;
 }
 
-// Color Palette matching design
-const COLOR_CONFIG = {
-  overdue: { bg: 'bg-[#C82D2B]', text: 'text-[#C82D2B]', pillBg: 'bg-[#FFE2E0]', border: 'border-[#C82D2B]' },
-  today: { bg: 'bg-[#BCE343]', text: 'text-[#8EA824]', pillBg: 'bg-[#F2FDC3]', border: 'border-[#8EA824]' },
-  upcoming: { bg: 'bg-[#3C88CE]', text: 'text-[#2D6CA8]', pillBg: 'bg-[#DDEFFE]', border: 'border-[#2D6CA8]' },
-  nodate: { bg: 'bg-[#E3AA65]', text: 'text-[#A06E32]', pillBg: 'bg-[#FFF0DD]', border: 'border-[#A06E32]' },
-  done: { bg: 'bg-gray-500', text: 'text-gray-400', pillBg: 'bg-gray-200', border: 'border-gray-400' }
+// Section / Category Styling Config
+const CATEGORY_THEME = {
+  overdue: { 
+    line: 'bg-[#C82D2B]', 
+    dotInner: 'bg-[#C82D2B]', 
+    dotHalo: 'bg-[#C82D2B]/30', 
+    text: 'text-[#C82D2B]',
+    pillBg: 'bg-[#FFE2E0]', 
+    border: 'border-[#C82D2B]' 
+  },
+  today: { 
+    line: 'bg-[#BCE343]', 
+    dotInner: 'bg-[#BCE343]', 
+    dotHalo: 'bg-[#BCE343]/30', 
+    text: 'text-[#8EA824]',
+    pillBg: 'bg-[#F2FDC3]', 
+    border: 'border-[#8EA824]' 
+  },
+  upcoming: { 
+    line: 'bg-[#3C88CE]', 
+    dotInner: 'bg-[#3C88CE]', 
+    dotHalo: 'bg-[#3C88CE]/30', 
+    text: 'text-[#2D6CA8]',
+    pillBg: 'bg-[#DDEFFE]', 
+    border: 'border-[#2D6CA8]' 
+  },
+  nodate: { 
+    line: 'bg-[#E3AA65]', 
+    dotInner: 'bg-[#E3AA65]', 
+    dotHalo: 'bg-[#E3AA65]/30', 
+    text: 'text-[#A06E32]',
+    pillBg: 'bg-[#FFF0DD]', 
+    border: 'border-[#A06E32]' 
+  },
+  done: { 
+    line: 'bg-gray-500', 
+    dotInner: 'bg-gray-500', 
+    dotHalo: 'bg-gray-500/30', 
+    text: 'text-gray-400',
+    pillBg: 'bg-gray-200', 
+    border: 'border-gray-400' 
+  }
 };
 
+// 1. TIMELINE SECTION COMPONENT (Side Vertical Line + Glowing Pin Header)
+export function TaskSection({ title, count, type = 'nodate', children }) {
+  const theme = CATEGORY_THEME[type] || CATEGORY_THEME.nodate;
+
+  return (
+    <div className="relative pl-6 mb-8">
+      {/* TIMELINE VERTICAL TRACK LINE */}
+      <div className={`absolute left-[5px] top-3 bottom-0 w-[2px] ${theme.line}`} />
+
+      {/* SECTION HEADER WITH GLOWING PIN DOT */}
+      <div className="relative flex items-center gap-2 mb-4">
+        {/* Glowing Pin Marker */}
+        <div className="absolute -left-[23px] flex items-center justify-center w-5 h-5">
+          <div className={`w-5 h-5 rounded-full ${theme.dotHalo} absolute animate-pulse`} />
+          <div className={`w-2.5 h-2.5 rounded-full ${theme.dotInner} z-10`} />
+        </div>
+
+        {/* Category Label */}
+        <span className={`font-mono text-xs font-bold uppercase tracking-wider ${theme.text}`}>
+          {title} ({count})
+        </span>
+      </div>
+
+      {/* TASK CARDS CONTAINER */}
+      <div className="flex flex-col gap-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// 2. SINGLE TASK CARD COMPONENT
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -36,7 +103,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   }, [showImageModal]);
 
   const urgencyKey = task.completed ? 'done' : (urgency(task) || 'nodate');
-  const accentTheme = COLOR_CONFIG[urgencyKey] || COLOR_CONFIG.nodate;
+  const accentTheme = CATEGORY_THEME[urgencyKey] || CATEGORY_THEME.nodate;
 
   return (
     <>
@@ -48,27 +115,25 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: 'easeOut' }}
         className="relative group w-[336px] select-none"
       >
-        {/* BACK CARD SHADOW (X: -12px shifted, Same Height 193px) */}
+        {/* SHADOW BACK CARD (Shifted X: -12px, Height: 193px) */}
         <div 
-          className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.bg}`} 
+          className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.line}`} 
         />
 
-        {/* MAIN FRONT CARD (Width: 336px, Height: 193px) */}
+        {/* MAIN CARD BODY */}
         <div 
           className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[336px] h-[193px] ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
-          {/* LEFT CONTENT AREA */}
+          {/* LEFT CONTENT */}
           <div className="flex flex-col justify-between flex-1 min-w-0 pr-1">
             <div>
-              {/* Header: Title + Image Icon + Mention Pill */}
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
                   {task.task}
                 </h3>
 
-                {/* Attachment Icon */}
                 {task.image && (
                   <button
                     type="button"
@@ -81,7 +146,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   </button>
                 )}
 
-                {/* User Pill Badge */}
                 {(task.assignee || task.mentionedUser) && (
                   <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                     {task.assignee || task.mentionedUser}
@@ -89,13 +153,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                 )}
               </div>
 
-              {/* Description */}
               <p className={`text-xs leading-relaxed line-clamp-2 ${task.completed ? 'text-gray-500' : 'text-gray-300'}`}>
                 {task.des || 'description description description'}
               </p>
             </div>
 
-            {/* Bottom Badges */}
             <div className="flex items-center gap-2 mt-auto flex-wrap">
               <span className={`px-3.5 py-1 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                 {task.deadline ? formatDeadline(task.deadline) : 'No Date'}
@@ -111,7 +173,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
           {/* RIGHT ACTION COLUMN */}
           <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-1 text-gray-400">
-            {/* Edit Icon */}
             <button
               type="button"
               onClick={() => onEdit(task)}
@@ -122,7 +183,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               </svg>
             </button>
 
-            {/* Delete Icon */}
             <button
               type="button"
               onClick={() => onDelete(task.id)}
@@ -133,7 +193,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               </svg>
             </button>
 
-            {/* Square Checkbox Icon */}
             <button
               type="button"
               onClick={() => onToggle(task.id)}
