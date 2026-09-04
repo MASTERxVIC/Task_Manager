@@ -117,7 +117,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                 {(task.assignee || task.mentionedUser) && (
                   <span
-                    className={`px-3 py-0.5 rounded-full text-[15px] font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                    className={`px-3 py-0.5 rounded-full text-[15px] font-mono font-bold border-2 ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
                   >
                     {task.assignee || task.mentionedUser}
                   </span>
@@ -133,14 +133,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
             <div className="flex items-center gap-2 mt-auto flex-wrap">
               <span
-                className={`px-3.5 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                className={`px-3.5 py-1 rounded-xl text-sm font-mono border-2 ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
               >
                 {task.deadline ? formatDeadline(task.deadline) : "No Date"}
               </span>
 
               {task.completed && (
                 <span
-                  className={`px-3.5 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                  className={`px-3.5 py-1 rounded-xl text-sm font-mono border-2 ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
                 >
                   {getRemainingDays(task.completed_at)}
                 </span>
