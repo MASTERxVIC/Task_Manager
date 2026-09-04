@@ -15,36 +15,40 @@ function getRemainingDays(completedAt) {
 // Section / Category Styling Config
 const CATEGORY_THEME = {
   overdue: { 
-    line: 'bg-[#C82D2B]', 
-    dotInner: 'bg-[#C82D2B]', 
-    dotHalo: 'bg-[#C82D2B]/30', 
-    text: 'text-[#C82D2B]',
+    line: 'bg-[#CF0003]', 
+    dotInner: 'bg-[#CF0003]', 
+    dotHalo: 'bg-[#CF0003]/30', 
+    text: 'text-[#CF0003]',
     pillBg: 'bg-[#FFE2E0]', 
-    border: 'border-[#C82D2B]' 
+    border: 'border-[#CF0003]',
+    borderColorClass: 'border-l-[#CF0003]' // Dynamic Border Color
   },
   today: { 
-    line: 'bg-[#BCE343]', 
-    dotInner: 'bg-[#BCE343]', 
-    dotHalo: 'bg-[#BCE343]/30', 
+    line: 'bg-[#B0E01E]', 
+    dotInner: 'bg-[#B0E01E]', 
+    dotHalo: 'bg-[#B0E01E]/30', 
     text: 'text-[#8EA824]',
     pillBg: 'bg-[#F2FDC3]', 
-    border: 'border-[#8EA824]' 
+    border: 'border-[#8EA824]',
+    borderColorClass: 'border-l-[#B0E01E]' // Dynamic Border Color
   },
   upcoming: { 
-    line: 'bg-[#3C88CE]', 
-    dotInner: 'bg-[#3C88CE]', 
-    dotHalo: 'bg-[#3C88CE]/30', 
-    text: 'text-[#2D6CA8]',
+    line: 'bg-[#008ACF]', 
+    dotInner: 'bg-[#008ACF]', 
+    dotHalo: 'bg-[#008ACF]/30', 
+    text: 'text-[#008ACF]',
     pillBg: 'bg-[#DDEFFE]', 
-    border: 'border-[#2D6CA8]' 
+    border: 'border-[#008ACF]',
+    borderColorClass: 'border-l-[#008ACF]' // Dynamic Border Color
   },
   nodate: { 
-    line: 'bg-[#E3AA65]', 
-    dotInner: 'bg-[#E3AA65]', 
-    dotHalo: 'bg-[#E3AA65]/30', 
+    line: 'bg-[#FFC684]', 
+    dotInner: 'bg-[#FFC684]', 
+    dotHalo: 'bg-[#FFC684]/30', 
     text: 'text-[#A06E32]',
     pillBg: 'bg-[#FFF0DD]', 
-    border: 'border-[#A06E32]' 
+    border: 'border-[#A06E32]',
+    borderColorClass: 'border-l-[#FFC684]' // Dynamic Border Color
   },
   done: { 
     line: 'bg-gray-500', 
@@ -52,7 +56,8 @@ const CATEGORY_THEME = {
     dotHalo: 'bg-gray-500/30', 
     text: 'text-gray-400',
     pillBg: 'bg-gray-200', 
-    border: 'border-gray-400' 
+    border: 'border-gray-400',
+    borderColorClass: 'border-l-gray-400' // Dynamic Border Color
   }
 };
 
@@ -86,7 +91,6 @@ export function TaskSection({ title, count, type = 'nodate', children }) {
         </span>
       </div>
 
-      {/* HAR SECTION KE ANDAR MAX 3 CARDS WALI ROW BANAYEGA */}
       <TaskGrid>
         {children}
       </TaskGrid>
@@ -94,7 +98,7 @@ export function TaskSection({ title, count, type = 'nodate', children }) {
   );
 }
 
-// 3. SINGLE TASK CARD COMPONENT (FIXED WIDTH W-[336PX])
+// 3. SINGLE TASK CARD COMPONENT
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -122,16 +126,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: 'easeOut' }}
         className="relative group w-[336px] select-none shrink-0"
       >
-        
-
-        {/* MAIN CARD BODY */}
+        {/* MAIN CARD BODY - DYNAMIC LEFT BORDER COLOR INTEGRATED */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 border-[#CF0003] ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
           {/* LEFT CONTENT */}
-          <div className="flex flex-col justify-between flex-1 min-w-0 p-3">
+          <div className="flex flex-col justify-between flex-1 min-w-0">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
@@ -176,7 +178,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           </div>
 
           {/* RIGHT ACTION COLUMN */}
-          <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-1 text-gray-400">
+          <div className="flex flex-col justify-between items-center shrink-0 px-2 py-1 text-gray-400">
             <button
               type="button"
               onClick={() => onEdit(task)}
