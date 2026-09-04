@@ -73,11 +73,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -12, transition: { duration: 0.15 } }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative group w-full max-w-[348px] select-none"
+        className="relative group shrink-0 select-none"
       >
-        {/* MAIN CARD BODY - Width ko w-full kar diya hai taaki overlap issue na ho */}
+        {/* FIXED DIMENSIONS: Width 348px & Height 193px exact mockup layout ke match me */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-full h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? 'opacity-60' : 'opacity-100'
           }`}
         >
@@ -85,7 +85,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           <div className="flex flex-col justify-between flex-1 min-w-0">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-2">
-                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-300' : 'text-white'}`}>
+                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'text-gray-300' : 'text-white'}`}>
                   {task.task}
                 </h3>
 
