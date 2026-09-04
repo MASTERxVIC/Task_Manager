@@ -95,11 +95,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    className=" hover:text-white transition-colors shrink-0 opacity-60 hover:opacity-0"
+                    className=" hover:text-white transition-colors shrink-0 opacity-40 hover:opacity-100"
                   >
                     <svg
-                      width="18"
-                      height="20"
+                      width="15"
+                      height="17"
                       viewBox="0 0 18 20"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -153,11 +153,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onEdit(task)}
-              className="hover:text-white transition-colors p-0.5 opacity-60 hover:opacity-0"
+              className="hover:text-white transition-colors p-0.5 opacity-40 hover:opacity-100"
             >
               <svg
-                width="18"
-                height="18"
+                width="15"
+                      height="17"
                 viewBox="0 0 18 18"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -175,11 +175,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-60 hover:opacity-0"
+              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-40 hover:opacity-100"
             >
               <svg
-                width="18"
-                height="20"
+               width="15"
+                      height="17"
                 viewBox="0 0 18 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +197,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onToggle(task.id)}
-              className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-all ${
+              className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all ${
                 task.completed
                   ? "border-gray-400 bg-transparent text-gray-300"
                   : "border-gray-400 hover:border-gray-200 bg-transparent text-transparent"
