@@ -56,11 +56,10 @@ const CATEGORY_THEME = {
   }
 };
 
-// 1. DYNAMIC RESPONSIVE GRID CONTAINER
-// Horizontal-first filling: Mobile = 1, Tablet = 2, Desktop (LG) = 3, Large (XL) = 4
+// 1. GRID CONTAINER (MAX 3 CARDS PER ROW IN EACH SECTION)
 export function TaskGrid({ children }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 items-start justify-items-stretch w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start justify-start max-w-[1080px]">
       {children}
     </div>
   );
@@ -71,25 +70,23 @@ export function TaskSection({ title, count, type = 'nodate', children }) {
   const theme = CATEGORY_THEME[type] || CATEGORY_THEME.nodate;
 
   return (
-    <div className="relative pl-8 mb-10 w-full">
+    <div className="relative pl-6 mb-10 w-full">
       {/* TIMELINE VERTICAL TRACK LINE */}
-      <div className={`absolute left-2 top-3 bottom-0 w-[2px] ${theme.line}`} />
+      <div className={`absolute left-[5px] top-3 bottom-0 w-[2px] ${theme.line}`} />
 
       {/* SECTION HEADER WITH GLOWING PIN DOT */}
-      <div className="relative flex items-center gap-2 mb-6">
-        {/* Glowing Pin Marker */}
-        <div className="absolute -left-[31px] flex items-center justify-center w-5 h-5">
+      <div className="relative flex items-center gap-2 mb-5">
+        <div className="absolute -left-[23px] flex items-center justify-center w-5 h-5">
           <div className={`w-5 h-5 rounded-full ${theme.dotHalo} absolute animate-pulse`} />
           <div className={`w-2.5 h-2.5 rounded-full ${theme.dotInner} z-10`} />
         </div>
 
-        {/* Category Label */}
         <span className={`font-mono text-xs font-bold uppercase tracking-wider ${theme.text}`}>
           {title} ({count})
         </span>
       </div>
 
-      {/* GRID WRAPPER FOR HORIZONTAL-FIRST ROW PLACEMENT */}
+      {/* HAR SECTION KE ANDAR MAX 3 CARDS WALI ROW BANAYEGA */}
       <TaskGrid>
         {children}
       </TaskGrid>
@@ -97,7 +94,7 @@ export function TaskSection({ title, count, type = 'nodate', children }) {
   );
 }
 
-// 3. SINGLE TASK CARD COMPONENT
+// 3. SINGLE TASK CARD COMPONENT (FIXED WIDTH W-[336PX])
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -123,16 +120,16 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -12, transition: { duration: 0.15 } }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative group w-full select-none"
+        className="relative group w-[336px] select-none shrink-0"
       >
         {/* SHADOW BACK CARD */}
         <div 
-          className={`absolute inset-y-0 -left-2.5 right-2.5 rounded-[32px] transition-all duration-300 ${accentTheme.line}`} 
+          className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.line}`} 
         />
 
         {/* MAIN CARD BODY */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-full min-h-[193px] ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[336px] h-[193px] ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
