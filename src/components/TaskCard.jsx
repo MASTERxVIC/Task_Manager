@@ -77,7 +77,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
       >
         {/* FIXED DIMENSIONS: Width 348px & Height 193px exact mockup layout ke match me */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[338px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] px-[15px] py-[16px] text-white shadow-xl transition-all duration-200 w-[336px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? 'opacity-60' : 'opacity-100'
           }`}
         >
