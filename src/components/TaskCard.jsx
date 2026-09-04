@@ -140,7 +140,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
               {task.completed && (
                 <span
-                  className={`px-3.3 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                  className={`px-3.5 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
                 >
                   {getRemainingDays(task.completed_at)}
                 </span>

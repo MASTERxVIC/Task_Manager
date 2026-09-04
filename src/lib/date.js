@@ -33,8 +33,8 @@ export function formatDeadline(deadline) {
   const diffDays = Math.round((due - today) / 86400000);
 
   if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays === -1) return 'Yesterday';
+  if (diffDays === 1) return 'Tomm';
+  if (diffDays === -1) return 'Yest';
 
   return due.toLocaleDateString(undefined, {
     month: 'short',
