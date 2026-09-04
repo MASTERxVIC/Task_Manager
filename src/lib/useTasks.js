@@ -370,7 +370,7 @@ export function useTasks(boardId = null, boardMembers = []) {
 
     const { error } = await supabase
       .from("todos")
-      .update(validPatch)
+      .update(patch)
       .eq("id", id);
 
     if (!error) {
