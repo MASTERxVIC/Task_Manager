@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Anta&family=Archivo:ital,wght@0,100..900;1,100..900&family=Big+Shoulders+Inline:opsz,wght@10..72,100..900&family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Fredoka:wght@300..700&family=Inder&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Righteous&family=Space+Grotesk:wght@300..700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Anta&family=Archivo:ital,wght@0,100..900;1,100..900&family=Big+Shoulders+Inline:opsz,wght@10..72,100..900&family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Fredoka:wght@300..700&family=Inder&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Righteous&family=Space+Grotesk:wght@300..700&family=Space+Mono:wght@400;700&display=swap');
 
 @theme {
   /* Structural — Custom Palette */
@@ -28,17 +28,10 @@
   /* Font Mappings — Sabhi fonts custom variables par available hain */
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'Space Mono', monospace;
-  --font-inter: 'Inter', sans-serif;
-  --font-manrope: 'Manrope', sans-serif;
   --font-fredoka: 'Fredoka', cursive;
-  --font-righteous: 'Righteous', cursive;
-  --font-anta: 'Anta', sans-serif;
-  --font-inder: 'Inder', sans-serif;
-  --font-stencil: 'Big Shoulders Stencil', cursive;
-  --font-inline: 'Big Shoulders Inline', cursive;
   --font-archivo: 'Archivo', sans-serif;
+  --font-afacad: 'Afacad', sans-serif;
 }
 
 * {

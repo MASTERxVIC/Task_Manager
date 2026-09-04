@@ -77,7 +77,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
       >
         {/* FIXED DIMENSIONS: Width 348px & Height 193px exact mockup layout ke match me */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-4xl bg-[#222222] px-4 py-5 text-white shadow-xl transition-all duration-200 w-84 h-48.25 border-l-8 ${accentTheme.borderColorClass} ${
+          className={`relative z-10 flex justify-between gap-2 rounded-4xl bg-[#222222] pl-5 pr-4 py-5 text-white shadow-xl transition-all duration-200 w-84 h-48.25 border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? 'opacity-60' : 'opacity-100'
           }`}
         >
@@ -85,7 +85,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           <div className="flex flex-col justify-between flex-1 min-w-0">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-2">
-                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'text-gray-300' : 'text-white'}`}>
+                <h3 className={`text-xl font-bold font-afacad truncate  ${task.completed ? 'text-gray-300' : 'text-white'}`}>
                   {task.task}
                 </h3>
 
@@ -102,13 +102,13 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                 )}
 
                 {(task.assignee || task.mentionedUser) && (
-                  <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
+                  <span className={`px-3 py-0.5 rounded-full text-xs font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                     {task.assignee || task.mentionedUser}
                   </span>
                 )}
               </div>
 
-              <p className={`text-xs leading-relaxed line-clamp-2 ${task.completed ? 'text-gray-400' : 'text-gray-300'}`}>
+              <p className={`text-xs font-afacad font-regular line-clamp-2 ${task.completed ? 'text-gray-400' : 'text-gray-300'}`}>
                 {task.des || 'description description description'}
               </p>
             </div>
