@@ -123,13 +123,13 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         className="relative group w-[336px] select-none shrink-0"
       >
         {/* SHADOW BACK CARD */}
-        <div 
+        {/* <div 
           className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.line}`} 
-        />
+        /> */}
 
         {/* MAIN CARD BODY */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[336px] h-[193px] ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-4 border-[#CF0003] ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
