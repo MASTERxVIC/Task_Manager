@@ -12,93 +12,45 @@ function getRemainingDays(completedAt) {
   return `Deletes in ${daysLeft}d`;
 }
 
-// Section / Category Styling Config
+// Category Specific Themes
 const CATEGORY_THEME = {
   overdue: { 
-    line: 'bg-[#CF0003]', 
-    dotInner: 'bg-[#CF0003]', 
-    dotHalo: 'bg-[#CF0003]/30', 
     text: 'text-[#CF0003]',
     pillBg: 'bg-[#FFE2E0]', 
     border: 'border-[#CF0003]',
     borderColorClass: 'border-l-[#CF0003]'
   },
   today: { 
-    line: 'bg-[#B0E01E]', 
-    dotInner: 'bg-[#B0E01E]', 
-    dotHalo: 'bg-[#B0E01E]/30', 
     text: 'text-[#8EA824]',
     pillBg: 'bg-[#F2FDC3]', 
     border: 'border-[#8EA824]',
     borderColorClass: 'border-l-[#B0E01E]'
   },
   upcoming: { 
-    line: 'bg-[#008ACF]', 
-    dotInner: 'bg-[#008ACF]', 
-    dotHalo: 'bg-[#008ACF]/30', 
     text: 'text-[#008ACF]',
     pillBg: 'bg-[#DDEFFE]', 
     border: 'border-[#008ACF]',
     borderColorClass: 'border-l-[#008ACF]'
   },
-  nodate: { 
-    line: 'bg-[#FFC684]', 
-    dotInner: 'bg-[#FFC684]', 
-    dotHalo: 'bg-[#FFC684]/30', 
+  none: { 
     text: 'text-[#A06E32]',
     pillBg: 'bg-[#FFF0DD]', 
     border: 'border-[#A06E32]',
     borderColorClass: 'border-l-[#FFC684]'
-  },
-  done: { 
-    line: 'bg-gray-500', 
-    dotInner: 'bg-gray-500', 
-    dotHalo: 'bg-gray-500/30', 
-    text: 'text-gray-400',
-    pillBg: 'bg-gray-200', 
-    border: 'border-gray-400',
-    borderColorClass: 'border-l-gray-400'
   }
 };
 
-// 1. GRID CONTAINER (MAX 3 CARDS PER ROW IN EACH SECTION)
-export function TaskGrid({ children }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start justify-start max-w-[1080px]">
-      {children}
-    </div>
-  );
+// Helper: Get actual category even if task is completed
+function getTaskCategory(task) {
+  if (task.category) return task.category;
+  
+  // Calculate category based on deadline manually if completed
+  if (!task.deadline) return 'none';
+  
+  const rawUrgency = urgency({ ...task, completed: false });
+  return rawUrgency || 'none';
 }
 
-// 2. TIMELINE SECTION COMPONENT
-export function TaskSection({ title, count, type = 'nodate', children }) {
-  const theme = CATEGORY_THEME[type] || CATEGORY_THEME.nodate;
-
-  return (
-    <div className="relative pl-6 mb-10 w-full">
-      {/* TIMELINE VERTICAL TRACK LINE */}
-      <div className={`absolute left-[5px] top-3 bottom-0 w-[2px] ${theme.line}`} />
-
-      {/* SECTION HEADER WITH GLOWING PIN DOT */}
-      <div className="relative flex items-center gap-2 mb-5">
-        <div className="absolute -left-[23px] flex items-center justify-center w-5 h-5">
-          <div className={`w-5 h-5 rounded-full ${theme.dotHalo} absolute animate-pulse`} />
-          <div className={`w-2.5 h-2.5 rounded-full ${theme.dotInner} z-10`} />
-        </div>
-
-        <span className={`font-mono text-xs font-bold uppercase tracking-wider ${theme.text}`}>
-          {title} ({count})
-        </span>
-      </div>
-
-      <TaskGrid>
-        {children}
-      </TaskGrid>
-    </div>
-  );
-}
-
-// 3. SINGLE TASK CARD COMPONENT
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -113,9 +65,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
     };
   }, [showImageModal]);
 
-  // Complete hone par bhi card apni ORIGINAL category ki styling preserve karega
-  const urgencyKey = urgency(task) || 'nodate';
-  const accentTheme = CATEGORY_THEME[urgencyKey] || CATEGORY_THEME.nodate;
+  const categoryKey = getTaskCategory(task);
+  const accentTheme = CATEGORY_THEME[categoryKey] || CATEGORY_THEME.none;
 
   return (
     <>

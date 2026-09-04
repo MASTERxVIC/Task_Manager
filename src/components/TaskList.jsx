@@ -12,11 +12,11 @@ const GROUP_LABEL = {
   done: 'Completed',
 };
 const GROUP_DOT = {
-  overdue: 'bg-coral',
-  today: 'bg-amber',
-  upcoming: 'bg-violet',
-  none: 'bg-muted-dim',
-  done: 'bg-mint',
+  overdue: 'bg-[#CF0003]',
+  today: 'bg-[#B0E01E]',
+  upcoming: 'bg-[#008ACF]',
+  none: 'bg-[#FFC684]',
+  done: 'bg-gray-400',
 };
 
 function groupTasks(tasks) {
@@ -48,28 +48,29 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
 
   return (
     <div className="relative">
-      {/* signature: a gradient timeline rail running down the grouped list,
-          shifting from urgent (coral) to calm (violet) as tasks get further out */}
+      {/* signature: gradient timeline rail */}
       {view === 'all' && (
         <div
           className="absolute left-[13px] top-2 bottom-2 w-px hidden sm:block"
-          style={{ background: 'linear-gradient(180deg, var(--color-coral), var(--color-amber), var(--color-violet), var(--color-mint))' }}
+          style={{ background: 'linear-gradient(180deg, #CF0003, #B0E01E, #008ACF, #FFC684, #9CA3AF)' }}
         />
       )}
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {groups.map((group) => (
           <section key={group.key}>
             {view === 'all' && (
-              <div className="flex items-center gap-3 mb-3 relative">
+              <div className="flex items-center gap-3 mb-4 relative">
                 <span className={`w-2 h-2 rounded-full ${GROUP_DOT[group.key]} sm:ml-[9px] ring-4 ring-void`} />
-                <h2 className="font-mono text-[11px] tracking-widest text-muted-dim uppercase">
+                <h2 className="font-mono text-[11px] tracking-widest text-muted-dim uppercase font-bold">
                   {GROUP_LABEL[group.key]}
                   <span className="text-muted-dim/60"> ({group.items.length})</span>
                 </h2>
               </div>
             )}
-            <div className="flex flex-col gap-2 sm:pl-6">
+            
+            {/* GRID LAYOUT: 3 CARDS PER ROW */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:pl-6 items-start justify-start max-w-[1100px]">
               <AnimatePresence initial={false}>
                 {group.items.map((task) => (
                   <TaskCard key={task.id} task={task} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
