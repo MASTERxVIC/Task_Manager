@@ -302,6 +302,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     des,
     deadline,
     priority,
+    image = "",
     board_id = null,
   }) => {
     if (!user) return;
@@ -316,6 +317,7 @@ export function useTasks(boardId = null, boardMembers = []) {
       des,
       deadline,
       priority: priority || "normal",
+      image,
       completed: false,
       completed_at: null,
     };
@@ -364,7 +366,7 @@ export function useTasks(boardId = null, boardMembers = []) {
   // 6. Update Task (Multi-Device & Name Mention Integrated)
   const updateTask = async (id, patch) => {
     const currentTask = tasks.find((t) => t.id === id);
-    const { image, ...validPatch } = patch;
+  
 
     const { error } = await supabase
       .from("todos")
