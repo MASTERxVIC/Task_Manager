@@ -69,8 +69,8 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
               </div>
             )}
             
-            {/* GRID LAYOUT: 3 CARDS PER ROW */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:pl-6 items-start justify-start max-w-[1100px]">
+            {/* FLEX-WRAP CONTAINER WITH EXACT GAPS */}
+            <div className="flex flex-wrap gap-6 sm:pl-6 items-start justify-start w-full">
               <AnimatePresence initial={false}>
                 {group.items.map((task) => (
                   <TaskCard key={task.id} task={task} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
