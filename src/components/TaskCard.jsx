@@ -12,7 +12,7 @@ function getRemainingDays(completedAt) {
   return `Deletes in ${daysLeft}d`;
 }
 
-// Design Specific Palette Colors
+// Color Palette matching design
 const COLOR_CONFIG = {
   overdue: { bg: 'bg-[#C82D2B]', text: 'text-[#C82D2B]', pillBg: 'bg-[#FFE2E0]', border: 'border-[#C82D2B]' },
   today: { bg: 'bg-[#BCE343]', text: 'text-[#8EA824]', pillBg: 'bg-[#F2FDC3]', border: 'border-[#8EA824]' },
@@ -46,16 +46,16 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -12, transition: { duration: 0.15 } }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative group w-full max-w-[320px] select-none"
+        className="relative group w-[336px] select-none"
       >
-        {/* EXACT DESIGN BACK SHADOW OFFSET (Top-Left & Bottom Expansion) */}
+        {/* BACK CARD SHADOW (X: -12px shifted, Same Height 193px) */}
         <div 
-          className={`absolute -top-1.5 -left-2.5 -bottom-1.5 right-2 rounded-[28px] transition-all duration-300 ${accentTheme.bg}`} 
+          className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.bg}`} 
         />
 
-        {/* MAIN MATTE CARD */}
+        {/* MAIN FRONT CARD (Width: 336px, Height: 193px) */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[24px] bg-[#222222] p-4 text-white shadow-xl transition-all duration-200 min-h-[135px] ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[336px] h-[193px] ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
@@ -63,7 +63,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           <div className="flex flex-col justify-between flex-1 min-w-0 pr-1">
             <div>
               {/* Header: Title + Image Icon + Mention Pill */}
-              <div className="flex items-center gap-2 flex-wrap mb-1">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
                 <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
                   {task.task}
                 </h3>
@@ -83,7 +83,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                 {/* User Pill Badge */}
                 {(task.assignee || task.mentionedUser) && (
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
+                  <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                     {task.assignee || task.mentionedUser}
                   </span>
                 )}
@@ -96,13 +96,13 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             </div>
 
             {/* Bottom Badges */}
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
+            <div className="flex items-center gap-2 mt-auto flex-wrap">
+              <span className={`px-3.5 py-1 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                 {task.deadline ? formatDeadline(task.deadline) : 'No Date'}
               </span>
 
               {task.completed && (
-                <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
+                <span className={`px-3.5 py-1 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                   {getRemainingDays(task.completed_at)}
                 </span>
               )}
@@ -110,14 +110,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           </div>
 
           {/* RIGHT ACTION COLUMN */}
-          <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-0.5 text-gray-400">
+          <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-1 text-gray-400">
             {/* Edit Icon */}
             <button
               type="button"
               onClick={() => onEdit(task)}
               className="hover:text-white transition-colors p-0.5"
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
               </svg>
             </button>
@@ -128,7 +128,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               onClick={() => onDelete(task.id)}
               className="hover:text-red-400 transition-colors my-auto p-0.5"
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z" />
               </svg>
             </button>
@@ -143,7 +143,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   : 'border-gray-400 hover:border-gray-200 bg-transparent text-transparent'
               }`}
             >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 13l4 4L19 7" />
               </svg>
             </button>
