@@ -122,10 +122,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: 'easeOut' }}
         className="relative group w-[336px] select-none shrink-0"
       >
-        {/* SHADOW BACK CARD */}
-        {/* <div 
-          className={`absolute inset-y-0 -left-3 right-3 rounded-[32px] transition-all duration-300 ${accentTheme.line}`} 
-        /> */}
+        
 
         {/* MAIN CARD BODY */}
         <div 
@@ -134,7 +131,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
           }`}
         >
           {/* LEFT CONTENT */}
-          <div className="flex flex-col justify-between flex-1 min-w-0 pr-1">
+          <div className="flex flex-col justify-between flex-1 min-w-0 p-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
