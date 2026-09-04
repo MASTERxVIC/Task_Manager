@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "../lib/supabaseClient"; 
+import { supabase } from "../lib/supabaseClient";
 
 const PRIORITIES = [
   { key: "low", label: "Low", color: "bg-low" },
@@ -26,13 +26,13 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
       setForm(
         editingTask
           ? {
-              task: editingTask.task,
+              task: editingTask.task || "",
               des: editingTask.des || "",
               deadline: editingTask.deadline || "",
               priority: editingTask.priority || "normal",
               image: editingTask.image || "",
             }
-          : emptyForm,
+          : emptyForm
       );
       setError("");
       setUploading(false);
@@ -40,7 +40,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
   }, [open, editingTask]);
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     try {
@@ -48,13 +48,16 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
       setError("");
 
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
+      const uniqueId = typeof crypto !== "undefined" && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : Date.now();
+      const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `task-images/${fileName}`;
 
       // 1. Supabase Storage bucket me file upload karna
       const { error: uploadError } = await supabase.storage
-        .from("todos") // Apne Supabase Storage Bucket ka naam yahan rakhein
-        .upload(filePath, file);
+        .from("todos")
+        .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
       if (uploadError) throw uploadError;
 
@@ -63,11 +66,13 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
         .from("todos")
         .getPublicUrl(filePath);
 
-      // 3. State me direct public URL store karna
+      if (!data?.publicUrl) throw new Error("Could not retrieve public URL.");
+
+      // 3. Form state update
       setForm((f) => ({ ...f, image: data.publicUrl }));
     } catch (err) {
       console.error("Error uploading image:", err.message);
-      setError("Failed to upload image.");
+      setError("Failed to upload image. Check storage permissions.");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -169,7 +174,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="absolute top-3 right-3 bg-ink/70 hover:bg-ink text-white p-1 rounded-full text-xs transition-colors"
+                        className="absolute top-3 right-3 bg-ink/70 hover:bg-ink text-white px-2 py-1 rounded-full text-xs transition-colors"
                       >
                         ✕ Remove
                       </button>
