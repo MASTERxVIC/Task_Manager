@@ -102,13 +102,13 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                 )}
 
                 {(task.assignee || task.mentionedUser) && (
-                  <span className={`px-3 py-0.5 rounded-full text-xs font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
+                  <span className={`px-3 py-0.5 rounded-full text-[15px] font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                     {task.assignee || task.mentionedUser}
                   </span>
                 )}
               </div>
 
-              <p className={`text-xs font-afacad font-regular line-clamp-2 ${task.completed ? 'text-gray-400' : 'text-gray-300'}`}>
+              <p className={`text-xl font-afacad font-regular line-clamp-2 ${task.completed ? 'text-gray-400' : 'text-gray-300'}`}>
                 {task.des || 'description description description'}
               </p>
             </div>
