@@ -129,7 +129,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
         {/* MAIN CARD BODY */}
         <div 
-          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-4 border-[#CF0003] ${
+          className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 border-[#CF0003] ${
             task.completed ? 'opacity-60' : ''
           }`}
         >
