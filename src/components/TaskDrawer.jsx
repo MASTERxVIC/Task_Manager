@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "../lib/supabase"; 
 
 const PRIORITIES = [
   { key: "low", label: "Low", color: "bg-low" },
@@ -18,6 +19,7 @@ const emptyForm = {
 export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -33,19 +35,43 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
           : emptyForm,
       );
       setError("");
+      setUploading(false);
     }
   }, [open, editingTask]);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm((f) => ({ ...f, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
+    try {
+      setUploading(true);
+      setError("");
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `task-images/${fileName}`;
+
+      // 1. Supabase Storage bucket me file upload karna
+      const { error: uploadError } = await supabase.storage
+        .from("todos") // Apne Supabase Storage Bucket ka naam yahan rakhein
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Uploaded file ka Public URL generate karna
+      const { data } = supabase.storage
+        .from("todos")
+        .getPublicUrl(filePath);
+
+      // 3. State me direct public URL store karna
+      setForm((f) => ({ ...f, image: data.publicUrl }));
+    } catch (err) {
+      console.error("Error uploading image:", err.message);
+      setError("Failed to upload image.");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   };
 
   const handleRemoveImage = () => {
@@ -152,7 +178,9 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                     <div>
                       <label
                         htmlFor="task-image-upload"
-                        className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-line bg-white hover:bg-surface/5 text-muted hover:text-ink text-xs font-medium cursor-pointer transition-all shadow-sm"
+                        className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-line bg-white hover:bg-surface/5 text-muted hover:text-ink text-xs font-medium cursor-pointer transition-all shadow-sm ${
+                          uploading ? "opacity-50 pointer-events-none" : ""
+                        }`}
                       >
                         <svg
                           width="16"
@@ -175,12 +203,13 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
-                        <span>Attach Photo</span>
+                        <span>{uploading ? "Uploading..." : "Attach Photo"}</span>
                       </label>
                       <input
                         id="task-image-upload"
                         type="file"
                         accept="image/*"
+                        disabled={uploading}
                         onChange={handleImageUpload}
                         className="hidden"
                       />
@@ -266,7 +295,8 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-surface text-white hover:opacity-95 transition-opacity shadow-sm"
+                  disabled={uploading}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-surface text-white hover:opacity-95 transition-opacity shadow-sm disabled:opacity-50"
                 >
                   {editingTask ? "Save changes" : "Add task"}
                 </button>
