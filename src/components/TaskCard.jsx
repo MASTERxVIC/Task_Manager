@@ -21,7 +21,7 @@ const CATEGORY_THEME = {
     text: 'text-[#CF0003]',
     pillBg: 'bg-[#FFE2E0]', 
     border: 'border-[#CF0003]',
-    borderColorClass: 'border-l-[#CF0003]' // Dynamic Border Color
+    borderColorClass: 'border-l-[#CF0003]'
   },
   today: { 
     line: 'bg-[#B0E01E]', 
@@ -30,7 +30,7 @@ const CATEGORY_THEME = {
     text: 'text-[#8EA824]',
     pillBg: 'bg-[#F2FDC3]', 
     border: 'border-[#8EA824]',
-    borderColorClass: 'border-l-[#B0E01E]' // Dynamic Border Color
+    borderColorClass: 'border-l-[#B0E01E]'
   },
   upcoming: { 
     line: 'bg-[#008ACF]', 
@@ -39,7 +39,7 @@ const CATEGORY_THEME = {
     text: 'text-[#008ACF]',
     pillBg: 'bg-[#DDEFFE]', 
     border: 'border-[#008ACF]',
-    borderColorClass: 'border-l-[#008ACF]' // Dynamic Border Color
+    borderColorClass: 'border-l-[#008ACF]'
   },
   nodate: { 
     line: 'bg-[#FFC684]', 
@@ -48,7 +48,7 @@ const CATEGORY_THEME = {
     text: 'text-[#A06E32]',
     pillBg: 'bg-[#FFF0DD]', 
     border: 'border-[#A06E32]',
-    borderColorClass: 'border-l-[#FFC684]' // Dynamic Border Color
+    borderColorClass: 'border-l-[#FFC684]'
   },
   done: { 
     line: 'bg-gray-500', 
@@ -57,7 +57,7 @@ const CATEGORY_THEME = {
     text: 'text-gray-400',
     pillBg: 'bg-gray-200', 
     border: 'border-gray-400',
-    borderColorClass: 'border-l-gray-400' // Dynamic Border Color
+    borderColorClass: 'border-l-gray-400'
   }
 };
 
@@ -113,7 +113,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
     };
   }, [showImageModal]);
 
-  const urgencyKey = task.completed ? 'done' : (urgency(task) || 'nodate');
+  // Complete hone par bhi card apni ORIGINAL category ki styling preserve karega
+  const urgencyKey = urgency(task) || 'nodate';
   const accentTheme = CATEGORY_THEME[urgencyKey] || CATEGORY_THEME.nodate;
 
   return (
@@ -126,17 +127,17 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: 'easeOut' }}
         className="relative group w-[336px] select-none shrink-0"
       >
-        {/* MAIN CARD BODY - DYNAMIC LEFT BORDER COLOR INTEGRATED */}
+        {/* MAIN CARD BODY */}
         <div 
           className={`relative z-10 flex justify-between gap-2 rounded-[32px] bg-[#222222] p-5 text-white shadow-xl transition-all duration-200 w-[348px] h-[193px] border-l-8 ${accentTheme.borderColorClass} ${
-            task.completed ? 'opacity-60' : ''
+            task.completed ? 'opacity-60' : 'opacity-100'
           }`}
         >
           {/* LEFT CONTENT */}
           <div className="flex flex-col justify-between flex-1 min-w-0">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-2">
-                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
+                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-300' : 'text-white'}`}>
                   {task.task}
                 </h3>
 
@@ -159,7 +160,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                 )}
               </div>
 
-              <p className={`text-xs leading-relaxed line-clamp-2 ${task.completed ? 'text-gray-500' : 'text-gray-300'}`}>
+              <p className={`text-xs leading-relaxed line-clamp-2 ${task.completed ? 'text-gray-400' : 'text-gray-300'}`}>
                 {task.des || 'description description description'}
               </p>
             </div>
