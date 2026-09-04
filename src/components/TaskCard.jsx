@@ -95,7 +95,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    className=" hover:text-white transition-colors shrink-0 opacity-40 hover:opacity-100"
+                    className=" hover:text-white transition-colors shrink-0 opacity-40 hover:opacity-100 cursor-pointer"
                   >
                     <svg
                       width="15"
@@ -133,14 +133,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
             <div className="flex items-center gap-2 mt-auto flex-wrap">
               <span
-                className={`px-3.5 py-1 rounded-lg text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                className={`px-3.5 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
               >
                 {task.deadline ? formatDeadline(task.deadline) : "No Date"}
               </span>
 
               {task.completed && (
                 <span
-                  className={`px-3.5 py-1 rounded-lg text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                  className={`px-3.3 py-1 rounded-xl text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
                 >
                   {getRemainingDays(task.completed_at)}
                 </span>
@@ -153,7 +153,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onEdit(task)}
-              className="hover:text-white transition-colors p-0.5 opacity-40 hover:opacity-100"
+              className="hover:text-white transition-colors p-0.5 opacity-40 hover:opacity-100 cursor-pointer"
             >
               <svg
                 width="16"
@@ -175,7 +175,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-40 hover:opacity-100"
+              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-40 hover:opacity-100 cursor-pointer"
             >
               <svg
                 width="16"
@@ -197,7 +197,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onToggle(task.id)}
-              className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all opacity-40 hover:opacity-100 ${
+              className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all opacity-40 hover:opacity-100 cursor-pointer ${
                 task.completed
                   ? "border-gray-400 bg-transparent text-gray-300"
                   : "border-gray-400 hover:border-gray-200 bg-transparent text-transparent"
