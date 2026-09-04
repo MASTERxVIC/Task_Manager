@@ -56,7 +56,16 @@ const CATEGORY_THEME = {
   }
 };
 
-// 1. TIMELINE SECTION COMPONENT (Side Vertical Line + Glowing Pin Header)
+// 1. GRID CONTAINER FOR CARDS (MAX 3 PER ROW)
+export function TaskGrid({ children }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8 items-start justify-items-start w-full">
+      {children}
+    </div>
+  );
+}
+
+// 2. TIMELINE SECTION COMPONENT
 export function TaskSection({ title, count, type = 'nodate', children }) {
   const theme = CATEGORY_THEME[type] || CATEGORY_THEME.nodate;
 
@@ -79,15 +88,15 @@ export function TaskSection({ title, count, type = 'nodate', children }) {
         </span>
       </div>
 
-      {/* TASK CARDS CONTAINER */}
-      <div className="flex flex-col gap-4">
+      {/* GRID WRAPPER INTEGRATED FOR 3 CARDS PER ROW */}
+      <TaskGrid>
         {children}
-      </div>
+      </TaskGrid>
     </div>
   );
 }
 
-// 2. SINGLE TASK CARD COMPONENT
+// 3. SINGLE TASK CARD COMPONENT
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const [showImageModal, setShowImageModal] = useState(false);
 
