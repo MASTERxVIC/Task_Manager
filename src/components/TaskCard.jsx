@@ -156,8 +156,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               className="hover:text-white transition-colors p-0.5 opacity-40 hover:opacity-100"
             >
               <svg
-                width="15"
-                      height="17"
+                width="16"
+                height="16"
                 viewBox="0 0 18 18"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -178,8 +178,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-40 hover:opacity-100"
             >
               <svg
-               width="15"
-                      height="17"
+                width="16"
+                height="18"
                 viewBox="0 0 18 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -204,8 +204,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               }`}
             >
               <svg
-                width="12"
-                height="12"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
