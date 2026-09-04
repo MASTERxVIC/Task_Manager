@@ -321,7 +321,7 @@ export default function App() {
   return (
     <div className="h-[100dvh] w-full flex bg-[#FDFBF7] overflow-hidden fixed inset-0">
       {/* Desktop Sidebar: Set to w-80 or w-72 as per your design */}
-      <div className="hidden md:block lg:w-84.75 shrink-0 h-full  z-30">
+      <div className="hidden md:block z-30">
         <Sidebar 
           view={view} 
           setView={setView} 
