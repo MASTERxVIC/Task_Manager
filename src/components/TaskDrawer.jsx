@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "../lib/supabase"; 
+import { supabase } from "../lib/supabaseClient"; 
 
 const PRIORITIES = [
   { key: "low", label: "Low", color: "bg-low" },
