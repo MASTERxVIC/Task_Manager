@@ -133,14 +133,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
             <div className="flex items-center gap-2 mt-auto flex-wrap">
               <span
-                className={`px-3.5 py-1 rounded-full text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                className={`px-3.5 py-1 rounded-lg text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
               >
                 {task.deadline ? formatDeadline(task.deadline) : "No Date"}
               </span>
 
               {task.completed && (
                 <span
-                  className={`px-3.5 py-1 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
+                  className={`px-3.5 py-1 rounded-lg text-sm font-mono border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}
                 >
                   {getRemainingDays(task.completed_at)}
                 </span>
