@@ -95,13 +95,23 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    className="text-gray-400 hover:text-white transition-colors shrink-0"
+                    className=" hover:text-white transition-colors shrink-0 opacity-60 hover:opacity-0"
                   >
-                    <img
-                      src="/Attachment.svg"
-                      alt="Attachment"
-                      className="w-[18px] h-[18px]"
-                    />
+                    <svg
+                      width="18"
+                      height="20"
+                      viewBox="0 0 18 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M1 9.43198L7.89429 2.53769C9.94454 0.487437 13.2687 0.487437 15.319 2.53769C17.3692 4.58794 17.369 7.91224 15.3187 9.96249L7.36377 17.9174C5.99693 19.2843 3.78123 19.2841 2.4144 17.9173C1.04756 16.5504 1.04723 14.3346 2.41406 12.9677L10.369 5.01279C11.0524 4.32937 12.1611 4.32937 12.8445 5.01279C13.5279 5.6962 13.5274 6.80398 12.844 7.4874L5.94971 14.3817"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
                   </button>
                 )}
 
@@ -143,15 +153,29 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onEdit(task)}
-              className="hover:text-white transition-colors p-0.5"
+              className="hover:text-white transition-colors p-0.5 opacity-60 hover:opacity-0"
             >
-              <img src="/Edit.svg" alt="Edit" className="w-[18px] h-[18px]" />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 4.58605L1 12.5861V16.5861H17M1 16.5861L5 16.586L13 8.58604M9 4.58605L11.8686 1.7174L11.8704 1.7157C12.2652 1.32082 12.463 1.12303 12.691 1.04894C12.8919 0.983686 13.1082 0.983686 13.3091 1.04894C13.5369 1.12297 13.7345 1.32054 14.1288 1.71486L15.8686 3.45466C16.2646 3.85067 16.4627 4.04878 16.5369 4.2771C16.6022 4.47795 16.6021 4.69429 16.5369 4.89513C16.4628 5.1233 16.265 5.3211 15.8695 5.71655L15.8686 5.7174L13 8.58604M9 4.58605L13 8.58604"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </button>
 
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              className="hover:text-red-400 transition-colors my-auto p-0.5"
+              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-60 hover:opacity-0"
             >
               <svg
                 width="18"
