@@ -12,13 +12,13 @@ function getRemainingDays(completedAt) {
   return `Deletes in ${daysLeft}d`;
 }
 
-// Color Palette Matched to Mockup
+// Design Specific Palette Colors
 const COLOR_CONFIG = {
-  overdue: { bg: 'bg-[#C82D2B]', text: 'text-[#C82D2B]', pillBg: 'bg-[#FFD2D0]' },
-  today: { bg: 'bg-[#BCE343]', text: 'text-[#8EA824]', pillBg: 'bg-[#EEFB8A]' },
-  upcoming: { bg: 'bg-[#3C88CE]', text: 'text-[#2D6CA8]', pillBg: 'bg-[#C3E4FF]' },
-  nodate: { bg: 'bg-[#E3AA65]', text: 'text-[#A06E32]', pillBg: 'bg-[#FFE3C3]' },
-  done: { bg: 'bg-gray-500', text: 'text-gray-400', pillBg: 'bg-gray-300' }
+  overdue: { bg: 'bg-[#C82D2B]', text: 'text-[#C82D2B]', pillBg: 'bg-[#FFE2E0]', border: 'border-[#C82D2B]' },
+  today: { bg: 'bg-[#BCE343]', text: 'text-[#8EA824]', pillBg: 'bg-[#F2FDC3]', border: 'border-[#8EA824]' },
+  upcoming: { bg: 'bg-[#3C88CE]', text: 'text-[#2D6CA8]', pillBg: 'bg-[#DDEFFE]', border: 'border-[#2D6CA8]' },
+  nodate: { bg: 'bg-[#E3AA65]', text: 'text-[#A06E32]', pillBg: 'bg-[#FFF0DD]', border: 'border-[#A06E32]' },
+  done: { bg: 'bg-gray-500', text: 'text-gray-400', pillBg: 'bg-gray-200', border: 'border-gray-400' }
 };
 
 export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
@@ -46,34 +46,33 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -12, transition: { duration: 0.15 } }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative group w-full max-w-[340px]"
+        className="relative group w-full max-w-[320px] select-none"
       >
-        {/* Back-Shadow Accent Block (Curved Outline Shift) */}
+        {/* EXACT DESIGN BACK SHADOW OFFSET (Top-Left & Bottom Expansion) */}
         <div 
-          className={`absolute -left-2 -bottom-2 top-2 right-2 rounded-[22px] transition-all duration-300 ${accentTheme.bg}`} 
+          className={`absolute -top-1.5 -left-2.5 -bottom-1.5 right-2 rounded-[28px] transition-all duration-300 ${accentTheme.bg}`} 
         />
 
-        {/* Main Dark Card */}
+        {/* MAIN MATTE CARD */}
         <div 
-          className={`relative z-10 flex justify-between gap-3 rounded-[20px] bg-[#222222] p-4 text-white shadow-xl transition-all duration-200 min-h-[140px] ${
-            task.completed ? 'opacity-60' : 'hover:scale-[1.01]'
+          className={`relative z-10 flex justify-between gap-2 rounded-[24px] bg-[#222222] p-4 text-white shadow-xl transition-all duration-200 min-h-[135px] ${
+            task.completed ? 'opacity-60' : ''
           }`}
         >
-          {/* LEFT SIDE CONTENT AREA */}
-          <div className="flex flex-col justify-between flex-1 min-w-0">
-            {/* Header: Title + Image Attachment + Mention Pill */}
+          {/* LEFT CONTENT AREA */}
+          <div className="flex flex-col justify-between flex-1 min-w-0 pr-1">
             <div>
-              <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                <h3 className={`font-bold text-base truncate ${task.completed ? 'line-through text-gray-400' : 'text-gray-100'}`}>
+              {/* Header: Title + Image Icon + Mention Pill */}
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h3 className={`font-bold text-base truncate tracking-wide ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
                   {task.task}
                 </h3>
 
-                {/* Paperclip Icon */}
+                {/* Attachment Icon */}
                 {task.image && (
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    title="View attachment"
                     className="text-gray-400 hover:text-white transition-colors shrink-0"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -82,9 +81,9 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   </button>
                 )}
 
-                {/* Mentioned User Pill Badge */}
+                {/* User Pill Badge */}
                 {(task.assignee || task.mentionedUser) && (
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide ${accentTheme.pillBg} ${accentTheme.text}`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                     {task.assignee || task.mentionedUser}
                   </span>
                 )}
@@ -98,30 +97,27 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
             {/* Bottom Badges */}
             <div className="flex items-center gap-2 mt-3 flex-wrap">
-              {/* Date Badge */}
-              <span className={`px-3 py-0.5 rounded-full text-xs font-bold font-mono ${accentTheme.pillBg} ${accentTheme.text}`}>
+              <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                 {task.deadline ? formatDeadline(task.deadline) : 'No Date'}
               </span>
 
-              {/* Completed Remaining Days Badge */}
               {task.completed && (
-                <span className={`px-3 py-0.5 rounded-full text-xs font-bold font-mono ${accentTheme.pillBg} ${accentTheme.text}`}>
+                <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border}`}>
                   {getRemainingDays(task.completed_at)}
                 </span>
               )}
             </div>
           </div>
 
-          {/* RIGHT SIDE VERTICAL ACTION COLUMN (Aligned to Mockup) */}
-          <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-0.5">
+          {/* RIGHT ACTION COLUMN */}
+          <div className="flex flex-col justify-between items-center shrink-0 pl-1 py-0.5 text-gray-400">
             {/* Edit Icon */}
             <button
               type="button"
               onClick={() => onEdit(task)}
-              aria-label="Edit task"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="hover:text-white transition-colors p-0.5"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
               </svg>
             </button>
@@ -130,26 +126,24 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              aria-label="Delete task"
-              className="text-gray-400 hover:text-red-400 transition-colors my-auto"
+              className="hover:text-red-400 transition-colors my-auto p-0.5"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z" />
               </svg>
             </button>
 
-            {/* Checkbox Icon */}
+            {/* Square Checkbox Icon */}
             <button
               type="button"
               onClick={() => onToggle(task.id)}
-              aria-label={task.completed ? 'Mark incomplete' : 'Mark complete'}
-              className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+              className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${
                 task.completed
-                  ? 'bg-blue-400 border-blue-400 text-white'
+                  ? 'border-gray-400 bg-transparent text-gray-300'
                   : 'border-gray-400 hover:border-gray-200 bg-transparent text-transparent'
               }`}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 13l4 4L19 7" />
               </svg>
             </button>
@@ -165,7 +159,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowImageModal(false)}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
