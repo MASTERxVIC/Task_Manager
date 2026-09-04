@@ -406,7 +406,7 @@ export default function App() {
         />
 
         {/* CSS UPDATED: max-w-3xl changed to max-w-[1200px] */}
-        <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-12 py-6 max-w-[1200px] w-full mx-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 md:px-[58px] py-6 max-w-[1200px] w-full mx-auto">
           <TaskList
             tasks={tasks || []}
             view={view}
