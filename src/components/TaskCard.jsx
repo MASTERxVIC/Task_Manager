@@ -160,7 +160,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                         {/* Dynamic Badge (+1, +2, etc.) */}
                         {extraCount > 0 && (
-                          <span className="bg-black/15 text-xs px-1.5 py-0.2 rounded-md font-sans font-semibold ml-0.5">
+                          <span className="bg-[#FDD739] text-[#1E1E23] text-xs px-1.5 py-0.2 rounded-lg font-mono font-semibold ml-0.5">
                             +{extraCount}
                           </span>
                         )}
