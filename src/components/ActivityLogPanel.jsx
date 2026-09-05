@@ -138,7 +138,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-muted flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-[#E8BD09] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-500">
               <h2 className="font-display font-semibold text-lg text-[#1E1E24] ">
