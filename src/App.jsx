@@ -429,6 +429,7 @@ export default function App() {
         onClose={closeDrawer} 
         onSave={handleSave} 
         editingTask={editingTask} 
+        boardMembers={boardMembers} 
       />
       
       <CreateBoardModal
