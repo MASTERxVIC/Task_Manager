@@ -208,7 +208,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
 
                     {log.task_title && (
-                      <div className="text-xs font-code text-muted/80 break-words">
+                      <div className="text-xs font-code text-[#FFF3BF] break-words">
                         {log.task_title}
                       </div>
                     )}
