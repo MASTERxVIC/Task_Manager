@@ -117,13 +117,20 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                 {/* MULTI-ASSIGNEE PILL WITH DYNAMIC BADGE & HOVER TOOLTIP */}
                 {(() => {
-                  const rawAssignees = task.assignees || task.assignee || task.mentionedUser || [];
+                  const rawAssignees =
+                    task.assignees || task.assignee || task.mentionedUser || [];
                   let memberList = [];
 
                   if (Array.isArray(rawAssignees)) {
                     memberList = rawAssignees;
-                  } else if (typeof rawAssignees === "string" && rawAssignees.trim()) {
-                    memberList = rawAssignees.split(",").map((item) => item.trim()).filter(Boolean);
+                  } else if (
+                    typeof rawAssignees === "string" &&
+                    rawAssignees.trim()
+                  ) {
+                    memberList = rawAssignees
+                      .split(",")
+                      .map((item) => item.trim())
+                      .filter(Boolean);
                   }
 
                   if (memberList.length === 0) return null;
@@ -131,13 +138,25 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                   const firstMember = memberList[0];
                   const extraCount = memberList.length - 1;
 
+                  // Check if it's a single assigned member (no extra count & single name)
+                  const isSingleMember = memberList.length === 1;
+
                   return (
                     <div className="relative group/pill inline-block shrink-0">
                       {/* Main Tag / Pill */}
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-xl text-[15px] font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border} cursor-pointer transition-all`}
                       >
-                        <span className="truncate max-w-[90px]">{firstMember}</span>
+                        {/* Single name case me truncate bilkul remove rahega, multiple case me 120px max-width constraint ke sath truncate hoga */}
+                        <span
+                          className={
+                            isSingleMember
+                              ? "whitespace-nowrap"
+                              : "truncate max-w-[120px]"
+                          }
+                        >
+                          {firstMember}
+                        </span>
 
                         {/* Dynamic Badge (+1, +2, etc.) */}
                         {extraCount > 0 && (
@@ -147,17 +166,22 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                         )}
                       </span>
 
-                      {/* Hover Tooltip showing full member list */}
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/pill:flex flex-col gap-1 bg-[#2A2A30] text-white text-xs font-sans rounded-lg px-3 py-2 shadow-2xl border border-white/10 z-50 whitespace-nowrap pointer-events-none transition-opacity">
-                        <span className="font-semibold text-[11px] text-gray-400 border-b border-white/10 pb-1 mb-0.5">
-                          Assigned Members ({memberList.length}):
-                        </span>
-                        {memberList.map((m, idx) => (
-                          <span key={idx} className="flex items-center gap-1.5 text-gray-200">
-                            • {m}
+                      {/* Hover Tooltip showing full member list (Multiple member hone par hi hover active hoga) */}
+                      {!isSingleMember && (
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/pill:flex flex-col gap-1 bg-[#2A2A30] text-white text-xs font-sans rounded-lg px-3 py-2 shadow-2xl border border-white/10 z-50 whitespace-nowrap pointer-events-none transition-opacity">
+                          <span className="font-semibold text-[11px] text-gray-400 border-b border-white/10 pb-1 mb-0.5">
+                            Assigned Members ({memberList.length}):
                           </span>
-                        ))}
-                      </div>
+                          {memberList.map((m, idx) => (
+                            <span
+                              key={idx}
+                              className="flex items-center gap-1.5 text-gray-200"
+                            >
+                              • {m}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
