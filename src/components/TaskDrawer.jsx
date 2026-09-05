@@ -130,18 +130,21 @@ export default function TaskDrawer({
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.task.trim()) {
-      setError("Give the task a name.");
-      return;
-    }
-    onSave({
-      ...form,
-      task: form.task.trim(),
-      des: form.des.trim(),
-    });
-  };
+  // ✅ Corrected handleSubmit inside TaskDrawer.jsx
+const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!form.task.trim()) {
+    setError("Give the task a name.");
+    return;
+  }
+  
+  onSave({
+    ...(editingTask || {}), // Original metadata & ID preserve rahenge
+    ...form,               // Updated form values overwrite ho jayenge
+    task: form.task.trim(),
+    des: form.des.trim(),
+  });
+};
 
   return (
     <AnimatePresence>
