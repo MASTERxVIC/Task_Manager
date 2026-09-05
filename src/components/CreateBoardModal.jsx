@@ -232,7 +232,7 @@ export default function CreateBoardModal({
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-muted" />
+                        <Check className="w-3.5 h-3.5 text-[#1E1E24]" />
                         <span>Copied!</span>
                       </>
                     ) : (
