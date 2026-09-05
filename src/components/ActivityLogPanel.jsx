@@ -138,7 +138,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-lime-500 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-lime-700 flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-500">
               <h2 className="font-display font-semibold text-lg text-white ">
@@ -177,7 +177,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                   >
                     <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold md:text-sm text-xs text-lime-700 truncate">
+                        <span className="font-semibold md:text-sm text-xs text-lime-500 truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
@@ -199,7 +199,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         </span>
                       </div>
 
-                      <span className="text-[10px] text-lime-700 font-medium shrink-0">
+                      <span className="text-[10px] text-lime-600 font-medium shrink-0">
                         {new Date(log.created_at).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -208,7 +208,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
 
                     {log.task_title && (
-                      <div className="text-xs font-code text-lime-500 break-words">
+                      <div className="text-xs font-code text-lime-300 break-words">
                         {log.task_title}
                       </div>
                     )}
