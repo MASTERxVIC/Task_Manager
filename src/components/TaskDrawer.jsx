@@ -36,12 +36,15 @@ export default function TaskDrawer({
     if (open) {
       // 1. Safely handle assignee data regardless of DB schema (array, string, or single string)
       const rawAssignee = editingTask?.assignee ?? editingTask?.assignees;
-      
+
       let initialAssignees = [];
       if (Array.isArray(rawAssignee)) {
         initialAssignees = rawAssignee;
       } else if (typeof rawAssignee === "string" && rawAssignee.trim()) {
-        initialAssignees = rawAssignee.split(",").map((s) => s.trim()).filter(Boolean);
+        initialAssignees = rawAssignee
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
 
       setForm(
@@ -54,7 +57,7 @@ export default function TaskDrawer({
               assignees: initialAssignees,
               image: editingTask.image || "",
             }
-          : emptyForm
+          : emptyForm,
       );
       setError("");
       setAssigneeInput("");
@@ -119,9 +122,7 @@ export default function TaskDrawer({
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from("todos")
-        .getPublicUrl(filePath);
+      const { data } = supabase.storage.from("todos").getPublicUrl(filePath);
 
       if (!data?.publicUrl) throw new Error("Could not retrieve public URL.");
 
@@ -176,7 +177,7 @@ export default function TaskDrawer({
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] md:rounded-l-2xl bg-[#1E1E24] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-[#1E1E24] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#FDD739] bg-[#1E1E24]">
               <h2 className="font-display font-semibold text-lg text-[#FDD739]">
@@ -204,14 +205,19 @@ export default function TaskDrawer({
             >
               <div className="flex-1 px-6 py-5 flex flex-col gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-name">
+                  <label
+                    className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5"
+                    htmlFor="task-name"
+                  >
                     Task name
                   </label>
                   <input
                     id="task-name"
                     autoFocus
                     value={form.task}
-                    onChange={(e) => setForm((f) => ({ ...f, task: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, task: e.target.value }))
+                    }
                     placeholder="e.g. Renew domain"
                     className="w-full bg-muted border border-muted rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] placeholder:text-gray-500  outline-none transition-colors shadow-sm"
                   />
@@ -247,7 +253,11 @@ export default function TaskDrawer({
                         setAssigneeInput(e.target.value);
                         setIsDropdownOpen(true);
                       }}
-                      placeholder={form.assignees.length === 0 ? "Select or search member..." : ""}
+                      placeholder={
+                        form.assignees.length === 0
+                          ? "Select or search member..."
+                          : ""
+                      }
                       className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-[#1E1E24] placeholder:text-gray-500  p-1"
                     />
                   </div>
@@ -256,16 +266,17 @@ export default function TaskDrawer({
                     <div className="absolute left-0 right-0 top-full mt-1 bg-muted border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
                       {filteredMembers.length > 0 ? (
                         filteredMembers.map((member) => {
-                          const displayName = member.full_name || member.email || "Team Member";
+                          const displayName =
+                            member.full_name || member.email || "Team Member";
                           return (
                             <div
                               key={member.user_id || member.id || displayName}
                               onClick={() => handleSelectMember(member)}
-                              className="px-3 py-2 flex items-center justify-between text-sm text-[#1E1E24] hover:bg-[#1E1E24]  cursor-pointer transition-colors"
+                              className="group px-3 py-2 flex items-center justify-between text-sm text-[#1E1E24] hover:bg-[#1E1E24] hover:text-muted cursor-pointer transition-colors"
                             >
                               <span className="truncate">{displayName}</span>
                               {member.role && (
-                                <span className="text-[10px] text-[#1E1E24] hover:text-muted capitalize ml-2">
+                                <span className="text-[10px] text-[#1E1E24] group-hover:text-muted opacity-75 capitalize ml-2 transition-colors">
                                   {member.role}
                                 </span>
                               )}
@@ -274,7 +285,9 @@ export default function TaskDrawer({
                         })
                       ) : (
                         <div className="px-3 py-2 text-xs text-[#1E1E24] bg-muted">
-                          {boardMembers.length === 0 ? "No members in this board" : "No matching members"}
+                          {boardMembers.length === 0
+                            ? "No members in this board"
+                            : "No matching members"}
                         </div>
                       )}
                     </div>
@@ -308,7 +321,9 @@ export default function TaskDrawer({
                           uploading ? "opacity-50 pointer-events-none" : ""
                         }`}
                       >
-                        <span>{uploading ? "Uploading..." : "Attach Photo"}</span>
+                        <span>
+                          {uploading ? "Uploading..." : "Attach Photo"}
+                        </span>
                       </label>
                       <input
                         id="task-image-upload"
@@ -323,33 +338,45 @@ export default function TaskDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-des">
+                  <label
+                    className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5"
+                    htmlFor="task-des"
+                  >
                     Description
                   </label>
                   <textarea
                     id="task-des"
                     rows={4}
                     value={form.des}
-                    onChange={(e) => setForm((f) => ({ ...f, des: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, des: e.target.value }))
+                    }
                     placeholder="Optional details..."
                     className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] placeholder:text-gray-500  outline-none transition-colors resize-none shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-date">
+                  <label
+                    className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5"
+                    htmlFor="task-date"
+                  >
                     Due date
                   </label>
                   <input
                     id="task-date"
                     type="date"
                     value={form.deadline}
-                    onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, deadline: e.target.value }))
+                    }
                     className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] outline-none transition-colors shadow-sm cursor-pointer"
                   />
                 </div>
 
-                {error && <p className="text-xs text-delete font-medium">{error}</p>}
+                {error && (
+                  <p className="text-xs text-delete font-medium">{error}</p>
+                )}
               </div>
 
               <div className="px-6 py-5 border-t border-gray-500 flex gap-3 bg-[#1E1E24]">
