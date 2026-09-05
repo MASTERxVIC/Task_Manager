@@ -138,16 +138,16 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-lime-700 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-[#1E1E24] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-500">
-              <h2 className="font-display font-semibold text-lg text-white ">
+              <h2 className="font-display font-semibold text-lg text-muted ">
                 Board Activity
               </h2>
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="text-white/80 hover:text-white  p-1 cursor-pointer transition-colors"
+                className="text-muted/80 hover:text-muted p-1 cursor-pointer transition-colors"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path
@@ -163,21 +163,21 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
               {loading && logs.length === 0 ? (
                 <div className="flex justify-center items-center py-10">
-                  <p className="text-white text-xs font-semibold">Loading activity logs...</p>
+                  <p className="text-muted text-xs font-semibold">Loading activity logs...</p>
                 </div>
               ) : logs.length === 0 ? (
                 <div className="text-center py-10">
-                  <p className="text-white text-xs font-semibold">No activity recorded yet.</p>
+                  <p className="text-muted text-xs font-semibold">No activity recorded yet.</p>
                 </div>
               ) : (
                 logs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3.5 bg-[#1E1E24] rounded-xl border border-lime-50 shadow-sm transition-all flex flex-col gap-1"
+                    className="p-3.5 bg-muted rounded-xl shadow-sm transition-all flex flex-col gap-1"
                   >
                     <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold md:text-sm text-xs text-lime-500 truncate">
+                        <span className="font-semibold md:text-sm text-xs text-muted truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
@@ -199,7 +199,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         </span>
                       </div>
 
-                      <span className="text-[10px] text-lime-600 font-medium shrink-0">
+                      <span className="text-[10px] text-muted/85 font-medium shrink-0">
                         {new Date(log.created_at).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -208,7 +208,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
 
                     {log.task_title && (
-                      <div className="text-xs font-code text-lime-300 break-words">
+                      <div className="text-xs font-code text-muted/85 break-words">
                         {log.task_title}
                       </div>
                     )}
