@@ -173,7 +173,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                 logs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3.5 bg-muted rounded-xl shadow-sm transition-all flex flex-col gap-1"
+                    className="p-3.5 bg-white rounded-xl border-l-4 border-muted shadow-sm transition-all flex flex-col gap-1"
                   >
                     <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
