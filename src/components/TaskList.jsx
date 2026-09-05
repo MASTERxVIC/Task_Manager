@@ -19,7 +19,7 @@ const GROUP_HEX_COLOR = {
   today: '#A7DD05',
   upcoming: '#008ACF',
   none: '#FFC684',
-  done: '#9CA3AF',
+  done: '#89A1FF',
 };
 
 function groupTasks(tasks) {
