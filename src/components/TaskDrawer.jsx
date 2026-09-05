@@ -34,13 +34,15 @@ export default function TaskDrawer({
 
   useEffect(() => {
     if (open) {
-      const initialAssignees = Array.isArray(editingTask?.assignees)
-        ? editingTask.assignees
-        : typeof editingTask?.assignees === "string"
-        ? editingTask.assignees.split(",").map((s) => s.trim()).filter(Boolean)
-        : editingTask?.assignee
-        ? [editingTask.assignee]
-        : [];
+      // 1. Safely handle assignee data regardless of DB schema (array, string, or single string)
+      const rawAssignee = editingTask?.assignee ?? editingTask?.assignees;
+      
+      let initialAssignees = [];
+      if (Array.isArray(rawAssignee)) {
+        initialAssignees = rawAssignee;
+      } else if (typeof rawAssignee === "string" && rawAssignee.trim()) {
+        initialAssignees = rawAssignee.split(",").map((s) => s.trim()).filter(Boolean);
+      }
 
       setForm(
         editingTask
@@ -140,11 +142,16 @@ export default function TaskDrawer({
       return;
     }
 
+    // Convert array to string for DB 'assignee' column mapping while preserving array fallback
+    const assigneeString = form.assignees.join(", ");
+
     onSave({
       ...(editingTask || {}),
       ...form,
       task: form.task.trim(),
       des: form.des.trim(),
+      assignee: assigneeString, // Exact database column key mapped
+      assignees: form.assignees, // Kept for UI local state consistency
     });
   };
 
