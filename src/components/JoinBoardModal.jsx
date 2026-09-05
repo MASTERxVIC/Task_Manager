@@ -67,7 +67,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-mdbg-[#FDD739] border border-line rounded-2xl p-6 shadow-2xl z-10 text-white"
+            className="relative w-full max-w-md bg-[#FDD739] border border-line rounded-2xl p-6 shadow-2xl z-10 text-white"
           >
             {/* Close Button */}
             <button
