@@ -348,49 +348,71 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
   };
 
-  // Update Task Function (Includes Assignee Fix)
-  const updateTask = async (id, patch) => {
-    const currentTask = tasks.find((t) => t.id === id);
+// Clean & Fixed Update Task Function
+const updateTask = async (id, patch) => {
+  const currentTask = tasks.find((t) => t.id === id);
+  if (!currentTask) return;
 
-    const { error } = await supabase.from("todos").update(patch).eq("id", id);
-
-    if (!error) {
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
-      );
-
-      const taskName = patch.task || currentTask?.task || "Task";
-
-      await logActivity({
-        actionType: "UPDATED",
-        todoId: id,
-        taskTitle: taskName,
-        details: patch,
-      });
-
-      if (targetUserIds.length > 0) {
-        notifyDataChange({
-          action: "EDIT",
-          itemTitle: taskName,
-          actorName,
-          targetUserIds,
-          currentUserId: user.id,
-          url: "/",
-        });
-
-        const updatedText = `${patch.task || ""} ${patch.des || ""}`;
-        if (boardMembers && boardMembers.length > 0) {
-          checkAndSendMentions({
-            text: updatedText,
-            itemTitle: taskName,
-            boardMembers,
-            currentUserId: user.id,
-            actorName,
-          });
-        }
-      }
-    }
+  // 1. Supabase payload ke liye sirf valid updatable fields extract karein
+  // Clean payload: Unwanted fields like 'id', 'created_at', 'user_id' automatically drop ho jayenge
+  const payload = {
+    task: patch.task !== undefined ? patch.task : currentTask.task,
+    des: patch.des !== undefined ? patch.des : currentTask.des,
+    deadline: patch.deadline !== undefined ? patch.deadline : currentTask.deadline,
+    priority: patch.priority !== undefined ? patch.priority : currentTask.priority,
+    assignee: patch.assignee !== undefined ? patch.assignee : currentTask.assignee,
+    image: patch.image !== undefined ? patch.image : currentTask.image,
   };
+
+  // 2. Supabase DB call
+  const { data, error } = await supabase
+    .from("todos")
+    .update(payload)
+    .eq("id", String(id))
+    .select();
+
+  if (error) {
+    console.error("Supabase Update Task Failed:", error.message, error.details);
+    return;
+  }
+
+  // 3. UI Local State Instant Sync
+  setTasks((prev) =>
+    prev.map((t) => (t.id === id ? { ...t, ...payload } : t))
+  );
+
+  const taskName = payload.task || currentTask.task || "Task";
+
+  // 4. Activity Log & Push Notifications
+  await logActivity({
+    actionType: "UPDATED",
+    todoId: id,
+    taskTitle: taskName,
+    details: payload,
+  });
+
+  if (targetUserIds.length > 0) {
+    notifyDataChange({
+      action: "EDIT",
+      itemTitle: taskName,
+      actorName,
+      targetUserIds,
+      currentUserId: user.id,
+      url: "/",
+    });
+
+    const updatedText = `${payload.task || ""} ${payload.des || ""}`;
+    if (boardMembers && boardMembers.length > 0) {
+      checkAndSendMentions({
+        text: updatedText,
+        itemTitle: taskName,
+        boardMembers,
+        currentUserId: user.id,
+        actorName,
+      });
+    }
+  }
+};
 
   // Toggle Task Function
   const toggleTask = async (id) => {
