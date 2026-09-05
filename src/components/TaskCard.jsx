@@ -83,10 +83,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: "easeOut" }}
         className="relative group shrink-0 select-none w-full max-w-xl sm:max-w-none sm:w-82 my-2 sm:my-0"
       >
-        {/* MOBILE ONLY: LEFT CURVED ACCENT BAR LAYER */}
-        <div
-          className={`block sm:hidden absolute left-0 top-0 bottom-0 w-8 rounded-l-3xl ${accentTheme.bgAccent}`}
-        />
 
         {/* MAIN CARD CONTAINER */}
         <div
