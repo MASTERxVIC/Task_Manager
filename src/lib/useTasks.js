@@ -11,13 +11,13 @@ export function useTasks(boardId = null, boardMembers = []) {
   const [loading, setLoading] = useState(true);
   const channelRef = useRef(null);
 
-  // FIX: Fallback state taaki agar component se boardMembers na mile, toh DB se fetch ho jaye
+  // Fallback state for board members fetch
   const [fetchedBoardMembers, setFetchedBoardMembers] = useState([]);
 
-  // DUPLICATE PREVENTER: Log deduplication tracker
+  // Log deduplication tracker
   const lastLoggedRef = useRef({ key: "", timestamp: 0 });
 
-  // Helper: Expired completed tasks locally filter karne ke liye
+  // Helper: Expired completed tasks filter
   const filterValidTasks = useCallback((taskList) => {
     const now = Date.now();
     return taskList.filter((t) => {
@@ -27,7 +27,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     });
   }, []);
 
-  // Current User ka display name nikalne ke liye helper
+  // Display Name Helper
   const actorName = useMemo(() => {
     if (!user) return "A user";
     return (
@@ -35,7 +35,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     );
   }, [user]);
 
-  // Board members fetch karne ka effect
+  // Board members fetch effect
   useEffect(() => {
     let isMounted = true;
     const fetchBoardMembers = async () => {
@@ -44,12 +44,12 @@ export function useTasks(boardId = null, boardMembers = []) {
         return;
       }
       const { data, error } = await supabase
-        .from('board_members')
-        .select('user_id')
-        .eq('board_id', boardId);
+        .from("board_members")
+        .select("user_id")
+        .eq("board_id", boardId);
 
       if (!error && data && isMounted) {
-        setFetchedBoardMembers(data.map(m => m.user_id));
+        setFetchedBoardMembers(data.map((m) => m.user_id));
       }
     };
 
@@ -59,12 +59,13 @@ export function useTasks(boardId = null, boardMembers = []) {
       setFetchedBoardMembers([]);
     }
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [boardId, boardMembers]);
 
-  // FIX 1 & Fallback: Flexible mapping for board members (Supports props and database fetch)
+  // Target User IDs array generator
   const targetUserIds = useMemo(() => {
-    // 1. Agar props mein boardMembers hain toh unhe use karo
     if (boardMembers && boardMembers.length > 0) {
       const extractedIds = boardMembers
         .map((m) => m.user_id || m.id || (typeof m === "string" ? m : null))
@@ -72,15 +73,14 @@ export function useTasks(boardId = null, boardMembers = []) {
       if (extractedIds.length > 0) return [...new Set(extractedIds)];
     }
 
-    // 2. Agar fetched board members hain toh unhe use karo
     if (fetchedBoardMembers.length > 0) {
       return [...new Set(fetchedBoardMembers)];
     }
 
-    // 3. Last option: sirf current user
     return user?.id ? [user.id] : [];
   }, [boardMembers, fetchedBoardMembers, user?.id]);
 
+  // Activity Logger
   const logActivity = useCallback(
     async ({ actionType, todoId, taskTitle, details = {} }) => {
       if (!user || !boardId) return;
@@ -91,7 +91,6 @@ export function useTasks(boardId = null, boardMembers = []) {
         lastLoggedRef.current.key === logKey &&
         now - lastLoggedRef.current.timestamp < 1000
       ) {
-        console.log("Duplicate Activity Log Prevented:", logKey);
         return;
       }
 
@@ -104,37 +103,25 @@ export function useTasks(boardId = null, boardMembers = []) {
           .eq("id", boardId)
           .maybeSingle();
 
-        if (boardError) {
-          console.error("Board check error for logging:", boardError);
-          return;
-        }
+        if (boardError || !boardData) return;
 
         if (
-          boardData &&
-          (boardData.is_default || boardData.name?.toLowerCase() === "default")
+          boardData.is_default ||
+          boardData.name?.toLowerCase() === "default"
         ) {
           return;
         }
 
-        const { data, error } = await supabase
-          .from("activity_logs")
-          .insert([
-            {
-              board_id: boardId,
-              todo_id: String(todoId),
-              user_id: user.id,
-              action_type: actionType,
-              task_title: taskTitle,
-              details: details,
-            },
-          ])
-          .select();
-
-        if (error) {
-          console.error("Supabase Activity Log Insert Error:", error);
-        } else {
-          console.log("Activity Log Created Successfully:", data);
-        }
+        await supabase.from("activity_logs").insert([
+          {
+            board_id: boardId,
+            todo_id: String(todoId),
+            user_id: user.id,
+            action_type: actionType,
+            task_title: taskTitle,
+            details: details,
+          },
+        ]);
       } catch (err) {
         console.error("Failed to write activity log:", err);
       }
@@ -142,10 +129,9 @@ export function useTasks(boardId = null, boardMembers = []) {
     [user, boardId]
   );
 
-  // 1. Fetch Board Specific or User Specific Tasks
+  // Fetch Tasks
   const fetchTasks = useCallback(
     async (userId, currentBoardId = null) => {
-      setTasks([]);
       setLoading(true);
       try {
         let query = supabase.from("todos").select("*");
@@ -160,9 +146,7 @@ export function useTasks(boardId = null, boardMembers = []) {
           ascending: false,
         });
 
-        if (error) {
-          console.error("Error fetching tasks:", error);
-        } else {
+        if (!error) {
           setTasks(filterValidTasks(data || []));
         }
       } catch (err) {
@@ -174,7 +158,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     [filterValidTasks]
   );
 
-  // 2. Cleanup Routine
+  // Cleanup Routine
   const cleanupOldTasks = useCallback(async (userId) => {
     try {
       const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
@@ -189,7 +173,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
   }, []);
 
-  // 3. Realtime Listener
+  // Realtime Subscriptions
   const setupRealtime = useCallback(
     (userId, currentBoardId = null) => {
       if (channelRef.current) {
@@ -241,7 +225,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     [filterValidTasks]
   );
 
-  // 4. Auth Session & Active Board Change Effect
+  // Auth Effect
   useEffect(() => {
     let isMounted = true;
 
@@ -296,12 +280,13 @@ export function useTasks(boardId = null, boardMembers = []) {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // 5. Add Task (Multi-Device & Name Mention Integrated)
+  // Add Task Function (Includes Assignee Fix)
   const addTask = async ({
     task,
     des,
     deadline,
     priority,
+    assignee = null,
     image = "",
     board_id = null,
   }) => {
@@ -317,6 +302,7 @@ export function useTasks(boardId = null, boardMembers = []) {
       des,
       deadline,
       priority: priority || "normal",
+      assignee,
       image,
       completed: false,
       completed_at: null,
@@ -338,9 +324,6 @@ export function useTasks(boardId = null, boardMembers = []) {
       });
 
       if (targetUserIds.length > 0) {
-        console.log("Board Members in Hook:", boardMembers);
-        console.log("Target User IDs:", targetUserIds);
-        
         notifyDataChange({
           action: "ADD",
           itemTitle: task,
@@ -363,15 +346,11 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
   };
 
-  // 6. Update Task (Multi-Device & Name Mention Integrated)
+  // Update Task Function (Includes Assignee Fix)
   const updateTask = async (id, patch) => {
     const currentTask = tasks.find((t) => t.id === id);
-  
 
-    const { error } = await supabase
-      .from("todos")
-      .update(patch)
-      .eq("id", id);
+    const { error } = await supabase.from("todos").update(patch).eq("id", id);
 
     if (!error) {
       setTasks((prev) =>
@@ -411,7 +390,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
   };
 
-  // 7. Toggle Task
+  // Toggle Task Function
   const toggleTask = async (id) => {
     const currentTask = tasks.find((t) => t.id === id);
     if (!currentTask) return;
@@ -424,9 +403,7 @@ export function useTasks(boardId = null, boardMembers = []) {
       .update({ completed: nextCompleted, completed_at: completedAt })
       .eq("id", id);
 
-    if (error) {
-      console.error("Error toggling task:", error);
-    } else {
+    if (!error) {
       setTasks((prev) =>
         prev.map((t) =>
           t.id === id
@@ -435,10 +412,8 @@ export function useTasks(boardId = null, boardMembers = []) {
         )
       );
 
-      const actionName = nextCompleted ? "COMPLETED" : "UNDO";
-
       await logActivity({
-        actionType: actionName,
+        actionType: nextCompleted ? "COMPLETED" : "UNDO",
         todoId: id,
         taskTitle: currentTask.task || "Unknown Task",
         details: { completed: nextCompleted },
@@ -457,7 +432,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
   };
 
-  // 8. Delete Task
+  // Delete Task Function
   const deleteTask = async (id) => {
     const taskToDelete = tasks.find((t) => t.id === id);
 
@@ -493,8 +468,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
 
     const { error } = await query;
-    if (error) console.error("Error clearing tasks:", error);
-    else setTasks([]);
+    if (!error) setTasks([]);
   };
 
   const clearCompleted = async () => {
@@ -507,8 +481,7 @@ export function useTasks(boardId = null, boardMembers = []) {
     }
 
     const { error } = await query;
-    if (error) console.error("Error clearing completed tasks:", error);
-    else setTasks((prev) => prev.filter((t) => !t.completed));
+    if (!error) setTasks((prev) => prev.filter((t) => !t.completed));
   };
 
   const logout = () => supabase.auth.signOut();
