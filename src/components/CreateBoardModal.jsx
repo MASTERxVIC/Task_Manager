@@ -172,7 +172,7 @@ export default function CreateBoardModal({
                         if (error) setError("");
                       }}
                       placeholder="e.g. Frontend Sprint 2026"
-                      className="w-full px-4 py-2.5 bg-[#1E1E24]  rounded-xl text-sm text-muted placeholder:text-gray-600 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-[#1E1E24] rounded-xl text-sm text-muted placeholder:text-gray-600 outline-none border border-line transition-all"
                       autoFocus
                     />
                     {error && (
