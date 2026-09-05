@@ -13,7 +13,7 @@ const emptyForm = {
   des: "",
   deadline: "",
   priority: "normal",
-  assignees: [], // Multi-select ke liye Array
+  assignees: [],
   image: "",
 };
 
@@ -22,19 +22,26 @@ export default function TaskDrawer({
   onClose,
   onSave,
   editingTask,
-  boardMembers = [], // Full object array [{ user_id, full_name, email, role }]
+  boardMembers = [],
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  // Member Searchable Dropdown States
   const [assigneeInput, setAssigneeInput] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (open) {
+      const initialAssignees = Array.isArray(editingTask?.assignees)
+        ? editingTask.assignees
+        : typeof editingTask?.assignees === "string"
+        ? editingTask.assignees.split(",").map((s) => s.trim()).filter(Boolean)
+        : editingTask?.assignee
+        ? [editingTask.assignee]
+        : [];
+
       setForm(
         editingTask
           ? {
@@ -42,11 +49,7 @@ export default function TaskDrawer({
               des: editingTask.des || "",
               deadline: editingTask.deadline || "",
               priority: editingTask.priority || "normal",
-              assignees: Array.isArray(editingTask.assignees)
-                ? editingTask.assignees
-                : editingTask.assignee
-                ? [editingTask.assignee]
-                : [],
+              assignees: initialAssignees,
               image: editingTask.image || "",
             }
           : emptyForm
@@ -58,7 +61,6 @@ export default function TaskDrawer({
     }
   }, [open, editingTask]);
 
-  // Dropdown ke bahar click karne par use close karna
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -75,6 +77,7 @@ export default function TaskDrawer({
       setForm((f) => ({ ...f, assignees: [...f.assignees, nameToSave] }));
     }
     setAssigneeInput("");
+    setIsDropdownOpen(false);
   };
 
   const handleRemoveMember = (memberToRemove) => {
@@ -130,21 +133,20 @@ export default function TaskDrawer({
     }
   };
 
-  // ✅ Corrected handleSubmit inside TaskDrawer.jsx
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!form.task.trim()) {
-    setError("Give the task a name.");
-    return;
-  }
-  
-  onSave({
-    ...(editingTask || {}), // Original metadata & ID preserve rahenge
-    ...form,               // Updated form values overwrite ho jayenge
-    task: form.task.trim(),
-    des: form.des.trim(),
-  });
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.task.trim()) {
+      setError("Give the task a name.");
+      return;
+    }
+
+    onSave({
+      ...(editingTask || {}),
+      ...form,
+      task: form.task.trim(),
+      des: form.des.trim(),
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -208,13 +210,11 @@ const handleSubmit = (e) => {
                   />
                 </div>
 
-                {/* Multi-Select Searchable Assignees Field */}
                 <div ref={dropdownRef} className="relative">
                   <label className="block text-xs font-medium text-ink/80 mb-1.5">
                     Assignees
                   </label>
-                  
-                  {/* Selected Tags Container */}
+
                   <div className="bg-white border border-line rounded-xl p-2 min-h-[42px] flex flex-wrap gap-1.5 items-center shadow-sm">
                     {form.assignees.map((member) => (
                       <span
@@ -231,7 +231,7 @@ const handleSubmit = (e) => {
                         </button>
                       </span>
                     ))}
-                    
+
                     <input
                       type="text"
                       value={assigneeInput}
@@ -245,7 +245,6 @@ const handleSubmit = (e) => {
                     />
                   </div>
 
-                  {/* Dropdown Options List */}
                   {isDropdownOpen && (
                     <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
                       {filteredMembers.length > 0 ? (
@@ -275,7 +274,6 @@ const handleSubmit = (e) => {
                   )}
                 </div>
 
-                {/* Attachment */}
                 <div>
                   <label className="block text-xs font-medium text-ink/80 mb-1.5">
                     Attachment
