@@ -77,7 +77,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
       >
         
         <div
-          className={`relative z-10 flex justify-between gap-2 rounded-4xl sm-rounded-4xl bg-[#1E1E23] pl-5 pr-4 py-5 text-white shadow-xl transition-all duration-200 w-82 h-48.25 sm:w-82 sm:h-40 border-l-8 ${accentTheme.borderColorClass} ${
+          className={`relative z-10 flex justify-between gap-2 rounded-4xl bg-[#1E1E23] pl-5 pr-4 py-5 text-white shadow-xl transition-all duration-200 w-82 h-48.25 border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? "opacity-60" : "opacity-100"
           }`}
         >
