@@ -12,28 +12,32 @@ function getRemainingDays(completedAt) {
   return `Deletes in ${daysLeft}d`;
 }
 
-// Category Specific Themes
+// Category Specific Themes (Added hoverText for reliable Tailwind styling)
 const CATEGORY_THEME = {
   overdue: {
     text: "text-[#CF0003]",
+    hoverText: "hover:text-[#CF0003]",
     pillBg: "bg-[#FFE2E0]",
     border: "border-[#CF0003]",
     borderColorClass: "border-l-[#CF0003]",
   },
   today: {
     text: "text-[#8EA824]",
+    hoverText: "hover:text-[#8EA824]",
     pillBg: "bg-[#F2FDC3]",
     border: "border-[#8EA824]",
     borderColorClass: "border-l-[#B0E01E]",
   },
   upcoming: {
     text: "text-[#008ACF]",
+    hoverText: "hover:text-[#008ACF]",
     pillBg: "bg-[#DDEFFE]",
     border: "border-[#008ACF]",
     borderColorClass: "border-l-[#008ACF]",
   },
   none: {
     text: "text-[#A06E32]",
+    hoverText: "hover:text-[#A06E32]",
     pillBg: "bg-[#FFF0DD]",
     border: "border-[#A06E32]",
     borderColorClass: "border-l-[#FFC684]",
@@ -75,7 +79,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
         transition={{ duration: 0.25, ease: "easeOut" }}
         className="relative group shrink-0 select-none"
       >
-        {/* FIXED DIMENSIONS: Width 348px & Height 193px exact mockup layout ke match me */}
+        {/* FIXED DIMENSIONS: Width 348px & Height 193px */}
         <div
           className={`relative z-10 flex justify-between gap-2 rounded-4xl bg-[#1E1E23] pl-5 pr-4 py-5 text-white shadow-xl transition-all duration-200 w-82 h-48.25 border-l-8 ${accentTheme.borderColorClass} ${
             task.completed ? "opacity-60" : "opacity-100"
@@ -86,16 +90,17 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <div>
               <div className="flex items-center gap-2 min-w-0 mb-2">
                 <h3
-                  className={`text-xl font-bold font-afacad truncate  ${task.completed ? "text-gray-300" : "text-white"}`}
+                  className={`text-xl font-bold font-afacad truncate ${task.completed ? "text-gray-300" : "text-white"}`}
                 >
                   {task.task}
                 </h3>
 
+                {/* ATTACHMENT BUTTON */}
                 {(task.image || task.img) && (
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    className=" hover:text-white transition-colors shrink-0 opacity-40 hover:opacity-100 cursor-pointer"
+                    className={`transition-colors shrink-0 text-gray-400 opacity-40 hover:opacity-100 cursor-pointer ${accentTheme.hoverText}`}
                   >
                     <svg
                       width="15"
@@ -137,17 +142,13 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                   const firstMember = memberList[0];
                   const extraCount = memberList.length - 1;
-
-                  // Check if it's a single assigned member (no extra count & single name)
                   const isSingleMember = memberList.length === 1;
 
                   return (
                     <div className="relative group/pill inline-block shrink-0">
-                      {/* Main Tag / Pill */}
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-xl text-[15px] font-mono font-bold border ${accentTheme.pillBg} ${accentTheme.text} ${accentTheme.border} cursor-pointer transition-all`}
                       >
-                        {/* Single name case me truncate bilkul remove rahega, multiple case me 120px max-width constraint ke sath truncate hoga */}
                         <span
                           className={
                             isSingleMember
@@ -158,7 +159,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                           {firstMember}
                         </span>
 
-                        {/* Dynamic Badge (+1, +2, etc.) */}
                         {extraCount > 0 && (
                           <span className="bg-[#FDD739] text-[#1E1E23] text-xs px-1.5 py-0.2 rounded-lg font-mono font-semibold ml-0.5">
                             +{extraCount}
@@ -166,7 +166,6 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                         )}
                       </span>
 
-                      {/* Hover Tooltip showing full member list (Multiple member hone par hi hover active hoga) */}
                       {!isSingleMember && (
                         <div className="absolute left-full top-0 ml-2 hidden group-hover/pill:flex flex-col gap-1 bg-[#FDD739] text-xs font-sans rounded-xl px-3 py-2 shadow-2xl border border-gray-900 z-50 whitespace-nowrap pointer-events-none transition-opacity">
                           <span className="font-sans font-semibold text-[11px] text-[#1E1E23] border-b border-gray-500 pb-1 mb-0.5">
@@ -213,10 +212,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
           {/* RIGHT ACTION COLUMN */}
           <div className="flex flex-col justify-between items-center shrink-0 px-2 py-1 text-gray-400">
+            {/* EDIT BUTTON */}
             <button
               type="button"
               onClick={() => onEdit(task)}
-              className="hover:text-white transition-colors p-0.5 opacity-40 hover:opacity-100 cursor-pointer"
+              className={`transition-colors p-0.5 opacity-40 hover:opacity-100 cursor-pointer ${accentTheme.hoverText}`}
             >
               <svg
                 width="16"
@@ -235,14 +235,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               </svg>
             </button>
 
+            {/* DELETE BUTTON */}
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              className={`transition-colors my-auto p-0.5 opacity-40 hover:opacity-100 cursor-pointer ${
-                accentTheme.text
-                  ? `hover:${accentTheme.text}`
-                  : "hover:text-gray-400"
-              }`}
+              className={`transition-colors my-auto p-0.5 opacity-40 hover:opacity-100 cursor-pointer ${accentTheme.hoverText}`}
             >
               <svg
                 width="16"
@@ -261,13 +258,14 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
               </svg>
             </button>
 
+            {/* CHECKBOX BUTTON */}
             <button
               type="button"
               onClick={() => onToggle(task.id)}
               className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all opacity-40 hover:opacity-100 cursor-pointer ${
                 task.completed
-                  ? "border-gray-400 bg-transparent text-gray-300"
-                  : "border-gray-400 hover:border-gray-200 bg-transparent text-transparent"
+                  ? `border-gray-400 bg-transparent ${accentTheme.text}`
+                  : `border-gray-400 bg-transparent text-transparent ${accentTheme.hoverText}`
               }`}
             >
               <svg
