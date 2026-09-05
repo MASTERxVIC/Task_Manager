@@ -29,13 +29,13 @@ export default function EmptyState({ context = 'all' }) {
   const copy = COPY[context] || COPY.all;
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 px-6">
-      <div className="w-14 h-14 rounded-2xl border border-line flex items-center justify-center mb-4">
+      <div className="w-14 h-14 rounded-2xl bg-[#FDD739]  flex items-center justify-center mb-4">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.6" className="text-muted-dim" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.6" className="text-[#1E1E24]" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <p className="font-display font-medium text-ink">{copy.title}</p>
-      <p className="text-sm text-muted mt-1 max-w-xs">{copy.body}</p>
+      <p className="font-display font-medium text-[#1E1E24]">{copy.title}</p>
+      <p className="text-sm text-gray-500 mt-1 max-w-xs">{copy.body}</p>
     </div>
   );
 }
