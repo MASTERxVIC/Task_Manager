@@ -168,8 +168,8 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
                       {/* Hover Tooltip showing full member list (Multiple member hone par hi hover active hoga) */}
                       {!isSingleMember && (
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/pill:flex flex-col gap-1 bg-[#2A2A30] text-white text-xs font-sans rounded-lg px-3 py-2 shadow-2xl border border-white/10 z-50 whitespace-nowrap pointer-events-none transition-opacity">
-                          <span className="font-semibold text-[11px] text-gray-400 border-b border-white/10 pb-1 mb-0.5">
+                        <div className="absolute left-full top-0 ml-2 hidden group-hover/pill:flex flex-col gap-1 bg-[#FDD739] text-[#1E1E23] text-xs font-sans rounded-xl px-3 py-2 shadow-2xl border border-white/10 z-50 whitespace-nowrap pointer-events-none transition-opacity">
+                          <span className="font-sans font-semibold text-[11px] text-gray-400 border-b border-white/10 pb-1 mb-0.5">
                             Assigned Members ({memberList.length}):
                           </span>
                           {memberList.map((m, idx) => (
