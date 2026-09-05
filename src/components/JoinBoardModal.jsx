@@ -79,7 +79,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
 
             {/* Header Icon & Title */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-muted border border-[#1E1E24]/20">
+              <div className="p-2.5 rounded-xl bg-muted border border-[#1E1E24]/20 text-muted">
                 <UserPlus className="w-6 h-6" />
               </div>
               <div>
