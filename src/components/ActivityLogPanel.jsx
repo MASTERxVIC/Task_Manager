@@ -177,7 +177,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                   >
                     <div className="flex justify-between items-center gap-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold md:text-sm text-xs text-muted truncate">
+                        <span className="font-semibold md:text-sm text-xs text-[#1E1E24] truncate">
                           {log.profiles?.full_name || log.profiles?.email || 'Unknown Member'}
                         </span>
                         
@@ -199,7 +199,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         </span>
                       </div>
 
-                      <span className="text-[10px] text-muted/85 font-medium shrink-0">
+                      <span className="text-[10px] text-[#1E1E24]/85 font-medium shrink-0">
                         {new Date(log.created_at).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -208,7 +208,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
 
                     {log.task_title && (
-                      <div className="text-xs font-code text-muted/85 break-words">
+                      <div className="text-xs font-code text-[#1E1E24]/85 break-words">
                         {log.task_title}
                       </div>
                     )}
