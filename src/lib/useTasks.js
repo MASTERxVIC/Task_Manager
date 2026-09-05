@@ -353,18 +353,18 @@ const updateTask = async (id, patch) => {
   const currentTask = tasks.find((t) => t.id === id);
   if (!currentTask) return;
 
-  // 1. Supabase payload ke liye sirf valid updatable fields extract karein
-  // Clean payload: Unwanted fields like 'id', 'created_at', 'user_id' automatically drop ho jayenge
+  // 1. Safe extraction: Ensure fields fall back gracefully to currentTask values
   const payload = {
-    task: patch.task !== undefined ? patch.task : currentTask.task,
-    des: patch.des !== undefined ? patch.des : currentTask.des,
+    task: patch.task ?? currentTask.task,
+    des: patch.des ?? currentTask.des,
     deadline: patch.deadline !== undefined ? patch.deadline : currentTask.deadline,
-    priority: patch.priority !== undefined ? patch.priority : currentTask.priority,
-    assignee: patch.assignee !== undefined ? patch.assignee : currentTask.assignee,
+    priority: patch.priority ?? currentTask.priority,
+    // Assignee fix: Check multiple properties if patch wraps assignee or preserves existing
+    assignee: patch.assignee !== undefined ? patch.assignee : (currentTask.assignee ?? null),
     image: patch.image !== undefined ? patch.image : currentTask.image,
   };
 
-  // 2. Supabase DB call
+  // 2. Supabase DB update query
   const { data, error } = await supabase
     .from("todos")
     .update(payload)
@@ -376,7 +376,7 @@ const updateTask = async (id, patch) => {
     return;
   }
 
-  // 3. UI Local State Instant Sync
+  // 3. UI Local State Instant Update
   setTasks((prev) =>
     prev.map((t) => (t.id === id ? { ...t, ...payload } : t))
   );
