@@ -152,7 +152,7 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
                           className={
                             isSingleMember
                               ? "whitespace-nowrap"
-                              : "truncate max-w-[120px]"
+                              : "truncate max-w-[100px]"
                           }
                         >
                           {firstMember}
