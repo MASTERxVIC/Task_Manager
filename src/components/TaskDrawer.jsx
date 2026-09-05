@@ -166,7 +166,7 @@ export default function TaskDrawer({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-[#1E1E24]/40 backdrop-blur-sm"
           />
           <motion.div
             key="drawer"
@@ -176,7 +176,7 @@ export default function TaskDrawer({
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] rounded-l-xl bg-[#1E1E24] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px]  bg-[#1E1E24] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#FDD739] bg-[#1E1E24]">
               <h2 className="font-display font-semibold text-lg text-[#FDD739]">
@@ -204,7 +204,7 @@ export default function TaskDrawer({
             >
               <div className="flex-1 px-6 py-5 flex flex-col gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7] mb-1.5" htmlFor="task-name">
+                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-name">
                     Task name
                   </label>
                   <input
@@ -218,7 +218,7 @@ export default function TaskDrawer({
                 </div>
 
                 <div ref={dropdownRef} className="relative">
-                  <label className="block text-xs font-medium text-[#FDFBF7] mb-1.5">
+                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5">
                     Assignees
                   </label>
 
@@ -226,7 +226,7 @@ export default function TaskDrawer({
                     {form.assignees.map((member) => (
                       <span
                         key={member}
-                        className="bg-surface/10 text-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium border border-line"
+                        className="bg-muted text-[#1E1E24] text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium border border-line"
                       >
                         {member}
                         <button
@@ -248,7 +248,7 @@ export default function TaskDrawer({
                         setIsDropdownOpen(true);
                       }}
                       placeholder={form.assignees.length === 0 ? "Select or search member..." : ""}
-                      className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-ink placeholder:text-muted/50 focus:outline-none p-1"
+                      className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-[#1E1E24] placeholder:text-muted/50  p-1"
                     />
                   </div>
 
@@ -261,7 +261,7 @@ export default function TaskDrawer({
                             <div
                               key={member.user_id || member.id || displayName}
                               onClick={() => handleSelectMember(member)}
-                              className="px-3 py-2 flex items-center justify-between text-sm text-ink hover:bg-surface/10 cursor-pointer transition-colors"
+                              className="px-3 py-2 flex items-center justify-between text-sm text-[#1E1E24] hover:bg-muted/10 cursor-pointer transition-colors"
                             >
                               <span className="truncate">{displayName}</span>
                               {member.role && (
@@ -273,7 +273,7 @@ export default function TaskDrawer({
                           );
                         })
                       ) : (
-                        <div className="px-3 py-2 text-xs text-muted">
+                        <div className="px-3 py-2 text-xs text-[#1E1E24] bg-muted">
                           {boardMembers.length === 0 ? "No members in this board" : "No matching members"}
                         </div>
                       )}
@@ -282,7 +282,7 @@ export default function TaskDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7] mb-1.5">
+                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5">
                     Attachment
                   </label>
                   {form.image ? (
@@ -295,7 +295,7 @@ export default function TaskDrawer({
                       <button
                         type="button"
                         onClick={() => setForm((f) => ({ ...f, image: "" }))}
-                        className="absolute top-3 right-3 bg-ink/70 hover:bg-ink text-[#FDFBF7] px-2 py-1 rounded-full text-xs transition-colors"
+                        className="absolute top-3 right-3 bg-[#1E1E24]/70 hover:bg-[#1E1E24] text-[#FDFBF7]/85 px-2 py-1 rounded-full text-xs transition-colors"
                       >
                         ✕ Remove
                       </button>
@@ -323,7 +323,7 @@ export default function TaskDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7] mb-1.5" htmlFor="task-des">
+                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-des">
                     Description
                   </label>
                   <textarea
@@ -332,12 +332,12 @@ export default function TaskDrawer({
                     value={form.des}
                     onChange={(e) => setForm((f) => ({ ...f, des: e.target.value }))}
                     placeholder="Optional details..."
-                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors resize-none shadow-sm"
+                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] placeholder:text-muted/50  outline-none transition-colors resize-none shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#FDFBF7] mb-1.5" htmlFor="task-date">
+                  <label className="block text-xs font-medium text-[#FDFBF7]/85 mb-1.5" htmlFor="task-date">
                     Due date
                   </label>
                   <input
@@ -345,7 +345,7 @@ export default function TaskDrawer({
                     type="date"
                     value={form.deadline}
                     onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
-                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-surface outline-none transition-colors shadow-sm cursor-pointer"
+                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] outline-none transition-colors shadow-sm cursor-pointer"
                   />
                 </div>
 
