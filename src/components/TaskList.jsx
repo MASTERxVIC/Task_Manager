@@ -4,6 +4,7 @@ import EmptyState from './EmptyState';
 import { urgency } from '../lib/date';
 
 const GROUP_ORDER = ['overdue', 'today', 'upcoming', 'none', 'done'];
+
 const GROUP_LABEL = {
   overdue: 'Overdue',
   today: 'Today',
@@ -11,12 +12,14 @@ const GROUP_LABEL = {
   none: 'No date',
   done: 'Completed',
 };
-const GROUP_DOT = {
-  overdue: 'bg-[#CF0003]',
-  today: 'bg-[#B0E01E]',
-  upcoming: 'bg-[#008ACF]',
-  none: 'bg-[#FFC684]',
-  done: 'bg-gray-400',
+
+// Tumhare exact colors ka map
+const GROUP_HEX_COLOR = {
+  overdue: '#CF0003',
+  today: '#A7DD05',
+  upcoming: '#008ACF',
+  none: '#FFC684',
+  done: '#9CA3AF',
 };
 
 function groupTasks(tasks) {
@@ -46,13 +49,19 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
 
   const groups = view === 'all' ? groupTasks(filtered) : [{ key: view, items: filtered }];
 
+  // Jo sections screen par dikh rahe hain, unhi ke colors se dynamic gradient rail banegi
+  const activeColors = groups.map((g) => GROUP_HEX_COLOR[g.key] || '#9CA3AF');
+  const gradientStyle = activeColors.length > 1
+    ? `linear-gradient(180deg, ${activeColors.join(', ')})`
+    : activeColors[0] || '#9CA3AF';
+
   return (
     <div className="relative">
-      {/* signature: gradient timeline rail */}
+      {/* Dynamic timeline rail (jo view me active hain, sirf unhi ka color flow karega) */}
       {view === 'all' && (
         <div
-          className="absolute left-[13px] top-2 bottom-2 w-px hidden sm:block"
-          style={{ background: 'linear-gradient(180deg, #CF0003, #B0E01E, #008ACF, #FFC684, #9CA3AF)' }}
+          className="absolute left-[13px] top-2 bottom-2 w-px hidden sm:block transition-all duration-300"
+          style={{ background: gradientStyle }}
         />
       )}
 
@@ -61,16 +70,20 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
           <section key={group.key}>
             {view === 'all' && (
               <div className="flex items-center gap-3 mb-4 relative">
-                <span className={`w-2 h-2 rounded-full ${GROUP_DOT[group.key]} sm:ml-[9px] ring-4 ring-void`} />
+                {/* Dot color inline style se mapped color use karega */}
+                <span
+                  className="w-2 h-2 rounded-full sm:ml-2.25 ring-4 ring-void shrink-0 transition-colors"
+                  style={{ backgroundColor: GROUP_HEX_COLOR[group.key] || '#9CA3AF' }}
+                />
                 <h2 className="font-mono text-[11px] tracking-widest text-muted-dim uppercase font-bold">
                   {GROUP_LABEL[group.key]}
                   <span className="text-muted-dim/60"> ({group.items.length})</span>
                 </h2>
               </div>
             )}
-            
+
             {/* FLEX-WRAP CONTAINER WITH EXACT GAPS */}
-            <div className="flex flex-wrap gap-6 sm:pl-6 items-start justify-start w-full">
+            <div className="flex flex-wrap gap-6 items-start justify-start w-full">
               <AnimatePresence initial={false}>
                 {group.items.map((task) => (
                   <TaskCard key={task.id} task={task} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
