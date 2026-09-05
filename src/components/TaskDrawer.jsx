@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
 
@@ -8,20 +8,27 @@ const PRIORITIES = [
   { key: "high", label: "High", color: "bg-high" },
 ];
 
-// FIX 1: Form state me assignee add kiya
+// Default members fallback agar parent se pass na ho
+const DEFAULT_MEMBERS = ["Atul Kumar", "Rahul Sharma", "Priya Singh", "Amit Patel"];
+
 const emptyForm = {
   task: "",
   des: "",
   deadline: "",
   priority: "normal",
-  assignee: "", // 👈 Added
+  assignees: [], // Multi-select ke liye Array
   image: "",
 };
 
-export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
+export default function TaskDrawer({ open, onClose, onSave, editingTask, membersList = DEFAULT_MEMBERS }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  
+  // Member Searchable Dropdown States
+  const [assigneeInput, setAssigneeInput] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (open) {
@@ -32,15 +39,52 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
               des: editingTask.des || "",
               deadline: editingTask.deadline || "",
               priority: editingTask.priority || "normal",
-              assignee: editingTask.assignee || "", // 👈 Added
+              assignees: Array.isArray(editingTask.assignees) 
+                ? editingTask.assignees 
+                : editingTask.assignee 
+                ? [editingTask.assignee] 
+                : [],
               image: editingTask.image || "",
             }
           : emptyForm
       );
       setError("");
+      setAssigneeInput("");
+      setIsDropdownOpen(false);
       setUploading(false);
     }
   }, [open, editingTask]);
+
+  // Dropdown ke bahar click karne par use close karna
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectMember = (member) => {
+    if (!form.assignees.includes(member)) {
+      setForm((f) => ({ ...f, assignees: [...f.assignees, member] }));
+    }
+    setAssigneeInput("");
+  };
+
+  const handleRemoveMember = (memberToRemove) => {
+    setForm((f) => ({
+      ...f,
+      assignees: f.assignees.filter((m) => m !== memberToRemove),
+    }));
+  };
+
+  const filteredMembers = membersList.filter(
+    (m) =>
+      m.toLowerCase().includes(assigneeInput.toLowerCase()) &&
+      !form.assignees.includes(m)
+  );
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -74,14 +118,10 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
     } catch (err) {
       console.error("Error uploading image:", err.message);
       setError("Failed to upload image. Check storage permissions.");
-    } finally { 
+    } finally {
       setUploading(false);
       if (e.target) e.target.value = "";
     }
-  };
-
-  const handleRemoveImage = () => {
-    setForm((f) => ({ ...f, image: "" }));
   };
 
   const handleSubmit = (e) => {
@@ -90,12 +130,10 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
       setError("Give the task a name.");
       return;
     }
-    // FIX 2: form me ab assignee key already present h
-    onSave({ 
-      ...form, 
-      task: form.task.trim(), 
+    onSave({
+      ...form,
+      task: form.task.trim(),
       des: form.des.trim(),
-      assignee: form.assignee.trim() 
     });
   };
 
@@ -148,42 +186,76 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
             >
               <div className="flex-1 px-6 py-5 flex flex-col gap-5">
                 <div>
-                  <label
-                    className="block text-xs font-medium text-ink/80 mb-1.5"
-                    htmlFor="task-name"
-                  >
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-name">
                     Task name
                   </label>
                   <input
                     id="task-name"
                     autoFocus
                     value={form.task}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, task: e.target.value }))
-                    }
+                    onChange={(e) => setForm((f) => ({ ...f, task: e.target.value }))}
                     placeholder="e.g. Renew domain"
                     className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors shadow-sm"
                   />
                 </div>
 
-                {/* FIX 3: Assignee Input Field Added Here */}
-                <div>
-                  <label
-                    className="block text-xs font-medium text-ink/80 mb-1.5"
-                    htmlFor="task-assignee"
-                  >
-                    Assignee Name
+                {/* Multi-Select Searchable Assignees Field */}
+                <div ref={dropdownRef} className="relative">
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5">
+                    Assignees
                   </label>
-                  <input
-                    id="task-assignee"
-                    type="text"
-                    value={form.assignee}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, assignee: e.target.value }))
-                    }
-                    placeholder="e.g. John Doe"
-                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors shadow-sm"
-                  />
+                  
+                  {/* Selected Tags Container */}
+                  <div className="bg-white border border-line rounded-xl p-2 min-h-[42px] flex flex-wrap gap-1.5 items-center shadow-sm">
+                    {form.assignees.map((member) => (
+                      <span
+                        key={member}
+                        className="bg-surface/10 text-ink text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 font-medium border border-line"
+                      >
+                        {member}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(member)}
+                          className="hover:text-delete text-muted transition-colors ml-0.5"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    
+                    <input
+                      type="text"
+                      value={assigneeInput}
+                      onFocus={() => setIsDropdownOpen(true)}
+                      onChange={(e) => {
+                        setAssigneeInput(e.target.value);
+                        setIsDropdownOpen(true);
+                      }}
+                      placeholder={form.assignees.length === 0 ? "Select or search member..." : ""}
+                      className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-ink placeholder:text-muted/50 focus:outline-none p-1"
+                    />
+                  </div>
+
+                  {/* Dropdown Options List */}
+                  {isDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
+                      {filteredMembers.length > 0 ? (
+                        filteredMembers.map((member) => (
+                          <div
+                            key={member}
+                            onClick={() => handleSelectMember(member)}
+                            className="px-3 py-2 text-sm text-ink hover:bg-surface/10 cursor-pointer transition-colors"
+                          >
+                            {member}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-xs text-muted">
+                          No members found
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Attachment */}
@@ -200,7 +272,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                       />
                       <button
                         type="button"
-                        onClick={handleRemoveImage}
+                        onClick={() => setForm((f) => ({ ...f, image: "" }))}
                         className="absolute top-3 right-3 bg-ink/70 hover:bg-ink text-white px-2 py-1 rounded-full text-xs transition-colors"
                       >
                         ✕ Remove
@@ -214,27 +286,6 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                           uploading ? "opacity-50 pointer-events-none" : ""
                         }`}
                       >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <rect
-                            x="3"
-                            y="3"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                          />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <polyline points="21 15 16 10 5 21" />
-                        </svg>
                         <span>{uploading ? "Uploading..." : "Attach Photo"}</span>
                       </label>
                       <input
@@ -250,39 +301,28 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                 </div>
 
                 <div>
-                  <label
-                    className="block text-xs font-medium text-ink/80 mb-1.5"
-                    htmlFor="task-des"
-                  >
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-des">
                     Description
                   </label>
                   <textarea
                     id="task-des"
                     rows={4}
                     value={form.des}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, des: e.target.value }))
-                    }
+                    onChange={(e) => setForm((f) => ({ ...f, des: e.target.value }))}
                     placeholder="Optional details..."
                     className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors resize-none shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label
-                    className="block text-xs font-medium text-ink/80 mb-1.5"
-                    htmlFor="task-date"
-                  >
+                  <label className="block text-xs font-medium text-ink/80 mb-1.5" htmlFor="task-date">
                     Due date
                   </label>
                   <input
                     id="task-date"
                     type="date"
                     value={form.deadline}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, deadline: e.target.value }))
-                    }
-                    onClick={(e) => e.target.showPicker?.()}
+                    onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
                     className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:border-surface outline-none transition-colors shadow-sm cursor-pointer"
                   />
                 </div>
@@ -296,9 +336,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                       <button
                         key={p.key}
                         type="button"
-                        onClick={() =>
-                          setForm((f) => ({ ...f, priority: p.key }))
-                        }
+                        onClick={() => setForm((f) => ({ ...f, priority: p.key }))}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           form.priority === p.key
                             ? "border-surface bg-surface/10 text-ink font-semibold shadow-sm"
@@ -312,9 +350,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                   </div>
                 </div>
 
-                {error && (
-                  <p className="text-xs text-delete font-medium">{error}</p>
-                )}
+                {error && <p className="text-xs text-delete font-medium">{error}</p>}
               </div>
 
               <div className="px-6 py-5 border-t border-line flex gap-3 bg-void">
