@@ -260,9 +260,9 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-dvh bg-[#FDFBF7]flex items-center justify-center text-gray-400">
+      <div className="h-dvh bg-[#FDFBF7] flex items-center justify-center text-[#1E1E24]">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[#FDD739] border-t-transparent rounded-full animate-spin" />
           <span>Loading tasks...</span>
         </div>
       </div>
