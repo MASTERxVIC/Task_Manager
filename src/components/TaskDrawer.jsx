@@ -8,9 +8,6 @@ const PRIORITIES = [
   { key: "high", label: "High", color: "bg-high" },
 ];
 
-// Default members fallback agar parent se pass na ho
-const DEFAULT_MEMBERS = ["Atul Kumar", "Rahul Sharma", "Priya Singh", "Amit Patel"];
-
 const emptyForm = {
   task: "",
   des: "",
@@ -20,7 +17,7 @@ const emptyForm = {
   image: "",
 };
 
-export default function TaskDrawer({ open, onClose, onSave, editingTask, membersList = DEFAULT_MEMBERS }) {
+export default function TaskDrawer({ open, onClose, onSave, editingTask, membersList = [] }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -251,7 +248,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask, members
                         ))
                       ) : (
                         <div className="px-3 py-2 text-xs text-muted">
-                          No members found
+                          {membersList.length === 0 ? "No members in this board" : "No matching members"}
                         </div>
                       )}
                     </div>
