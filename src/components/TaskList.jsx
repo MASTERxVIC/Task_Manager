@@ -13,7 +13,7 @@ const GROUP_LABEL = {
   done: 'Completed',
 };
 
-// Tumhare exact colors ka map
+// Exact HEX Colors as shown in your design
 const GROUP_HEX_COLOR = {
   overdue: '#CF0003',
   today: '#A7DD05',
@@ -49,40 +49,47 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
 
   const groups = view === 'all' ? groupTasks(filtered) : [{ key: view, items: filtered }];
 
-  // Jo sections screen par dikh rahe hain, unhi ke colors se dynamic gradient rail banegi
-  const activeColors = groups.map((g) => GROUP_HEX_COLOR[g.key] || '#9CA3AF');
-  const gradientStyle = activeColors.length > 1
-    ? `linear-gradient(180deg, ${activeColors.join(', ')})`
-    : activeColors[0] || '#9CA3AF';
-
   return (
-    <div className="relative">
-      {/* Dynamic timeline rail (jo view me active hain, sirf unhi ka color flow karega) */}
-      {view === 'all' && (
-        <div
-          className="absolute left-[13px] top-2 bottom-2 w-px hidden sm:block transition-all duration-300"
-          style={{ background: gradientStyle }}
-        />
-      )}
+    <div className="flex flex-col gap-10">
+      {groups.map((group) => {
+        const color = GROUP_HEX_COLOR[group.key] || '#9CA3AF';
 
-      <div className="flex flex-col gap-8">
-        {groups.map((group) => (
-          <section key={group.key}>
-            {view === 'all' && (
-              <div className="flex items-center gap-3 mb-4 relative">
-                {/* Dot color inline style se mapped color use karega */}
-                <span
-                  className="w-2 h-2 rounded-full sm:ml-2.25 ring-4 ring-void shrink-0 transition-colors"
-                  style={{ backgroundColor: GROUP_HEX_COLOR[group.key] || '#9CA3AF' }}
+        return (
+          <section key={group.key} className="relative pl-7 sm:pl-9">
+            {/* INDIVIDUAL SECTION TIMELINE RAIL (DOT + VERTICAL LINE) */}
+            <div className="absolute left-1.5 top-0 bottom-0 flex flex-col items-center">
+              {/* Outer Glow Circle / Dot */}
+              <div 
+                className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: `${color}33` }} // 20% opacity glow ring
+              >
+                <div 
+                  className="w-2.5 h-2.5 rounded-full" 
+                  style={{ backgroundColor: color }}
                 />
-                <h2 className="font-mono text-[11px] tracking-widest text-muted-dim uppercase font-bold">
+              </div>
+
+              {/* Vertical Solid Line for this section */}
+              <div 
+                className="w-0.5 h-full rounded-full mt-1" 
+                style={{ backgroundColor: color }}
+              />
+            </div>
+
+            {/* SECTION HEADER */}
+            {view === 'all' && (
+              <div className="flex items-center gap-3 mb-4">
+                <h2 
+                  className="font-mono text-xs tracking-widest uppercase font-bold"
+                  style={{ color }}
+                >
                   {GROUP_LABEL[group.key]}
-                  <span className="text-muted-dim/60"> ({group.items.length})</span>
+                  <span className="opacity-70"> ({group.items.length})</span>
                 </h2>
               </div>
             )}
-
-            {/* FLEX-WRAP CONTAINER WITH EXACT GAPS */}
+            
+            {/* TASKS FLEX CONTAINER */}
             <div className="flex flex-wrap gap-6 items-start justify-start w-full">
               <AnimatePresence initial={false}>
                 {group.items.map((task) => (
@@ -91,8 +98,8 @@ export default function TaskList({ tasks, view, search, onToggle, onEdit, onDele
               </AnimatePresence>
             </div>
           </section>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
