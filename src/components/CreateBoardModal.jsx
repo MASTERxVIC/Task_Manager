@@ -172,7 +172,7 @@ export default function CreateBoardModal({
                         if (error) setError("");
                       }}
                       placeholder="e.g. Frontend Sprint 2026"
-                      className="w-full px-4 py-2.5 bg-muted  rounded-xl text-sm text-[#1E1E24] placeholder:text-gray-600 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-[#1E1E24]  rounded-xl text-sm text-muted placeholder:text-gray-600 outline-none transition-all"
                       autoFocus
                     />
                     {error && (
@@ -228,7 +228,7 @@ export default function CreateBoardModal({
                   <button
                     type="button"
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-muted text-[#1E1E24] text-xs font-medium rounded-lg transition-all shadow-md cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-200 hover:bg-muted text-[#1E1E24] text-xs font-medium rounded-lg transition-all shadow-md cursor-pointer"
                   >
                     {copied ? (
                       <>
