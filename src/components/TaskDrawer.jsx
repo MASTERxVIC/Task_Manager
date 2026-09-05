@@ -176,7 +176,7 @@ export default function TaskDrawer({
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px]  bg-[#1E1E24] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] rounded-tl-xl rounded-bl-xl  bg-[#1E1E24] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#FDD739] bg-[#1E1E24]">
               <h2 className="font-display font-semibold text-lg text-[#FDD739]">
@@ -232,7 +232,7 @@ export default function TaskDrawer({
                         <button
                           type="button"
                           onClick={() => handleRemoveMember(member)}
-                          className="hover:text-delete text-muted transition-colors ml-0.5"
+                          className=" text-[#1E1E24]  transition-colors ml-0.5"
                         >
                           ×
                         </button>
@@ -248,12 +248,12 @@ export default function TaskDrawer({
                         setIsDropdownOpen(true);
                       }}
                       placeholder={form.assignees.length === 0 ? "Select or search member..." : ""}
-                      className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-[#1E1E24] placeholder:text-muted/50  p-1"
+                      className="flex-1 min-w-[120px] bg-transparent border-none text-sm text-[#1E1E24] placeholder:text-gray-500  p-1"
                     />
                   </div>
 
                   {isDropdownOpen && (
-                    <div className="absolute left-0 right-0 top-full mt-1 bg-[#FDFBF7] border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-muted border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
                       {filteredMembers.length > 0 ? (
                         filteredMembers.map((member) => {
                           const displayName = member.full_name || member.email || "Team Member";
@@ -261,11 +261,11 @@ export default function TaskDrawer({
                             <div
                               key={member.user_id || member.id || displayName}
                               onClick={() => handleSelectMember(member)}
-                              className="px-3 py-2 flex items-center justify-between text-sm text-[#1E1E24] hover:bg-muted/10 cursor-pointer transition-colors"
+                              className="px-3 py-2 flex items-center justify-between text-sm text-[#1E1E24] hover:bg-[#1E1E24]  cursor-pointer transition-colors"
                             >
                               <span className="truncate">{displayName}</span>
                               {member.role && (
-                                <span className="text-[10px] text-muted capitalize ml-2">
+                                <span className="text-[10px] text-[#1E1E24] hover:text-muted capitalize ml-2">
                                   {member.role}
                                 </span>
                               )}
@@ -332,7 +332,7 @@ export default function TaskDrawer({
                     value={form.des}
                     onChange={(e) => setForm((f) => ({ ...f, des: e.target.value }))}
                     placeholder="Optional details..."
-                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] placeholder:text-muted/50  outline-none transition-colors resize-none shadow-sm"
+                    className="w-full bg-[#FDFBF7] border border-line rounded-xl px-3 py-2.5 text-sm text-[#1E1E24] placeholder:text-gray-500  outline-none transition-colors resize-none shadow-sm"
                   />
                 </div>
 
