@@ -125,7 +125,7 @@ export default function CreateBoardModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-[#FDFBF7] backdrop-blur-sm"
+            className="fixed inset-0 bg-[#1E1E24] backdrop-blur-sm"
           />
 
           <motion.div
@@ -133,7 +133,7 @@ export default function CreateBoardModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-md  bg-[#FDD739] border border-line rounded-2xl p-6 shadow-2xl z-10 "
+            className="relative w-full max-w-md  bg-[#1E1E24] border border-line rounded-2xl p-6 shadow-2xl z-10 "
           >
             <button
               type="button"
@@ -146,14 +146,14 @@ export default function CreateBoardModal({
             {!createdBoard ? (
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-[#1E1E24] border border-[#1E1E24]/20">
+                  <div className="p-2.5 rounded-xl bg-muted border border-[#1E1E24]/20">
                     <FolderPlus className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1E1E24]">
+                    <h3 className="text-lg font-semibold text-muted">
                       Create New Board
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-300">
                       Start a shared workspace for your team
                     </p>
                   </div>
@@ -172,7 +172,7 @@ export default function CreateBoardModal({
                         if (error) setError("");
                       }}
                       placeholder="e.g. Frontend Sprint 2026"
-                      className="w-full px-4 py-2.5 bg-[#1E1E24]  rounded-xl text-sm text-muted placeholder:text-gray-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-muted  rounded-xl text-sm text-[#1E1E24] placeholder:text-gray-600 outline-none transition-all"
                       autoFocus
                     />
                     {error && (
@@ -192,7 +192,7 @@ export default function CreateBoardModal({
                     <button
                       type="submit"
                       disabled={loading || !boardName.trim()}
-                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-[#1E1E24] bg-muted/80 hover:bg-muted rounded-xl transition-all shadow-lg shadow-amber-600/20 disabled:opacity-50 cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-[#1E1E24] bg-muted/80 hover:bg-muted rounded-xl transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {loading ? "Creating..." : "Create Board"}
@@ -202,7 +202,7 @@ export default function CreateBoardModal({
               </>
             ) : (
               <div className="text-center py-2 space-y-4">
-                <div className="mx-auto w-12 h-12 rounded-full bg-[#1E1E24] border border-[#1E1E24] text-muted flex items-center justify-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-[#1E1E24] border border-muted text-muted flex items-center justify-center">
                   <Sparkles className="w-6 h-6" />
                 </div>
 
@@ -228,7 +228,7 @@ export default function CreateBoardModal({
                   <button
                     type="button"
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface text-white text-xs font-medium rounded-lg transition-all shadow-md cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-muted text-[#1E1E24] text-xs font-medium rounded-lg transition-all shadow-md cursor-pointer"
                   >
                     {copied ? (
                       <>
@@ -247,7 +247,7 @@ export default function CreateBoardModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="w-full py-2.5 text-sm font-medium bg-muted  text-[#1E1E24] rounded-xl transition-colors cursor-pointer"
+                  className="w-full py-2.5 text-sm font-semibold bg-muted text-[#1E1E24] rounded-xl transition-colors cursor-pointer"
                 >
                   Done
                 </button>

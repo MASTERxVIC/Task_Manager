@@ -58,7 +58,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-[#FDFBF7] backdrop-blur-sm"
+            className="fixed inset-0 bg-[#1E1E24] backdrop-blur-sm"
           />
 
           {/* Modal Container */}
@@ -67,24 +67,24 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-md bg-[#FDD739] border border-line rounded-2xl p-6 shadow-2xl z-10 text-white"
+            className="relative w-full max-w-md bg-[#1E1E24] border border-line rounded-2xl p-6 shadow-2xl z-10 text-white"
           >
             {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-muted transition-colors"
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-muted transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 " />
             </button>
 
             {/* Header Icon & Title */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#1E1E24] border border-[#1E1E24]/20 ">
+              <div className="p-2.5 rounded-xl bg-muted border border-[#1E1E24]/20">
                 <UserPlus className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-[#1E1E24]">Join a Shared Board</h3>
-                <p className="text-xs text-gray-500">Enter the invite code shared by your teammate</p>
+                <h3 className="text-lg font-semibold text-muted">Join a Shared Board</h3>
+                <p className="text-xs text-gray-300">Enter the invite code shared by your teammate</p>
               </div>
             </div>
 
@@ -95,7 +95,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                   Invite Code
                 </label>
                 <div className="relative flex items-center">
-                  <KeyRound className="absolute left-3.5 w-4 h-4 text-gray-500" />
+                  <KeyRound className="absolute left-3.5 w-4 h-4 text-muted" />
                   <input
                     type="text"
                     value={code}
@@ -104,7 +104,7 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                       if (error) setError('');
                     }}
                     placeholder="Enter invite code"
-                    className="w-full pl-10 pr-4 py-2.5 bg-[#1E1E24]/80  border border-line rounded-xl text-sm font-mono tracking-wider text-muted placeholder:text-gray-500 placeholder:font-sans outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#1E1E24]/80 border border-line rounded-xl text-sm font-mono tracking-wider text-muted placeholder:text-gray-500 placeholder:font-sans outline-none transition-all"
                     autoFocus
                   />
                 </div>
@@ -121,14 +121,14 @@ export default function JoinBoardModal({ open, onClose, onJoin }) {
                   type="button"
                   onClick={handleClose}
                   disabled={loading}
-                  className="px-4 py-2 text-smbg-white text-[#1E1E24] rounded-xl transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm bg-white text-[#1E1E24] rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !code.trim()}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-[#1E1E24] bg-muted/80 hover:bg-muted rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-[#1E1E24] bg-muted/80 hover:bg-muted rounded-xl transition-all  disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {loading ? 'Joining...' : 'Join Board'}
