@@ -185,7 +185,7 @@ export default function TaskDrawer({
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="text-muted/70 hover:text-muted p-1 transition-colors"
+                className="text-muted/70 hover:text-muted p-1 transition-colors cursor-pointer"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path
@@ -232,7 +232,7 @@ export default function TaskDrawer({
                         <button
                           type="button"
                           onClick={() => handleRemoveMember(member)}
-                          className=" text-[#1E1E24]  transition-colors ml-0.5"
+                          className=" text-[#1E1E24]  transition-colors ml-0.5 cursor-pointer"
                         >
                           ×
                         </button>
