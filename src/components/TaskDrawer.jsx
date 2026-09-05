@@ -74,9 +74,9 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
     } catch (err) {
       console.error("Error uploading image:", err.message);
       setError("Failed to upload image. Check storage permissions.");
-    } font-medium {
+    } finally { 
       setUploading(false);
-      e.target.value = "";
+      if (e.target) e.target.value = "";
     }
   };
 
