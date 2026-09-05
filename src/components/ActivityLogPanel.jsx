@@ -185,14 +185,14 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                           className={`uppercase text-[8px] 
                             px-1.5 py-0.5 rounded-full font-semibold shrink-0  ${
                             log.action_type === 'CREATE' || log.action_type === 'CREATED'
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                              ? 'bg-[#1E1E24] text-emerald-500 border border-emerald-200'
                               : log.action_type === 'DELETE' || log.action_type === 'DELETED'
-                              ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                              ? 'bg-[#1E1E24] text-rose-500 border border-rose-200'
                               : log.action_type === 'COMPLETED'
-                              ? 'bg-teal-50 text-teal-600 border border-teal-200'
+                              ? 'bg-[#1E1E24] text-teal-500 border border-teal-200'
                               : log.action_type === 'UNDO'
-                              ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                              : 'bg-sky-50 text-sky-600 border border-sky-200'
+                              ? 'bg-[#1E1E24] text-amber-500 border border-amber-200'
+                              : 'bg-[#1E1E24] text-sky-400 border border-sky-200'
                           }`}
                         >
                           {log.action_type}
@@ -208,7 +208,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                     </div>
 
                     {log.task_title && (
-                      <div className="text-xs font-code text-[#1E1E24]/85 break-words">
+                      <div className="text-xs font-code text-gray-500 break-words">
                         {log.task_title}
                       </div>
                     )}
