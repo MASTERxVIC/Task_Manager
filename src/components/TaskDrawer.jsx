@@ -17,11 +17,17 @@ const emptyForm = {
   image: "",
 };
 
-export default function TaskDrawer({ open, onClose, onSave, editingTask, membersList = [] }) {
+export default function TaskDrawer({
+  open,
+  onClose,
+  onSave,
+  editingTask,
+  boardMembers = [], // Full object array [{ user_id, full_name, email, role }]
+}) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
-  
+
   // Member Searchable Dropdown States
   const [assigneeInput, setAssigneeInput] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,10 +42,10 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask, members
               des: editingTask.des || "",
               deadline: editingTask.deadline || "",
               priority: editingTask.priority || "normal",
-              assignees: Array.isArray(editingTask.assignees) 
-                ? editingTask.assignees 
-                : editingTask.assignee 
-                ? [editingTask.assignee] 
+              assignees: Array.isArray(editingTask.assignees)
+                ? editingTask.assignees
+                : editingTask.assignee
+                ? [editingTask.assignee]
                 : [],
               image: editingTask.image || "",
             }
@@ -64,8 +70,9 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask, members
   }, []);
 
   const handleSelectMember = (member) => {
-    if (!form.assignees.includes(member)) {
-      setForm((f) => ({ ...f, assignees: [...f.assignees, member] }));
+    const nameToSave = member.full_name || member.email || "Team Member";
+    if (!form.assignees.includes(nameToSave)) {
+      setForm((f) => ({ ...f, assignees: [...f.assignees, nameToSave] }));
     }
     setAssigneeInput("");
   };
@@ -77,11 +84,13 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask, members
     }));
   };
 
-  const filteredMembers = membersList.filter(
-    (m) =>
-      m.toLowerCase().includes(assigneeInput.toLowerCase()) &&
-      !form.assignees.includes(m)
-  );
+  const filteredMembers = boardMembers.filter((m) => {
+    const displayName = m.full_name || m.email || "Team Member";
+    return (
+      displayName.toLowerCase().includes(assigneeInput.toLowerCase()) &&
+      !form.assignees.includes(displayName)
+    );
+  });
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -237,18 +246,26 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask, members
                   {isDropdownOpen && (
                     <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-line rounded-xl shadow-lg max-h-40 overflow-y-auto z-50 py-1">
                       {filteredMembers.length > 0 ? (
-                        filteredMembers.map((member) => (
-                          <div
-                            key={member}
-                            onClick={() => handleSelectMember(member)}
-                            className="px-3 py-2 text-sm text-ink hover:bg-surface/10 cursor-pointer transition-colors"
-                          >
-                            {member}
-                          </div>
-                        ))
+                        filteredMembers.map((member) => {
+                          const displayName = member.full_name || member.email || "Team Member";
+                          return (
+                            <div
+                              key={member.user_id || member.id || displayName}
+                              onClick={() => handleSelectMember(member)}
+                              className="px-3 py-2 flex items-center justify-between text-sm text-ink hover:bg-surface/10 cursor-pointer transition-colors"
+                            >
+                              <span className="truncate">{displayName}</span>
+                              {member.role && (
+                                <span className="text-[10px] text-muted capitalize ml-2">
+                                  {member.role}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })
                       ) : (
                         <div className="px-3 py-2 text-xs text-muted">
-                          {membersList.length === 0 ? "No members in this board" : "No matching members"}
+                          {boardMembers.length === 0 ? "No members in this board" : "No matching members"}
                         </div>
                       )}
                     </div>
