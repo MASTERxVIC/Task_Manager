@@ -238,7 +238,11 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete }) {
             <button
               type="button"
               onClick={() => onDelete(task.id)}
-              className="hover:text-red-400 transition-colors my-auto p-0.5 opacity-40 hover:opacity-100 cursor-pointer"
+              className={`transition-colors my-auto p-0.5 opacity-40 hover:opacity-100 cursor-pointer ${
+                accentTheme.text
+                  ? `hover:${accentTheme.text}`
+                  : "hover:text-gray-400"
+              }`}
             >
               <svg
                 width="16"
