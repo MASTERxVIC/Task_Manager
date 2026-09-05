@@ -176,7 +176,7 @@ export default function TaskDrawer({
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] rounded-tl-xl rounded-bl-xl  bg-[#1E1E24] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] md:rounded-l-2xl bg-[#1E1E24] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#FDD739] bg-[#1E1E24]">
               <h2 className="font-display font-semibold text-lg text-[#FDD739]">

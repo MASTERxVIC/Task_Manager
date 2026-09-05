@@ -136,7 +136,7 @@ export default function Sidebar({
           className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-line text-white hover:bg-slate-800 transition-all cursor-pointer"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-surface-raised border border-white/20 flex items-center justify-center text-xs font-bold text-ink shrink-0">
+            <div className="w-6 h-6 rounded-lg  border border-white/20 flex items-center justify-center text-xs font-bold bg-[#FDD739] text-[#1E1E24] shrink-0">
               {activeBoard?.name
                 ? activeBoard.name.charAt(0).toUpperCase()
                 : "B"}
@@ -450,7 +450,7 @@ export default function Sidebar({
         {user && (
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-surface-raised border border-white/20 flex items-center justify-center font-mono text-xs font-semibold text-ink shrink-0">
+              <div className="w-7 h-7 rounded-full bg-surface-raised border border-white/20 flex items-center justify-center font-mono text-xs font-semibold bg-[#FDD739] text-[#1E1E24] shrink-0">
                 {userInitial}
               </div>
               <div className="flex flex-col min-w-0">
