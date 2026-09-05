@@ -280,13 +280,13 @@ export function useTasks(boardId = null, boardMembers = []) {
     };
   }, [boardId, fetchTasks, setupRealtime, cleanupOldTasks]);
 
-  // Add Task Function (Includes Assignee Fix)
+// Add Task Function (Includes Assignee Fix & Fallback)
   const addTask = async ({
     task,
-    des,
-    deadline,
-    priority,
-    assignee = null,
+    des = "",
+    deadline = null,
+    priority = "normal",
+    assignee = null, // Ensure default null if omitted
     image = "",
     board_id = null,
   }) => {
@@ -302,7 +302,7 @@ export function useTasks(boardId = null, boardMembers = []) {
       des,
       deadline,
       priority: priority || "normal",
-      assignee,
+      assignee: assignee || null, // Clean check
       image,
       completed: false,
       completed_at: null,
@@ -343,6 +343,8 @@ export function useTasks(boardId = null, boardMembers = []) {
           });
         }
       }
+    } else if (error) {
+      console.error("Supabase Add Task Error:", error);
     }
   };
 

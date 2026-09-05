@@ -8,11 +8,13 @@ const PRIORITIES = [
   { key: "high", label: "High", color: "bg-high" },
 ];
 
+// FIX 1: Form state me assignee add kiya
 const emptyForm = {
   task: "",
   des: "",
   deadline: "",
   priority: "normal",
+  assignee: "", // 👈 Added
   image: "",
 };
 
@@ -30,6 +32,7 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
               des: editingTask.des || "",
               deadline: editingTask.deadline || "",
               priority: editingTask.priority || "normal",
+              assignee: editingTask.assignee || "", // 👈 Added
               image: editingTask.image || "",
             }
           : emptyForm
@@ -48,32 +51,30 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
       setError("");
 
       const fileExt = file.name.split(".").pop();
-      const uniqueId = typeof crypto !== "undefined" && crypto.randomUUID 
-        ? crypto.randomUUID() 
-        : Date.now();
+      const uniqueId =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now();
       const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `task-images/${fileName}`;
 
-      // 1. Supabase Storage bucket me file upload karna
       const { error: uploadError } = await supabase.storage
         .from("todos")
         .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
       if (uploadError) throw uploadError;
 
-      // 2. Uploaded file ka Public URL generate karna
       const { data } = supabase.storage
         .from("todos")
         .getPublicUrl(filePath);
 
       if (!data?.publicUrl) throw new Error("Could not retrieve public URL.");
 
-      // 3. Form state update
       setForm((f) => ({ ...f, image: data.publicUrl }));
     } catch (err) {
       console.error("Error uploading image:", err.message);
       setError("Failed to upload image. Check storage permissions.");
-    } finally {
+    } font-medium {
       setUploading(false);
       e.target.value = "";
     }
@@ -89,7 +90,13 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
       setError("Give the task a name.");
       return;
     }
-    onSave({ ...form, task: form.task.trim(), des: form.des.trim() });
+    // FIX 2: form me ab assignee key already present h
+    onSave({ 
+      ...form, 
+      task: form.task.trim(), 
+      des: form.des.trim(),
+      assignee: form.assignee.trim() 
+    });
   };
 
   return (
@@ -155,6 +162,26 @@ export default function TaskDrawer({ open, onClose, onSave, editingTask }) {
                       setForm((f) => ({ ...f, task: e.target.value }))
                     }
                     placeholder="e.g. Renew domain"
+                    className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors shadow-sm"
+                  />
+                </div>
+
+                {/* FIX 3: Assignee Input Field Added Here */}
+                <div>
+                  <label
+                    className="block text-xs font-medium text-ink/80 mb-1.5"
+                    htmlFor="task-assignee"
+                  >
+                    Assignee Name
+                  </label>
+                  <input
+                    id="task-assignee"
+                    type="text"
+                    value={form.assignee}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, assignee: e.target.value }))
+                    }
+                    placeholder="e.g. John Doe"
                     className="w-full bg-white border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:border-surface outline-none transition-colors shadow-sm"
                   />
                 </div>
