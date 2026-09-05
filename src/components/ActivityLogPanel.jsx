@@ -138,7 +138,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-[#E8BD09] flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-[#FFF3BF] flex flex-col shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-500">
               <h2 className="font-display font-semibold text-lg text-[#1E1E24] ">
@@ -182,7 +182,7 @@ export default function ActivityLogPanel({ boardId, isOpen, onClose }) {
                         </span>
                         
                         <span
-                          className={`uppercase text-[8px] font-mono 
+                          className={`uppercase text-[8px] 
                             px-1.5 py-0.5 rounded-full font-semibold shrink-0  ${
                             log.action_type === 'CREATE' || log.action_type === 'CREATED'
                               ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
